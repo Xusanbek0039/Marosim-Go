@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- MarosimGo ---
+backend/media/
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.env.local
