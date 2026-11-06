@@ -61,7 +61,6 @@ export function StudioFormDialog({
 
   useEffect(() => {
     if (!open) return;
-    setOwnerSearch("");
     form.reset(
       studio
         ? {
@@ -143,7 +142,7 @@ export function StudioFormDialog({
             control={form.control}
             name="responsible_user_id"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
+              <Select value={field.value} onValueChange={field.onChange} onOpenChange={(o) => !o && setOwnerSearch("")}>
                 <SelectTrigger id="studio-owner" className="w-full" aria-invalid={Boolean(errors.responsible_user_id)}>
                   <SelectValue placeholder={owners.isPending ? "Yuklanmoqda…" : "Tanlang"} />
                 </SelectTrigger>

@@ -45,25 +45,27 @@ export function PersonDrawer({
   const can = useCan();
   const { data: me } = useMe();
   const reveal = useRevealPinfl(kind === "admin" ? "admins" : "users");
-  const [plain, setPlain] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState<{ id: string; value: string } | null>(null);
+  const plain = open && person && revealed?.id === person.id ? revealed.value : null;
+  const setPlain = (value: string | null) => setRevealed(value && person ? { id: person.id, value } : null);
   const canReveal = kind === "admin" ? me?.role === "SUPER_ADMIN" : can("users.view_pinfl");
 
   // Full PINFL stays on screen briefly and is wiped when the drawer closes.
   useEffect(() => {
-    if (!plain) return;
-    const id = setTimeout(() => setPlain(null), REVEAL_SECONDS * 1000);
+    if (!revealed) return;
+    const id = setTimeout(() => setRevealed(null), REVEAL_SECONDS * 1000);
     return () => clearTimeout(id);
-  }, [plain]);
-  useEffect(() => {
-    if (!open) setPlain(null);
-  }, [open]);
+  }, [revealed]);
 
   if (!person) return null;
 
   return (
     <MotionDrawer
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => {
+        if (!next) setRevealed(null);
+        onOpenChange(next);
+      }}
       title="Profil tafsiloti"
       footer={
         <>

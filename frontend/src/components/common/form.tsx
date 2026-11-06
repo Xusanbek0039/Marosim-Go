@@ -2,7 +2,7 @@
 
 import { ImageUpIcon, Trash2Icon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { fieldErrorVariants } from "@/motion/tokens";
@@ -73,17 +73,8 @@ export function ImageUpload({
 }) {
   const id = useId();
   const [localError, setLocalError] = useState<string>();
-  const [preview, setPreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!value) {
-      setPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(value);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [value]);
+  const preview = useMemo(() => (value ? URL.createObjectURL(value) : null), [value]);
+  useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
 
   const shown = value === null ? null : (preview ?? currentUrl ?? null);
 

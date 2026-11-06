@@ -2,7 +2,7 @@
 
 import { KeyRoundIcon, Loader2Icon, MoreHorizontalIcon, PencilIcon, PlusIcon, PowerIcon, Trash2Icon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { CardsSkeleton, EmptyState, ErrorState, GlassCard, PageHeader, Pagination, StatusBadge, UserAvatar } from "@/components/common";
@@ -35,22 +35,11 @@ const ORDERING = [
   { value: "-last_login", label: "Oxirgi kirish" },
 ];
 
-function PermissionsDialog({ admin, onClose }: { admin: Admin | null; onClose: () => void }) {
+function PermissionsForm({ admin, onClose }: { admin: Admin; onClose: () => void }) {
   const update = adminsResource.useUpdate();
-  const [value, setValue] = useState<PermissionCode[]>([]);
-
-  useEffect(() => {
-    if (admin) setValue(admin.permissions);
-  }, [admin]);
-
+  const [value, setValue] = useState<PermissionCode[]>(admin.permissions);
   return (
-    <MotionDialog
-      open={Boolean(admin)}
-      onOpenChange={(o) => !o && !update.isPending && onClose()}
-      title="Ruxsatlarni tahrirlash"
-      description={admin ? `${admin.full_name} qaysi bo'limlarda nima qila olishini belgilang.` : undefined}
-      size="lg"
-    >
+    <>
       <PermissionsEditor value={value} onChange={setValue} />
       <div className="flex gap-3">
         <Button variant="outline" className="h-11 flex-1" onClick={onClose} disabled={update.isPending}>
@@ -60,7 +49,6 @@ function PermissionsDialog({ admin, onClose }: { admin: Admin | null; onClose: (
           className="h-11 flex-1"
           disabled={update.isPending}
           onClick={() =>
-            admin &&
             update.mutate(
               { id: admin.id, values: { permissions: value } },
               {
@@ -77,6 +65,20 @@ function PermissionsDialog({ admin, onClose }: { admin: Admin | null; onClose: (
           Saqlash
         </Button>
       </div>
+    </>
+  );
+}
+
+function PermissionsDialog({ admin, onClose }: { admin: Admin | null; onClose: () => void }) {
+  return (
+    <MotionDialog
+      open={Boolean(admin)}
+      onOpenChange={(o) => !o && onClose()}
+      title="Ruxsatlarni tahrirlash"
+      description={admin ? `${admin.full_name} qaysi bo'limlarda nima qila olishini belgilang.` : undefined}
+      size="lg"
+    >
+      {admin && <PermissionsForm key={admin.id} admin={admin} onClose={onClose} />}
     </MotionDialog>
   );
 }
