@@ -185,7 +185,7 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
               inputMode="numeric"
               autoComplete="off"
               maxLength={20}
-              placeholder="••••••••••••••"
+              placeholder="14 ta raqam"
               aria-invalid={Boolean(errors.pinfl)}
               className="tracking-[0.12em] tabular-nums"
               {...form.register("pinfl")}

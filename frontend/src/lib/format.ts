@@ -1,17 +1,19 @@
 import type { Role } from "./api/types";
 
-const dateFmt = new Intl.DateTimeFormat("uz-UZ", { day: "2-digit", month: "2-digit", year: "numeric" });
-const dateTimeFmt = new Intl.DateTimeFormat("uz-UZ", {
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 const numberFmt = new Intl.NumberFormat("uz-UZ");
+const pad = (n: number) => String(n).padStart(2, "0");
 
-export const formatDate = (iso?: string | null) => (iso ? dateFmt.format(new Date(iso)) : "—");
-export const formatDateTime = (iso?: string | null) => (iso ? dateTimeFmt.format(new Date(iso)) : "—");
+/** dd.mm.yyyy — the format used across Uzbekistan (Intl's "uz" locale yields ISO dates). */
+export const formatDate = (iso?: string | null) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+};
+export const formatDateTime = (iso?: string | null) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return `${formatDate(iso)}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
 export const formatNumber = (n: number) => numberFmt.format(Math.round(n));
 
 export const ROLE_LABELS: Record<Role, string> = {
