@@ -63,7 +63,8 @@ TEMPLATES = [
 # SQLite by default; switch to PostgreSQL by setting e.g.
 # DATABASE_URL=postgres://marosimgo:password@localhost:5432/marosimgo
 DATABASES = {"default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
+# No ATOMIC_REQUESTS: audit/security records must survive a failed request.
+# Write paths use explicit transaction.atomic blocks instead.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CACHES = {"default": env.cache("CACHE_URL", default="locmemcache://marosimgo")}

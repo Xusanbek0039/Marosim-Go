@@ -16,13 +16,14 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed, Throttled
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.audit.services import AuditAction, record
+from apps.core.exceptions import AccountLocked
 
 from . import lockout
 from .authentication import enforce_csrf
@@ -83,7 +84,7 @@ class LoginView(APIView):
         password = serializer.validated_data["password"]
 
         if lockout.is_locked(email):
-            raise Throttled(detail=LOCKED)
+            raise AccountLocked(LOCKED)
 
         user = authenticate(request, username=email, password=password)
         if user is None or user.is_deleted:

@@ -36,6 +36,12 @@ class Conflict(exceptions.APIException):
     default_code = "conflict"
 
 
+class AccountLocked(exceptions.APIException):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    default_detail = "Juda ko'p muvaffaqiyatsiz urinish. Keyinroq qayta urinib ko'ring."
+    default_code = "account_locked"
+
+
 def _code_for(exc: exceptions.APIException) -> str:
     if isinstance(exc, exceptions.ValidationError):
         return "validation_error"
