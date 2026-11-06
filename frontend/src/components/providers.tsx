@@ -41,7 +41,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <MotionRoot>
             <TooltipProvider delayDuration={250}>
               {children}
-              <Toaster position="top-right" richColors closeButton />
+              <Toaster position="bottom-right" richColors closeButton />
             </TooltipProvider>
           </MotionRoot>
         </MotionPreferenceProvider>
