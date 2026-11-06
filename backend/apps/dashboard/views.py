@@ -41,12 +41,14 @@ class DashboardOverviewView(APIView):
         studios = Studio.objects.filter(deleted_at__isnull=True).aggregate(
             total=Count("id"), active=Count("id", filter=Q(is_active=True))
         )
-        by_role = dict(alive.values_list("role").annotate(n=Count("id")).values_list("role", "n"))
+        by_role = {row["role"]: row["n"] for row in alive.order_by().values("role").annotate(n=Count("id"))}
 
         visible_roles = list(client_roles)
         if request.user.role == Role.SUPER_ADMIN:
             visible_roles.append(Role.ADMIN.value)
         recent = alive.filter(role__in=visible_roles).order_by("-created_at")[:6]
+        if not request.user.has_admin_permission("users.view"):
+            recent = User.objects.none()
 
         return Response(
             {
