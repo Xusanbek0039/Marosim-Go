@@ -141,6 +141,8 @@ SIMPLE_JWT = {
 AUTH_COOKIES = {
     "ACCESS": "mg_access",
     "REFRESH": "mg_refresh",
+    # Non-secret marker ("1") so the Next.js proxy can tell a session probably exists.
+    "SESSION_HINT": "mg_session",
     "REFRESH_PATH": "/api/v1/auth/",
     "SECURE": env.bool("AUTH_COOKIE_SECURE", default=not DEBUG),
     "DOMAIN": env.str("AUTH_COOKIE_DOMAIN", default=None),

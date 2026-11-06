@@ -41,6 +41,7 @@ def test_web_login_sets_httponly_cookies_and_hides_tokens(super_admin):
     assert access["httponly"] and refresh["httponly"]
     assert refresh["path"] == "/api/v1/auth/"
     assert refresh["samesite"] == "Strict"
+    assert res.cookies[settings.AUTH_COOKIES["SESSION_HINT"]].value == "1"
 
 
 def test_web_login_requires_csrf(super_admin):
@@ -74,6 +75,7 @@ def test_web_logout_clears_cookies_and_blacklists(super_admin):
     res = client.post(LOGOUT, **csrf_headers(client))
     assert res.status_code == 204
     assert res.cookies[ACCESS].value == ""
+    assert res.cookies[settings.AUTH_COOKIES["SESSION_HINT"]].value == ""
     mobile = APIClient(HTTP_X_CLIENT="mobile")
     assert mobile.post(REFRESH, {"refresh": refresh}, format="json").status_code == 401
 

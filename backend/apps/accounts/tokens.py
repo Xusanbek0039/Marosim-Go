@@ -113,9 +113,18 @@ def set_auth_cookies(response: HttpResponse, tokens: dict) -> None:
         samesite="Strict",
         **common,
     )
+    response.set_cookie(
+        cfg["SESSION_HINT"],
+        "1",
+        max_age=int(jwt["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+        path="/",
+        samesite="Lax",
+        **common,
+    )
 
 
 def clear_auth_cookies(response: HttpResponse) -> None:
     cfg = settings.AUTH_COOKIES
     response.delete_cookie(cfg["ACCESS"], path="/", domain=cfg["DOMAIN"], samesite="Lax")
     response.delete_cookie(cfg["REFRESH"], path=cfg["REFRESH_PATH"], domain=cfg["DOMAIN"], samesite="Strict")
+    response.delete_cookie(cfg["SESSION_HINT"], path="/", domain=cfg["DOMAIN"], samesite="Lax")
