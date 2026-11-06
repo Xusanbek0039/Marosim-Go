@@ -77,7 +77,8 @@ def _detect_reuse(raw: str, request) -> None:
         return
     if BlacklistedToken.objects.filter(token__jti=jti).exists():
         user = _user_from_token(token)
-        if user is not None:
+        # A token from an already revoked generation (stale ``ver``) is not a theft signal.
+        if user is not None and token.get("ver") == user.auth_version:
             revoke_all_sessions(user)
             record(request, AuditAction.TOKEN_REUSE, user, actor=user)
 

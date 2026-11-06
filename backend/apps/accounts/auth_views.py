@@ -12,8 +12,8 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.middleware.csrf import get_token, rotate_token
 from django.utils import timezone
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -54,6 +54,16 @@ def token_response(request, user: User, tokens: dict, status_code=status.HTTP_20
     return response
 
 
+class PublicAuthView(APIView):
+    """Unauthenticated auth endpoints still answer 401 (not 403) with a WWW-Authenticate header."""
+
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get_authenticate_header(self, request):
+        return 'Bearer realm="api"'
+
+
 class CsrfView(APIView):
     """Sets the ``csrftoken`` cookie the web panel echoes back in ``X-CSRFToken``."""
 
@@ -67,9 +77,7 @@ class CsrfView(APIView):
         return Response({"detail": "ok"})
 
 
-class LoginView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
+class LoginView(PublicAuthView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
 
@@ -104,9 +112,7 @@ class LoginView(APIView):
         return token_response(request, user, issue_tokens(user))
 
 
-class RefreshView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
+class RefreshView(PublicAuthView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "token_refresh"
 
@@ -136,9 +142,7 @@ class RefreshView(APIView):
         return token_response(request, user, tokens)
 
 
-class LogoutView(APIView):
-    authentication_classes = []
-    permission_classes = [AllowAny]
+class LogoutView(PublicAuthView):
 
     @extend_schema(request=RefreshSerializer, responses={204: None})
     def post(self, request):
