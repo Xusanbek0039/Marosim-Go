@@ -226,3 +226,5 @@ node_modules/
 next-env.d.ts
 *.tsbuildinfo
 .env.local
+# The Python template above ignores every "lib/" — keep the frontend source library tracked.
+!frontend/src/lib/
