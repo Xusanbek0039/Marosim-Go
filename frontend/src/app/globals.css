@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Scan every source file (class names also live in .ts helpers such as lib/format.ts). */
+@source "../";
+
 @custom-variant dark (&:is(.dark *));
 
 /* ==========================================================================
