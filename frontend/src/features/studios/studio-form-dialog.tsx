@@ -158,8 +158,14 @@ export function StudioFormDialog({
                       className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-brand"
                     />
                   </div>
-                  {ownerOptions.length === 0 && (
-                    <p className="px-3 py-2 text-sm text-muted-foreground">STUDIO rolidagi faol foydalanuvchi topilmadi</p>
+                  {owners.error ? (
+                    <p className="px-3 py-2 text-sm text-destructive">
+                      Ro&apos;yxatni olish uchun &quot;Foydalanuvchilarni ko&apos;rish&quot; ruxsati kerak
+                    </p>
+                  ) : (
+                    ownerOptions.length === 0 && (
+                      <p className="px-3 py-2 text-sm text-muted-foreground">STUDIO rolidagi faol foydalanuvchi topilmadi</p>
+                    )
                   )}
                   {ownerOptions.map((o) => (
                     <SelectItem key={o.id} value={o.id}>
