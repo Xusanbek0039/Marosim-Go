@@ -180,12 +180,16 @@ X_FRAME_OPTIONS = "DENY"
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+# Behind the Next.js proxy: build absolute URLs (pagination, media) with the panel's host.
+USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST", default=False)
 if env.bool("USE_X_FORWARDED_PROTO", default=False):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # ------------------------------------------------------------------ uploads/media
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(env.str("MEDIA_ROOT", default=str(BASE_DIR / "media")))
+# Let Django serve uploads (development / small deployments). In production prefer nginx.
+SERVE_MEDIA = env.bool("SERVE_MEDIA", default=DEBUG)
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 6 * 1024 * 1024

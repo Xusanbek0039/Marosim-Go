@@ -12,4 +12,8 @@ class ApiSecurityHeadersMiddleware:
             response.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
             if not request.path.startswith("/api/v1/docs/"):
                 response.setdefault("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
+        elif request.path.startswith("/media/"):
+            # Uploaded files are re-encoded images; never let them execute or be framed.
+            response["Content-Security-Policy"] = "default-src 'none'; img-src 'self'; sandbox"
+            response["X-Content-Type-Options"] = "nosniff"
         return response
