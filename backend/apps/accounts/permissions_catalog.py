@@ -1,0 +1,43 @@
+"""Granular permissions a Super Admin can grant to each ADMIN account.
+
+Codes are stable identifiers (stored on the user); labels are for the UI. Adding a module
+later = adding entries here and referencing the code from the new view.
+"""
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class PermissionDef:
+    code: str
+    module: str
+    label: str
+
+
+ADMIN_PERMISSIONS: tuple[PermissionDef, ...] = (
+    PermissionDef("dashboard.view", "dashboard", "Dashboardni ko'rish"),
+    PermissionDef("users.view", "users", "Foydalanuvchilarni ko'rish"),
+    PermissionDef("users.create", "users", "Foydalanuvchi qo'shish"),
+    PermissionDef("users.update", "users", "Foydalanuvchini tahrirlash"),
+    PermissionDef("users.delete", "users", "Foydalanuvchini o'chirish"),
+    PermissionDef("users.view_pinfl", "users", "To'liq JSHSHIRni ko'rish"),
+    PermissionDef("studios.view", "studios", "Studiyalarni ko'rish"),
+    PermissionDef("studios.create", "studios", "Studiya qo'shish"),
+    PermissionDef("studios.update", "studios", "Studiyani tahrirlash"),
+    PermissionDef("studios.delete", "studios", "Studiyani o'chirish"),
+)
+
+ALL_CODES: tuple[str, ...] = tuple(p.code for p in ADMIN_PERMISSIONS)
+DEFAULT_ADMIN_PERMISSIONS: tuple[str, ...] = ("dashboard.view",)
+
+MODULE_LABELS = {
+    "dashboard": "Dashboard",
+    "users": "Foydalanuvchilar",
+    "studios": "Studiyalar",
+}
+
+
+def normalize(codes) -> list[str]:
+    """Deduplicate and order codes as in the catalog. Unknown codes must be rejected before this."""
+    wanted = set(codes or ())
+    return [code for code in ALL_CODES if code in wanted]
