@@ -3,7 +3,7 @@
  * Components never hard-code durations/easings; they import from here.
  * Reduced motion is handled globally by <MotionConfig reducedMotion="user">.
  */
-import type { Transition, Variants } from "motion/react";
+import type { TargetAndTransition, Transition, Variants } from "motion/react";
 
 export const duration = {
   instant: 0.08,
@@ -74,10 +74,10 @@ export const fieldErrorVariants: Variants = {
 };
 
 /** Horizontal shake used on invalid form submit. */
-export const shake = {
+export const shake: TargetAndTransition = {
   x: [0, -8, 8, -6, 6, -3, 3, 0],
   transition: { duration: 0.42, ease: "easeInOut" },
-} as const;
+};
 
 /** Hover lift + glow for glass cards. */
 export const cardHover = {

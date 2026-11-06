@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
 
-export default function PanelLayout({ children }: LayoutProps<"/">) {
+export default function PanelLayout({ children }: { children: React.ReactNode }) {
   return <AppShell>{children}</AppShell>;
 }
