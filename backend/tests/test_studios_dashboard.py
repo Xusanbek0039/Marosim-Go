@@ -9,8 +9,12 @@ STUDIOS = "/api/v1/studios/"
 def test_create_studio_with_logo(super_admin, client_for, studio_user):
     res = client_for(super_admin).post(
         STUDIOS,
-        {"name": "Nur Studio", "address": "Toshkent", "responsible_user_id": str(studio_user.pk),
-         "profile_picture": image_file("logo.jpg", "JPEG")},
+        {
+            "name": "Nur Studio",
+            "address": "Toshkent",
+            "responsible_user_id": str(studio_user.pk),
+            "profile_picture": image_file("logo.jpg", "JPEG"),
+        },
         format="multipart",
     )
     assert res.status_code == 201, res.data

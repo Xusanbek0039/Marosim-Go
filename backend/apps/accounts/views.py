@@ -16,7 +16,14 @@ from .serializers import AdminSerializer, ManagedUserSerializer, PermissionDefSe
 from .tokens import revoke_all_sessions
 
 AUDITED_FIELDS = [
-    "email", "first_name", "last_name", "profile_picture", "address", "role", "is_active", "admin_permissions",
+    "email",
+    "first_name",
+    "last_name",
+    "profile_picture",
+    "address",
+    "role",
+    "is_active",
+    "admin_permissions",
 ]
 
 

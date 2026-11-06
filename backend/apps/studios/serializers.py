@@ -22,8 +22,15 @@ class StudioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Studio
         fields = [
-            "id", "name", "profile_picture", "address", "responsible_user", "responsible_user_id",
-            "is_active", "created_at", "updated_at",
+            "id",
+            "name",
+            "profile_picture",
+            "address",
+            "responsible_user",
+            "responsible_user_id",
+            "is_active",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
 

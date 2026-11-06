@@ -1,0 +1,1407 @@
+openapi: 3.0.3
+info:
+  title: MarosimGo API
+  version: 1.0.0
+  description: 'MarosimGo REST API (v1). Web panel: httpOnly cookie; mobil: Bearer
+    token.'
+paths:
+  /api/v1/admins/:
+    get:
+      operationId: admins_list
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      parameters:
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: pinfl
+        schema:
+          type: string
+        description: JSHSHIR (aniq moslik)
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - STUDIO
+          - USER
+        description: |-
+          * `USER` - Foydalanuvchi
+          * `STUDIO` - Studiya
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admins
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminList'
+          description: ''
+    post:
+      operationId: admins_create
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      tags:
+      - admins
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+  /api/v1/admins/{id}/:
+    get:
+      operationId: admins_retrieve
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - admins
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    patch:
+      operationId: admins_partial_update
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - admins
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+          description: ''
+    delete:
+      operationId: admins_destroy
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - admins
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admins/{id}/pinfl/:
+    get:
+      operationId: admins_pinfl_retrieve
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      summary: Adminning to'liq JSHSHIRi (audit qilinadi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - admins
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinflReveal'
+          description: ''
+  /api/v1/admins/permissions/:
+    get:
+      operationId: admins_permissions_list
+      description: ADMIN accounts and their granular permissions — Super Admin only.
+      summary: Adminlarga beriladigan ruxsatlar ro'yxati
+      tags:
+      - admins
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionDef'
+          description: ''
+  /api/v1/auth/csrf/:
+    get:
+      operationId: auth_csrf_retrieve
+      description: Sets the ``csrftoken`` cookie the web panel echoes back in ``X-CSRFToken``.
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          description: CSRF cookie o'rnatildi
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Unauthenticated auth endpoints still answer 401 (not 403) with
+        a WWW-Authenticate header.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: Unauthenticated auth endpoints still answer 401 (not 403) with
+        a WWW-Authenticate header.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: Unauthenticated auth endpoints still answer 401 (not 403) with
+        a WWW-Authenticate header.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/v1/dashboard/overview/:
+    get:
+      operationId: dashboard_overview_retrieve
+      tags:
+      - dashboard
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardOverview'
+          description: ''
+  /api/v1/studios/:
+    get:
+      operationId: studios_list
+      parameters:
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: responsible_user
+        schema:
+          type: string
+          format: uuid
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - studios
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStudioList'
+          description: ''
+    post:
+      operationId: studios_create
+      tags:
+      - studios
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudioRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Studio'
+          description: ''
+  /api/v1/studios/{id}/:
+    get:
+      operationId: studios_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this studio.
+        required: true
+      tags:
+      - studios
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Studio'
+          description: ''
+    patch:
+      operationId: studios_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this studio.
+        required: true
+      tags:
+      - studios
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStudioRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStudioRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStudioRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Studio'
+          description: ''
+    delete:
+      operationId: studios_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this studio.
+        required: true
+      tags:
+      - studios
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/:
+    get:
+      operationId: users_list
+      description: 'Clients of the platform: USER and STUDIO accounts.'
+      parameters:
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: pinfl
+        schema:
+          type: string
+        description: JSHSHIR (aniq moslik)
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - STUDIO
+          - USER
+        description: |-
+          * `USER` - Foydalanuvchi
+          * `STUDIO` - Studiya
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManagedUserList'
+          description: ''
+    post:
+      operationId: users_create
+      description: 'Clients of the platform: USER and STUDIO accounts.'
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManagedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManagedUserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedUser'
+          description: ''
+  /api/v1/users/{id}/:
+    get:
+      operationId: users_retrieve
+      description: 'Clients of the platform: USER and STUDIO accounts.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedUser'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      description: 'Clients of the platform: USER and STUDIO accounts.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedUser'
+          description: ''
+    delete:
+      operationId: users_destroy
+      description: 'Clients of the platform: USER and STUDIO accounts.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/{id}/pinfl/:
+    get:
+      operationId: users_pinfl_retrieve
+      description: 'Clients of the platform: USER and STUDIO accounts.'
+      summary: To'liq JSHSHIR (audit qilinadi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PinflReveal'
+          description: ''
+components:
+  schemas:
+    Admin:
+      type: object
+      description: |-
+        Create/update/read accounts managed by the panel.
+
+        ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        full_name:
+          type: string
+          readOnly: true
+        pinfl_masked:
+          type: string
+          readOnly: true
+          nullable: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        role:
+          allOf:
+          - $ref: '#/components/schemas/AdminRoleEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Oxirgi kirish
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionsEnum'
+          maxItems: 10
+      required:
+      - created_at
+      - email
+      - first_name
+      - full_name
+      - id
+      - last_login
+      - last_name
+      - pinfl_masked
+      - role
+      - updated_at
+    AdminRequest:
+      type: object
+      description: |-
+        Create/update/read accounts managed by the panel.
+
+        ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 10
+          maxLength: 128
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        pinfl:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 32
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionsEnum'
+          maxItems: 10
+      required:
+      - email
+      - first_name
+      - last_name
+    AdminRoleEnum:
+      enum:
+      - ADMIN
+      type: string
+      description: '* `ADMIN` - Admin'
+    DashboardOverview:
+      type: object
+      properties:
+        totals:
+          type: object
+          additionalProperties:
+            type: integer
+        role_distribution:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        recent_profiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSummary'
+        generated_at:
+          type: string
+          format: date-time
+      required:
+      - generated_at
+      - recent_profiles
+      - role_distribution
+      - totals
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - email
+      - password
+    ManagedUser:
+      type: object
+      description: |-
+        Create/update/read accounts managed by the panel.
+
+        ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        full_name:
+          type: string
+          readOnly: true
+        pinfl_masked:
+          type: string
+          readOnly: true
+          nullable: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        role:
+          $ref: '#/components/schemas/ManagedUserRoleEnum'
+        is_active:
+          type: boolean
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Oxirgi kirish
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - first_name
+      - full_name
+      - id
+      - last_login
+      - last_name
+      - pinfl_masked
+      - updated_at
+    ManagedUserRequest:
+      type: object
+      description: |-
+        Create/update/read accounts managed by the panel.
+
+        ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 10
+          maxLength: 128
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        pinfl:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 32
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        role:
+          $ref: '#/components/schemas/ManagedUserRoleEnum'
+        is_active:
+          type: boolean
+      required:
+      - email
+      - first_name
+      - last_name
+    ManagedUserRoleEnum:
+      enum:
+      - USER
+      - STUDIO
+      type: string
+      description: |-
+        * `USER` - Foydalanuvchi
+        * `STUDIO` - Studiya
+    Me:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        pinfl_masked:
+          type: string
+          readOnly: true
+          nullable: true
+        permissions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Oxirgi kirish
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - created_at
+      - email
+      - first_name
+      - full_name
+      - id
+      - last_login
+      - last_name
+      - permissions
+      - pinfl_masked
+      - profile_picture
+      - role
+    PaginatedAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Admin'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PaginatedManagedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedUser'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PaginatedStudioList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Studio'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PatchedAdminRequest:
+      type: object
+      description: |-
+        Create/update/read accounts managed by the panel.
+
+        ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 10
+          maxLength: 128
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        pinfl:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 32
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionsEnum'
+          maxItems: 10
+    PatchedManagedUserRequest:
+      type: object
+      description: |-
+        Create/update/read accounts managed by the panel.
+
+        ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 10
+          maxLength: 128
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        pinfl:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 32
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        role:
+          $ref: '#/components/schemas/ManagedUserRoleEnum'
+        is_active:
+          type: boolean
+    PatchedStudioRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        responsible_user_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        is_active:
+          type: boolean
+    PermissionDef:
+      type: object
+      properties:
+        code:
+          type: string
+        module:
+          type: string
+        module_label:
+          type: string
+        label:
+          type: string
+      required:
+      - code
+      - label
+      - module
+      - module_label
+    PermissionsEnum:
+      enum:
+      - dashboard.view
+      - users.view
+      - users.create
+      - users.update
+      - users.delete
+      - users.view_pinfl
+      - studios.view
+      - studios.create
+      - studios.update
+      - studios.delete
+      type: string
+      description: |-
+        * `dashboard.view` - dashboard.view
+        * `users.view` - users.view
+        * `users.create` - users.create
+        * `users.update` - users.update
+        * `users.delete` - users.delete
+        * `users.view_pinfl` - users.view_pinfl
+        * `studios.view` - studios.view
+        * `studios.create` - studios.create
+        * `studios.update` - studios.update
+        * `studios.delete` - studios.delete
+    PinflReveal:
+      type: object
+      properties:
+        pinfl:
+          type: string
+      required:
+      - pinfl
+    RefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+    RoleEnum:
+      enum:
+      - SUPER_ADMIN
+      - ADMIN
+      - STUDIO
+      - USER
+      type: string
+      description: |-
+        * `SUPER_ADMIN` - Super Admin
+        * `ADMIN` - Admin
+        * `STUDIO` - Studiya
+        * `USER` - Foydalanuvchi
+    Studio:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
+        responsible_user:
+          allOf:
+          - $ref: '#/components/schemas/UserSummary'
+          readOnly: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - created_at
+      - id
+      - name
+      - responsible_user
+      - updated_at
+    StudioRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        responsible_user_id:
+          type: string
+          format: uuid
+          writeOnly: true
+        is_active:
+          type: boolean
+      required:
+      - address
+      - name
+      - responsible_user_id
+    UserSummary:
+      type: object
+      description: Compact, safe representation used inside other resources (studios,
+        dashboard).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+        last_name:
+          type: string
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        pinfl_masked:
+          type: string
+          readOnly: true
+          nullable: true
+        is_active:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - first_name
+      - full_name
+      - id
+      - is_active
+      - last_name
+      - pinfl_masked
+      - profile_picture
+      - role
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Mobil: Authorization: Bearer <access>. Web panel: httpOnly cookie
+        + X-CSRFToken.'

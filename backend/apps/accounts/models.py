@@ -84,9 +84,7 @@ class User(BaseModel, SoftDeleteModel, AbstractBaseUser):
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["role", "is_active"])]
         constraints = [
-            models.CheckConstraint(
-                condition=Q(role__in=[r.value for r in Role]), name="accounts_user_role_valid"
-            ),
+            models.CheckConstraint(condition=Q(role__in=[r.value for r in Role]), name="accounts_user_role_valid"),
         ]
 
     def __str__(self) -> str:

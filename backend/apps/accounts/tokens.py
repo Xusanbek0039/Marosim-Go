@@ -49,9 +49,7 @@ def revoke_all_sessions(user: User) -> None:
     outstanding = OutstandingToken.objects.filter(
         user=user, expires_at__gt=timezone.now(), blacklistedtoken__isnull=True
     )
-    BlacklistedToken.objects.bulk_create(
-        [BlacklistedToken(token=t) for t in outstanding], ignore_conflicts=True
-    )
+    BlacklistedToken.objects.bulk_create([BlacklistedToken(token=t) for t in outstanding], ignore_conflicts=True)
 
 
 def rotate_refresh(raw: str, request=None) -> tuple[User, dict]:

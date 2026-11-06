@@ -1,6 +1,6 @@
 """One error shape for the whole API:
 
-    {"error": {"code": "...", "message": "...", "details": {...}}}
+{"error": {"code": "...", "message": "...", "details": {...}}}
 """
 
 import logging

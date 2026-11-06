@@ -5,7 +5,10 @@ import re
 
 _PATTERNS = [
     (re.compile(r"(?<!\d)\d{14}(?!\d)"), "[PINFL]"),
-    (re.compile(r"(?i)(\"?(?:password|pinfl|token|access|refresh|secret)\"?\s*[:=]\s*)\"?[^\s,&\"}]+"), r"\1[REDACTED]"),
+    (
+        re.compile(r"(?i)(\"?(?:password|pinfl|token|access|refresh|secret)\"?\s*[:=]\s*)\"?[^\s,&\"}]+"),
+        r"\1[REDACTED]",
+    ),
     (re.compile(r"(?i)bearer\s+[a-z0-9\-_.]+"), "Bearer [REDACTED]"),
 ]
 

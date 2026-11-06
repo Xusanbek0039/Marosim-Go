@@ -40,9 +40,7 @@ def snapshot(instance: Model, fields: list[str]) -> dict:
 
 def diff(before: dict, after: dict, touched_sensitive: set[str] | None = None) -> dict:
     changes = {
-        key: {"from": before.get(key), "to": after.get(key)}
-        for key in after
-        if before.get(key) != after.get(key)
+        key: {"from": before.get(key), "to": after.get(key)} for key in after if before.get(key) != after.get(key)
     }
     for name in touched_sensitive or ():
         changes[name] = "[REDACTED]"

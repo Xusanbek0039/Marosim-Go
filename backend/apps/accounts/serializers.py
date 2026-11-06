@@ -18,8 +18,16 @@ class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "email", "first_name", "last_name", "full_name", "role",
-            "profile_picture", "pinfl_masked", "is_active", "created_at",
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "full_name",
+            "role",
+            "profile_picture",
+            "pinfl_masked",
+            "is_active",
+            "created_at",
         ]
         read_only_fields = fields
 
@@ -32,8 +40,18 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "email", "first_name", "last_name", "full_name", "role", "profile_picture",
-            "address", "pinfl_masked", "permissions", "last_login", "created_at",
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "full_name",
+            "role",
+            "profile_picture",
+            "address",
+            "pinfl_masked",
+            "permissions",
+            "last_login",
+            "created_at",
         ]
         read_only_fields = fields
 
@@ -51,8 +69,12 @@ class ManagedUserSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(max_length=254)
     password = serializers.CharField(
-        write_only=True, required=False, trim_whitespace=False, style={"input_type": "password"},
-        min_length=10, max_length=128,
+        write_only=True,
+        required=False,
+        trim_whitespace=False,
+        style={"input_type": "password"},
+        min_length=10,
+        max_length=128,
     )
     pinfl = serializers.CharField(write_only=True, required=False, max_length=32)
     pinfl_masked = serializers.CharField(read_only=True, allow_null=True)
@@ -63,8 +85,21 @@ class ManagedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "id", "email", "password", "first_name", "last_name", "full_name", "pinfl", "pinfl_masked",
-            "profile_picture", "address", "role", "is_active", "last_login", "created_at", "updated_at",
+            "id",
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+            "full_name",
+            "pinfl",
+            "pinfl_masked",
+            "profile_picture",
+            "address",
+            "role",
+            "is_active",
+            "last_login",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = ["id", "last_login", "created_at", "updated_at"]
         extra_kwargs = {

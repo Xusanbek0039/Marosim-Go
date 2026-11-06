@@ -28,8 +28,13 @@ class StudioViewSet(viewsets.ModelViewSet):
     permission_module = "studios"
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     filterset_class = StudioFilter
-    search_fields = ["name", "address", "responsible_user__first_name", "responsible_user__last_name",
-                     "responsible_user__email"]
+    search_fields = [
+        "name",
+        "address",
+        "responsible_user__first_name",
+        "responsible_user__last_name",
+        "responsible_user__email",
+    ]
     ordering_fields = ["name", "created_at", "updated_at"]
     ordering = ["-created_at"]
 

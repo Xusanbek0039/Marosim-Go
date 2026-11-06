@@ -133,7 +133,13 @@ class RefreshView(PublicAuthView):
             if not is_mobile(request):
                 # Make sure a rejected browser session is fully cleared.
                 response = Response(
-                    {"error": {"code": "session_invalid", "message": "Sessiya tugagan. Qayta kiring.", "details": None}},
+                    {
+                        "error": {
+                            "code": "session_invalid",
+                            "message": "Sessiya tugagan. Qayta kiring.",
+                            "details": None,
+                        }
+                    },
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
                 clear_auth_cookies(response)
@@ -143,7 +149,6 @@ class RefreshView(PublicAuthView):
 
 
 class LogoutView(PublicAuthView):
-
     @extend_schema(request=RefreshSerializer, responses={204: None})
     def post(self, request):
         if is_mobile(request):

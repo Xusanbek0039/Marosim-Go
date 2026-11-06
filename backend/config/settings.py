@@ -210,6 +210,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "RoleEnum": "apps.accounts.models.Role",
+        "ClientRoleEnum": ["USER", "STUDIO"],
+        "AdminRoleEnum": ["ADMIN"],
+    },
     "SERVE_PERMISSIONS": (
         ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.accounts.permissions.IsSuperAdmin"]
     ),
