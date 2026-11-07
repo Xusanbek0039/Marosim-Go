@@ -58,13 +58,6 @@ class VenueOwnerVenueViewSet(
     lookup_value_regex = UUID_RE
     #: delete = gallery images only (there is no destroy mixin: a venue itself cannot be deleted here)
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
-        "get",
-        "post",
-        "patch",
-        "delete",
-        "head",
-        "options",
-    ]  # delete: gallery images only (no destroy mixin)
     search_fields = ["name", "address", "district"]
     ordering_fields = ["name", "created_at", "base_price", "capacity_max"]
     ordering = ["-created_at"]
