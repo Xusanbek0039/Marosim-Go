@@ -216,6 +216,18 @@ OWNERSHIP_TESTS = {
         ["me_invitations_list", "me_invitations_accept_create", "me_invitations_decline_create"],
         "ownership_invitation_scope_is_own_phone",
     ),
+    # venues — tests live in tests/test_venues.py
+    **dict.fromkeys(
+        [
+            "venue_owner_venues_list",
+            "venue_owner_venues_retrieve",
+            "venue_owner_venues_partial_update",
+            "venue_owner_venues_halls_list",
+            "venue_owner_venues_halls_create",
+            "venue_owner_venues_halls_partial_update",
+        ],
+        "ownership_venue_scope_is_own_membership",
+    ),
 }
 
 from . import test_ceremonies as _ceremony_tests  # noqa: E402
@@ -224,6 +236,10 @@ ownership_ceremony_scope_is_own_studio = _ceremony_tests.test_ceremony_scope_is_
 ownership_studio_me_is_own_memberships = _ceremony_tests.test_studio_me_lists_own_memberships_only
 ownership_user_ceremony_scope = _ceremony_tests.test_user_ceremony_scope_is_own_participation
 ownership_invitation_scope_is_own_phone = _ceremony_tests.test_invitation_scope_is_own_phone
+
+from . import test_venues as _venue_tests  # noqa: E402
+
+ownership_venue_scope_is_own_membership = _venue_tests.test_venue_scope_is_own_membership
 
 
 @pytest.mark.parametrize(
