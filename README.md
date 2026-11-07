@@ -32,7 +32,9 @@ python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().de
 # lokal http uchun .env ichida: AUTH_COOKIE_SECURE=false (yoki DJANGO_DEBUG=true)
 
 python manage.py migrate
-python manage.py createsuperuser   # yagona Super Admin yaratish yo'li (API orqali mumkin emas)
+python manage.py createsuperuser   # yagona Super Admin yaratish yo'li (API orqali mumkin emas); login = telefon
+python manage.py set_phone --list-missing          # v2 dan oldingi (telefonsiz) hisoblar
+python manage.py set_phone admin@example.uz +998901234567  # eski hisobga login telefon biriktirish
 python manage.py seed_demo         # ixtiyoriy, faqat DJANGO_DEBUG=true bo'lganda: demo ma'lumotlar
 python manage.py runserver 127.0.0.1:8000
 ```
@@ -93,7 +95,11 @@ login bloklash va throttling uchun umumiy kesh ham kerak: `CACHE_URL=redis://loc
 - **Web:** tokenlar faqat `HttpOnly` cookie'da (refresh — `SameSite=Strict`, faqat `/api/v1/auth/` yo'lida);
   localStorage'da hech qanday token yo'q. Cookie bilan kelgan har bir o'zgartiruvchi so'rov CSRF tekshiruvidan o'tadi.
 - **Sessiyani bekor qilish:** nofaol qilish, o'chirish yoki parol o'zgarganda barcha tokenlar darhol yaroqsiz bo'ladi.
-- **Brute-force:** IP bo'yicha throttle (5/min) + email bo'yicha 5 xatodan keyin 15 daqiqalik blok.
+- **Login:** telefon raqam (E.164) + parol. Xato telefon/parol/nofaol hisob — bir xil umumiy xato.
+- **Brute-force:** IP bo'yicha throttle (5/min) + telefon bo'yicha 5 xatodan keyin 15 daqiqalik blok;
+  ro'yxatdan o'tish 10/soat, ixtiyoriy bot-guard (`BOT_PROTECTION_GUARD`).
+- **API monitoring:** faqat metod, yo'l, status, davomiylik, request ID, user ID saqlanadi (tana, header, cookie,
+  token, query string — yo'q); 14 kunlik retention, `python manage.py prune_request_logs`.
 - **RBAC:** hamma tekshiruvlar serverda. `ADMIN` faqat Super Admin bergan ruxsatlar doirasida ishlaydi;
   adminlarni faqat Super Admin boshqaradi.
 - **JSHSHIR:** Fernet bilan shifrlangan (kalit rotatsiyasi bilan), unikallik — HMAC orqali; API'da faqat

@@ -1,4 +1,12 @@
-import { LayoutDashboardIcon, type LucideIcon, Settings2Icon, ShieldCheckIcon, UsersIcon, VideoIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  LayoutDashboardIcon,
+  type LucideIcon,
+  Settings2Icon,
+  ShieldCheckIcon,
+  UsersIcon,
+  VideoIcon,
+} from "lucide-react";
 
 import type { Me, PermissionCode } from "@/lib/api/types";
 
@@ -15,6 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/users", label: "Foydalanuvchilar", icon: UsersIcon, requires: "users.view" },
   { href: "/admins", label: "Adminlar", icon: ShieldCheckIcon, requires: "super" },
   { href: "/studios", label: "Studiyalar", icon: VideoIcon, requires: "studios.view" },
+  { href: "/monitoring", label: "API Monitoring", icon: ActivityIcon, requires: "super" },
   { href: "/settings", label: "Sozlamalar", icon: Settings2Icon },
 ];
 

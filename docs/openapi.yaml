@@ -1,14 +1,22 @@
 openapi: 3.0.3
 info:
   title: MarosimGo API
-  version: 1.0.0
-  description: 'MarosimGo REST API (v1). Web panel: httpOnly cookie; mobil: Bearer
-    token.'
+  version: 2.0.0
+  description: |-
+    MarosimGo REST API (v1). Login identifikatori — telefon raqam (E.164).
+
+    * **Mobil:** `X-Client: mobile` + `Authorization: Bearer <access>`.
+    * **Web panel:** httpOnly cookie + `X-CSRFToken`.
+
+    Har bir operatsiyada `x-access` (rol/ruxsat) va standart xato javoblari avtomatik hujjatlashtiriladi.
 paths:
   /api/v1/admins/:
     get:
       operationId: admins_list
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       parameters:
       - in: query
         name: created_after
@@ -74,9 +82,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAdminList'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
     post:
       operationId: admins_create
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       tags:
       - admins
       requestBody:
@@ -90,7 +125,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/AdminRequest'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -100,10 +134,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/Admin'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
   /api/v1/admins/{id}/:
     get:
       operationId: admins_retrieve
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       parameters:
       - in: path
         name: id
@@ -123,9 +190,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/Admin'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
     patch:
       operationId: admins_partial_update
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       parameters:
       - in: path
         name: id
@@ -156,9 +256,48 @@ paths:
               schema:
                 $ref: '#/components/schemas/Admin'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
     delete:
       operationId: admins_destroy
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       parameters:
       - in: path
         name: id
@@ -174,10 +313,43 @@ paths:
       responses:
         '204':
           description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
   /api/v1/admins/{id}/pinfl/:
     get:
       operationId: admins_pinfl_retrieve
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       summary: Adminning to'liq JSHSHIRi (audit qilinadi)
       parameters:
       - in: path
@@ -198,10 +370,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/PinflReveal'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
   /api/v1/admins/permissions/:
     get:
       operationId: admins_permissions_list
-      description: ADMIN accounts and their granular permissions — Super Admin only.
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
       summary: Adminlarga beriladigan ruxsatlar ro'yxati
       tags:
       - admins
@@ -216,10 +421,38 @@ paths:
                 items:
                   $ref: '#/components/schemas/PermissionDef'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
   /api/v1/auth/csrf/:
     get:
       operationId: auth_csrf_retrieve
-      description: Sets the ``csrftoken`` cookie the web panel echoes back in ``X-CSRFToken``.
+      description: |-
+        Sets the ``csrftoken`` cookie the web panel echoes back in ``X-CSRFToken``.
+
+        **Ruxsat:** Ochiq (public)
+      summary: CSRF cookie olish (web panel)
       tags:
       - auth
       security:
@@ -227,11 +460,34 @@ paths:
       responses:
         '200':
           description: CSRF cookie o'rnatildi
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
   /api/v1/auth/login/:
     post:
       operationId: auth_login_create
-      description: Unauthenticated auth endpoints still answer 401 (not 403) with
-        a WWW-Authenticate header.
+      description: |-
+        Noto'g'ri telefon, noto'g'ri parol va nofaol hisob uchun bir xil `401 invalid_credentials` qaytadi. Ketma-ket muvaffaqiyatsiz urinishlardan so'ng hisob vaqtincha bloklanadi (`429 account_locked`).
+
+        **Ruxsat:** Ochiq (public)
+      summary: Tizimga kirish (telefon + parol)
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - mobile
+        description: '`mobile` — tokenlar javob tanasida qaytadi. Yuborilmasa: web
+          panel (httpOnly cookie + CSRF).'
       tags:
       - auth
       requestBody:
@@ -239,6 +495,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginRequest'
+            examples:
+              TelefonVaParol:
+                value:
+                  phone_number: '+998901234567'
+                  password: SecurePassword123!
+                summary: Telefon va parol
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/LoginRequest'
@@ -253,13 +515,48 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Me'
+                $ref: '#/components/schemas/TokenPair'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
   /api/v1/auth/logout/:
     post:
       operationId: auth_logout_create
-      description: Unauthenticated auth endpoints still answer 401 (not 403) with
-        a WWW-Authenticate header.
+      description: |-
+        Refresh token blacklistga qo'shiladi; web panelda cookie'lar tozalanadi.
+
+        **Ruxsat:** Ochiq (public)
+      summary: Tizimdan chiqish
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - mobile
+        description: '`mobile` — tokenlar javob tanasida qaytadi. Yuborilmasa: web
+          panel (httpOnly cookie + CSRF).'
       tags:
       - auth
       requestBody:
@@ -278,9 +575,27 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
   /api/v1/auth/me/:
     get:
       operationId: auth_me_retrieve
+      summary: Mening profilim
       tags:
       - auth
       security:
@@ -292,11 +607,106 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles: []
+        permission: null
+        label: Har qanday tizimga kirgan foydalanuvchi
+      description: '**Ruxsat:** Har qanday tizimga kirgan foydalanuvchi'
+    patch:
+      operationId: auth_me_partial_update
+      description: |-
+        Faqat `first_name`, `last_name`, `profile_picture`, `address` o'zgaradi. Rol, holat, telefon va JSHSHIR bu yerda o'zgartirilmaydi (boshqa maydonlar e'tiborsiz qoldiriladi).
+
+        **Ruxsat:** Har qanday tizimga kirgan foydalanuvchi
+      summary: Profilni tahrirlash
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+            examples:
+              ProfilniYangilash:
+                value:
+                  first_name: Dilnoza
+                  last_name: Karimova
+                  address: Toshkent, Chilonzor
+                summary: Profilni yangilash
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMeUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles: []
+        permission: null
+        label: Har qanday tizimga kirgan foydalanuvchi
   /api/v1/auth/refresh/:
     post:
       operationId: auth_refresh_create
-      description: Unauthenticated auth endpoints still answer 401 (not 403) with
-        a WWW-Authenticate header.
+      description: |-
+        Refresh token bir martalik. Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi.
+
+        **Ruxsat:** Ochiq (public)
+      summary: Tokenni yangilash (rotation)
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - mobile
+        description: '`mobile` — tokenlar javob tanasida qaytadi. Yuborilmasa: web
+          panel (httpOnly cookie + CSRF).'
       tags:
       - auth
       requestBody:
@@ -317,8 +727,89 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Me'
+                $ref: '#/components/schemas/TokenPair'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register_create
+      description: |-
+        Rol har doim `USER`. Telefon raqam E.164 ga keltiriladi (`901234567` → `+998901234567`). Telefon egaligi hali tasdiqlanmagan (`is_phone_verified=false`). Bot himoyasi yoqilgan bo'lsa, `X-Bot-Token` sarlavhasi talab qilinadi.
+
+        **Ruxsat:** Ochiq (public)
+      summary: Ro'yxatdan o'tish (telefon + parol)
+      parameters:
+      - in: header
+        name: X-Client
+        schema:
+          type: string
+          enum:
+          - mobile
+        description: '`mobile` — tokenlar javob tanasida qaytadi. Yuborilmasa: web
+          panel (httpOnly cookie + CSRF).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              Ro'yxatdanO'tish:
+                value:
+                  phone_number: '+998901234567'
+                  password: SecurePassword123!
+                  password_confirm: SecurePassword123!
+                summary: Ro'yxatdan o'tish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
   /api/v1/dashboard/overview/:
     get:
       operationId: dashboard_overview_retrieve
@@ -333,6 +824,344 @@ paths:
               schema:
                 $ref: '#/components/schemas/DashboardOverview'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: dashboard.view
+        label: SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN
+      description: '**Ruxsat:** SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN'
+  /api/v1/health/live/:
+    get:
+      operationId: health_live_retrieve
+      summary: Liveness — jarayon ishlayaptimi
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthLive'
+          description: ''
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
+      description: '**Ruxsat:** Ochiq (public)'
+  /api/v1/health/ready/:
+    get:
+      operationId: health_ready_retrieve
+      description: |-
+        `database` ishlamasa 503 `unavailable`; faqat `cache` ishlamasa 200 `degraded`.
+
+        **Ruxsat:** Ochiq (public)
+      summary: Readiness — bog'liqliklar (database, cache) tayyormi
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthReady'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthReady'
+          description: ''
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
+  /api/v1/monitoring/endpoints/:
+    get:
+      operationId: monitoring_endpoints_retrieve
+      summary: API endpointlar katalogi (OpenAPI'dan avtomatik)
+      tags:
+      - monitoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEndpointCatalog'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      description: '**Ruxsat:** Faqat SUPER_ADMIN'
+  /api/v1/monitoring/logs/:
+    get:
+      operationId: monitoring_logs_list
+      summary: So'rovlar jurnali
+      parameters:
+      - in: query
+        name: error_category
+        schema:
+          type: string
+          enum:
+          - authentication
+          - client_error
+          - conflict
+          - method_not_allowed
+          - not_found
+          - payload
+          - permission
+          - server_error
+          - throttled
+          - validation
+        description: |-
+          * `validation` - Validatsiya
+          * `authentication` - Autentifikatsiya
+          * `permission` - Ruxsat
+          * `not_found` - Topilmadi
+          * `method_not_allowed` - Metod
+          * `conflict` - Konflikt
+          * `payload` - So'rov hajmi/format
+          * `throttled` - Throttling
+          * `client_error` - Mijoz xatosi
+          * `server_error` - Server xatosi
+      - in: query
+        name: method
+        schema:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - HEAD
+          - OPTIONS
+          - PATCH
+          - POST
+          - PUT
+        description: |-
+          * `GET` - GET
+          * `POST` - POST
+          * `PUT` - PUT
+          * `PATCH` - PATCH
+          * `DELETE` - DELETE
+          * `HEAD` - HEAD
+          * `OPTIONS` - OPTIONS
+      - in: query
+        name: min_duration
+        schema:
+          type: number
+          format: float
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: path
+        schema:
+          type: string
+      - in: query
+        name: request_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: route
+        schema:
+          type: string
+      - in: query
+        name: since
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: status_class
+        schema:
+          type: string
+          enum:
+          - 2xx
+          - 3xx
+          - 4xx
+          - 5xx
+        description: |-
+          Status sinfi
+
+          * `2xx` - 2xx
+          * `3xx` - 3xx
+          * `4xx` - 4xx
+          * `5xx` - 5xx
+      - in: query
+        name: status_code
+        schema:
+          type: integer
+      - in: query
+        name: until
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: user_id
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - monitoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRequestLogList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      description: '**Ruxsat:** Faqat SUPER_ADMIN'
+  /api/v1/monitoring/overview/:
+    get:
+      operationId: monitoring_overview_retrieve
+      summary: API statistikasi (real so'rovlar asosida)
+      parameters:
+      - in: query
+        name: window
+        schema:
+          type: string
+          enum:
+          - 15m
+          - 1h
+          - 24h
+          - 7d
+          default: 1h
+      tags:
+      - monitoring
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringOverview'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      description: '**Ruxsat:** Faqat SUPER_ADMIN'
   /api/v1/studios/:
     get:
       operationId: studios_list
@@ -391,6 +1220,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedStudioList'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: studios.view
+        label: SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
+      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN'
     post:
       operationId: studios_create
       tags:
@@ -416,6 +1271,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Studio'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: studios.create
+        label: SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN
+      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN'
   /api/v1/studios/{id}/:
     get:
       operationId: studios_retrieve
@@ -438,6 +1325,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Studio'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: studios.view
+        label: SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
+      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN'
     patch:
       operationId: studios_partial_update
       parameters:
@@ -470,6 +1389,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/Studio'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: studios.update
+        label: SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN
+      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN'
     delete:
       operationId: studios_destroy
       parameters:
@@ -487,10 +1444,45 @@ paths:
       responses:
         '204':
           description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: studios.delete
+        label: SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN
+      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN'
   /api/v1/users/:
     get:
       operationId: users_list
-      description: 'Clients of the platform: USER and STUDIO accounts.'
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
       parameters:
       - in: query
         name: created_after
@@ -556,9 +1548,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedManagedUserList'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: users.view
+        label: SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
     post:
       operationId: users_create
-      description: 'Clients of the platform: USER and STUDIO accounts.'
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.create` ruxsatli ADMIN
       tags:
       - users
       requestBody:
@@ -572,7 +1592,6 @@ paths:
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/ManagedUserRequest'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -582,10 +1601,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/ManagedUser'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: users.create
+        label: SUPER_ADMIN yoki `users.create` ruxsatli ADMIN
   /api/v1/users/{id}/:
     get:
       operationId: users_retrieve
-      description: 'Clients of the platform: USER and STUDIO accounts.'
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
       parameters:
       - in: path
         name: id
@@ -605,9 +1658,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/ManagedUser'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: users.view
+        label: SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
     patch:
       operationId: users_partial_update
-      description: 'Clients of the platform: USER and STUDIO accounts.'
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
       parameters:
       - in: path
         name: id
@@ -638,9 +1725,49 @@ paths:
               schema:
                 $ref: '#/components/schemas/ManagedUser'
           description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: users.update
+        label: SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
     delete:
       operationId: users_destroy
-      description: 'Clients of the platform: USER and STUDIO accounts.'
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN
       parameters:
       - in: path
         name: id
@@ -656,10 +1783,44 @@ paths:
       responses:
         '204':
           description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: users.delete
+        label: SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN
   /api/v1/users/{id}/pinfl/:
     get:
       operationId: users_pinfl_retrieve
-      description: 'Clients of the platform: USER and STUDIO accounts.'
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN
       summary: To'liq JSHSHIR (audit qilinadi)
       parameters:
       - in: path
@@ -680,6 +1841,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/PinflReveal'
           description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        - ADMIN
+        permission: users.view_pinfl
+        label: SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN
 components:
   schemas:
     Admin:
@@ -693,10 +1885,20 @@ components:
           type: string
           format: uuid
           readOnly: true
-        email:
+        phone_number:
           type: string
-          format: email
-          maxLength: 254
+          maxLength: 32
+        is_phone_verified:
+          type: boolean
+          readOnly: true
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         first_name:
           type: string
           maxLength: 100
@@ -744,12 +1946,10 @@ components:
           maxItems: 10
       required:
       - created_at
-      - email
-      - first_name
       - full_name
       - id
+      - is_phone_verified
       - last_login
-      - last_name
       - pinfl_masked
       - role
       - updated_at
@@ -760,11 +1960,18 @@ components:
 
         ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
       properties:
-        email:
+        phone_number:
           type: string
-          format: email
           minLength: 1
-          maxLength: 254
+          maxLength: 32
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         password:
           type: string
           writeOnly: true
@@ -772,11 +1979,9 @@ components:
           maxLength: 128
         first_name:
           type: string
-          minLength: 1
           maxLength: 100
         last_name:
           type: string
-          minLength: 1
           maxLength: 100
         pinfl:
           type: string
@@ -797,15 +2002,14 @@ components:
           items:
             $ref: '#/components/schemas/PermissionsEnum'
           maxItems: 10
-      required:
-      - email
-      - first_name
-      - last_name
     AdminRoleEnum:
       enum:
       - ADMIN
       type: string
       description: '* `ADMIN` - Admin'
+    BlankEnum:
+      enum:
+      - ''
     DashboardOverview:
       type: object
       properties:
@@ -830,21 +2034,95 @@ components:
       - recent_profiles
       - role_distribution
       - totals
+    ErrorCategoryEnum:
+      enum:
+      - validation
+      - authentication
+      - permission
+      - not_found
+      - method_not_allowed
+      - conflict
+      - payload
+      - throttled
+      - client_error
+      - server_error
+      type: string
+      description: |-
+        * `` - —
+        * `validation` - Validatsiya
+        * `authentication` - Autentifikatsiya
+        * `permission` - Ruxsat
+        * `not_found` - Topilmadi
+        * `method_not_allowed` - Metod
+        * `conflict` - Konflikt
+        * `payload` - So'rov hajmi/format
+        * `throttled` - Throttling
+        * `client_error` - Mijoz xatosi
+        * `server_error` - Server xatosi
+    ErrorEnvelope:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          - details
+          properties:
+            code:
+              type: string
+              example: validation_error
+            message:
+              type: string
+              example: Yuborilgan ma'lumotlar noto'g'ri.
+            details:
+              type: object
+              nullable: true
+              additionalProperties: true
+              example:
+                phone_number:
+                - 'Telefon raqam noto''g''ri. Masalan: +998901234567'
+    HealthLive:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+      - status
+    HealthReady:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        checks:
+          type: object
+          additionalProperties:
+            enum:
+            - ok
+            - fail
+            type: string
+            description: |-
+              * `ok` - ok
+              * `fail` - fail
+      required:
+      - checks
+      - status
     LoginRequest:
       type: object
       properties:
-        email:
+        phone_number:
           type: string
-          format: email
           minLength: 1
-          maxLength: 254
+          maxLength: 32
         password:
           type: string
           minLength: 1
           maxLength: 128
       required:
-      - email
       - password
+      - phone_number
     ManagedUser:
       type: object
       description: |-
@@ -856,10 +2134,20 @@ components:
           type: string
           format: uuid
           readOnly: true
-        email:
+        phone_number:
           type: string
-          format: email
-          maxLength: 254
+          maxLength: 32
+        is_phone_verified:
+          type: boolean
+          readOnly: true
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         first_name:
           type: string
           maxLength: 100
@@ -900,12 +2188,10 @@ components:
           readOnly: true
       required:
       - created_at
-      - email
-      - first_name
       - full_name
       - id
+      - is_phone_verified
       - last_login
-      - last_name
       - pinfl_masked
       - updated_at
     ManagedUserRequest:
@@ -915,11 +2201,18 @@ components:
 
         ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
       properties:
-        email:
+        phone_number:
           type: string
-          format: email
           minLength: 1
-          maxLength: 254
+          maxLength: 32
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         password:
           type: string
           writeOnly: true
@@ -927,11 +2220,9 @@ components:
           maxLength: 128
         first_name:
           type: string
-          minLength: 1
           maxLength: 100
         last_name:
           type: string
-          minLength: 1
           maxLength: 100
         pinfl:
           type: string
@@ -949,10 +2240,6 @@ components:
           $ref: '#/components/schemas/ManagedUserRoleEnum'
         is_active:
           type: boolean
-      required:
-      - email
-      - first_name
-      - last_name
     ManagedUserRoleEnum:
       enum:
       - USER
@@ -963,15 +2250,25 @@ components:
         * `STUDIO` - Studiya
     Me:
       type: object
+      description: The caller's own profile. PINFL is only ever exposed masked.
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Telefon raqam
+        is_phone_verified:
+          type: boolean
+          readOnly: true
         email:
           type: string
           format: email
           readOnly: true
+          nullable: true
         first_name:
           type: string
           readOnly: true
@@ -1019,12 +2316,93 @@ components:
       - first_name
       - full_name
       - id
+      - is_phone_verified
       - last_login
       - last_name
       - permissions
+      - phone_number
       - pinfl_masked
       - profile_picture
       - role
+    MonitoringEndpointCatalog:
+      type: object
+      properties:
+        api_base_url:
+          type: string
+        schema_url:
+          type: string
+        docs_url:
+          type: string
+        openapi_version:
+          type: string
+        api_version:
+          type: string
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - api_base_url
+      - api_version
+      - count
+      - docs_url
+      - openapi_version
+      - results
+      - schema_url
+    MonitoringOverview:
+      type: object
+      properties:
+        window:
+          type: string
+        bucket:
+          type: string
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        totals:
+          type: object
+          additionalProperties: {}
+        series:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        top_endpoints:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        status_codes:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        error_categories:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        security:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - bucket
+      - error_categories
+      - from
+      - security
+      - series
+      - status_codes
+      - to
+      - top_endpoints
+      - totals
+      - window
     PaginatedAdminList:
       type: object
       required:
@@ -1083,6 +2461,35 @@ components:
           type: integer
         total_pages:
           type: integer
+    PaginatedRequestLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestLog'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
     PaginatedStudioList:
       type: object
       required:
@@ -1119,11 +2526,18 @@ components:
 
         ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
       properties:
-        email:
+        phone_number:
           type: string
-          format: email
           minLength: 1
-          maxLength: 254
+          maxLength: 32
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         password:
           type: string
           writeOnly: true
@@ -1131,11 +2545,9 @@ components:
           maxLength: 128
         first_name:
           type: string
-          minLength: 1
           maxLength: 100
         last_name:
           type: string
-          minLength: 1
           maxLength: 100
         pinfl:
           type: string
@@ -1163,11 +2575,18 @@ components:
 
         ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
       properties:
-        email:
+        phone_number:
           type: string
-          format: email
           minLength: 1
-          maxLength: 254
+          maxLength: 32
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
         password:
           type: string
           writeOnly: true
@@ -1175,11 +2594,9 @@ components:
           maxLength: 128
         first_name:
           type: string
-          minLength: 1
           maxLength: 100
         last_name:
           type: string
-          minLength: 1
           maxLength: 100
         pinfl:
           type: string
@@ -1197,6 +2614,24 @@ components:
           $ref: '#/components/schemas/ManagedUserRoleEnum'
         is_active:
           type: boolean
+    PatchedMeUpdateRequest:
+      type: object
+      description: Self-service profile edit. Everything security-relevant (role,
+        flags, phone, PINFL) is absent on purpose.
+      properties:
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        profile_picture:
+          type: string
+          format: binary
+          nullable: true
+        address:
+          type: string
+          maxLength: 255
     PatchedStudioRequest:
       type: object
       properties:
@@ -1270,6 +2705,79 @@ components:
       properties:
         refresh:
           type: string
+    RegisterRequest:
+      type: object
+      description: Public sign-up. The role is always USER; any role/flag sent by
+        the client is ignored.
+      properties:
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 32
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - password_confirm
+      - phone_number
+    RequestLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        timestamp:
+          type: string
+          format: date-time
+        method:
+          type: string
+          readOnly: true
+        path:
+          type: string
+          readOnly: true
+        route:
+          type: string
+          readOnly: true
+        status_code:
+          type: integer
+          readOnly: true
+        duration_ms:
+          type: number
+          format: double
+          readOnly: true
+        request_id:
+          type: string
+          format: uuid
+          readOnly: true
+        user_id:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        error_category:
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ErrorCategoryEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+      required:
+      - duration_ms
+      - error_category
+      - id
+      - method
+      - path
+      - request_id
+      - route
+      - status_code
+      - timestamp
+      - user_id
     RoleEnum:
       enum:
       - SUPER_ADMIN
@@ -1282,6 +2790,16 @@ components:
         * `ADMIN` - Admin
         * `STUDIO` - Studiya
         * `USER` - Foydalanuvchi
+    StatusEnum:
+      enum:
+      - ok
+      - degraded
+      - unavailable
+      type: string
+      description: |-
+        * `ok` - ok
+        * `degraded` - degraded
+        * `unavailable` - unavailable
     Studio:
       type: object
       properties:
@@ -1345,6 +2863,22 @@ components:
       - address
       - name
       - responsible_user_id
+    TokenPair:
+      type: object
+      description: |-
+        Body of login/register/refresh. Tokens are only in the body for ``X-Client: mobile``;
+        the web panel receives them as httpOnly cookies instead.
+      properties:
+        user:
+          $ref: '#/components/schemas/Me'
+        access:
+          type: string
+          description: 'Faqat X-Client: mobile'
+        refresh:
+          type: string
+          description: 'Faqat X-Client: mobile'
+      required:
+      - user
     UserSummary:
       type: object
       description: Compact, safe representation used inside other resources (studios,
@@ -1354,10 +2888,16 @@ components:
           type: string
           format: uuid
           readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Telefon raqam
         email:
           type: string
           format: email
           readOnly: true
+          nullable: true
         first_name:
           type: string
           readOnly: true
@@ -1395,6 +2935,7 @@ components:
       - id
       - is_active
       - last_name
+      - phone_number
       - pinfl_masked
       - profile_picture
       - role

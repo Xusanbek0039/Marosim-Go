@@ -70,7 +70,9 @@ Marosim-Go/
 ```
 ┌──────────────────────────── accounts_user ────────────────────────────┐
 │ id               UUID PK                                              │
-│ email            varchar(254) UNIQUE (case-insensitive) — login       │
+│ phone_number     varchar(16) UNIQUE NULL — E.164, login (v2)          │
+│ is_phone_verified bool — OTP bo‘lmaguncha har doim false              │
+│ email            varchar(254) UNIQUE NULL — ixtiyoriy kontakt         │
 │ password         varchar(128) — Argon2 hash                           │
 │ first_name       varchar(100)                                         │
 │ last_name        varchar(100)                                         │
@@ -135,10 +137,13 @@ Marosim-Go/
 ### Endpointlar
 | Metod | Yo‘l | Kim | Izoh |
 |---|---|---|---|
-| POST | `/auth/login/` | hamma (throttle 5/min) | email + parol. Web: httpOnly cookie; mobil: body’da token |
+| POST | `/auth/register/` | hamma (throttle 10/soat) | telefon + parol (mobil). Rol har doim `USER` |
+| POST | `/auth/login/` | hamma (throttle 5/min) | telefon + parol. Web: httpOnly cookie; mobil: body’da token |
 | POST | `/auth/refresh/` | refresh egasi | rotatsiya + eski refresh blacklist |
 | POST | `/auth/logout/` | login qilgan | refresh blacklist + cookie tozalash |
-| GET | `/auth/me/` | login qilgan | joriy profil |
+| GET/PATCH | `/auth/me/` | login qilgan | joriy profil; PATCH: ism, familiya, rasm, manzil |
+| GET | `/health/live/`, `/health/ready/` | hamma | liveness / readiness (database, cache) |
+| GET | `/monitoring/overview/` `/logs/` `/endpoints/` | SUPER_ADMIN | API statistikasi, so‘rovlar jurnali, OpenAPI katalog |
 | GET/POST | `/users/` | SUPER_ADMIN yoki ruxsatli ADMIN | `USER` va `STUDIO` rollari |
 | GET/PATCH/DELETE | `/users/{id}/` | SUPER_ADMIN yoki ruxsatli ADMIN | DELETE = soft delete |
 | GET | `/users/{id}/pinfl/` | `users.view_pinfl` | to‘liq JSHSHIR, audit qilinadi, 20/soat |
@@ -185,7 +190,7 @@ Marosim-Go/
 ## 5. UI strukturasi (Liquid Control)
 
 ```
-/login                     — glass karta, email + parol
+/login                     — glass karta, telefon + parol
 /(panel) layout            — Sidebar (yig‘iladi: 260px ↔ 76px) + Topbar + PageTransition
   /dashboard               — 4 ta stat karta (animated counter) · oxirgi profillar · rollar taqsimoti
   /users                   — toolbar (search/filter/sort) · jadval · pagination · detail drawer · qo‘shish/tahrirlash modali
