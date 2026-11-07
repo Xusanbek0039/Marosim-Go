@@ -719,6 +719,20 @@
       "operation_id": "admins_create",
       "schema_fingerprint": "5e9a15282732b7d9"
     },
+    "POST /api/v1/admins/{id}/verify-phone/": {
+      "allowed_roles": [
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admins_verify_phone_create",
+      "schema_fingerprint": "55c909a345200edf"
+    },
     "POST /api/v1/auth/login/": {
       "allowed_roles": [
         "PUBLIC"
@@ -891,6 +905,27 @@
       "deprecated": false,
       "operation_id": "users_create",
       "schema_fingerprint": "b870407ff87d65a3"
+    },
+    "POST /api/v1/users/{id}/verify-phone/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "users.update"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "users.update"
+        ]
+      },
+      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "users_verify_phone_create",
+      "schema_fingerprint": "55c909a345200edf"
     }
   }
 }

@@ -175,6 +175,7 @@ OWNERSHIP_TESTS = {
             "users_partial_update",
             "users_destroy",
             "users_pinfl_retrieve",
+            "users_verify_phone_create",
         ],
         "test_users_scope_is_client_accounts_only",
     ),
@@ -186,6 +187,7 @@ OWNERSHIP_TESTS = {
             "admins_partial_update",
             "admins_destroy",
             "admins_pinfl_retrieve",
+            "admins_verify_phone_create",
         ],
         "test_admins_scope_is_admin_accounts_only",
     ),
@@ -245,6 +247,7 @@ def test_users_scope_is_client_accounts_only(super_admin, admin_user, plain_user
         assert client.patch(url, {"address": "x"}, format="json").status_code == 404
         assert client.delete(url).status_code == 404
         assert client.get(f"{url}pinfl/").status_code == 404
+        assert client.post(f"{url}verify-phone/").status_code == 404
     res = client.post("/api/v1/users/", {"role": "ADMIN", "phone_number": "+998977777777"}, format="json")
     assert res.status_code == 400 and "role" in res.data["error"]["details"]
 
@@ -260,6 +263,7 @@ def test_admins_scope_is_admin_accounts_only(super_admin, admin_user, plain_user
         assert client.patch(url, {"address": "x"}, format="json").status_code == 404
         assert client.delete(url).status_code == 404
         assert client.get(f"{url}pinfl/").status_code == 404
+        assert client.post(f"{url}verify-phone/").status_code == 404
     res = client.post(
         "/api/v1/admins/",
         {

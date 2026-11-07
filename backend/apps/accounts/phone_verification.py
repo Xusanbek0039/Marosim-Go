@@ -1,8 +1,8 @@
 """Phone ownership verification (SMS OTP) — design contract, not wired to any endpoint yet.
 
-No SMS provider has been chosen, so v2 ships with ``User.is_phone_verified = False`` for every
-self-registered account and nothing in the system treats an unverified number as proof of
-identity. When a provider is picked, implement this flow:
+Self-registered accounts start with ``User.is_phone_verified = False``. Authorized panel
+admins may manually confirm a number using the audited verify-phone action. No SMS provider
+has been chosen yet. When a provider is picked, implement this flow:
 
 1. ``POST /api/v1/auth/phone/otp/``  {phone_number, purpose}
    * purposes: ``verify`` (own number after sign-up), ``change`` (new number, authenticated),

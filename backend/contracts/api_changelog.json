@@ -65,6 +65,19 @@
       "changed": {},
       "breaking": [],
       "schema_changed": []
+    },
+    {
+      "revision": 2,
+      "date": "2026-11-07",
+      "note": "Adminlar users.update ruxsati bilan va Super Admin telefon raqamini audit orqali tasdiqlashi mumkin.",
+      "added": [
+        "POST /api/v1/admins/{id}/verify-phone/",
+        "POST /api/v1/users/{id}/verify-phone/"
+      ],
+      "removed": [],
+      "changed": {},
+      "breaking": [],
+      "schema_changed": []
     }
   ]
 }
