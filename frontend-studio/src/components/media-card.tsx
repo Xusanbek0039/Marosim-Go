@@ -48,32 +48,39 @@ function useUploadQueue(ceremonyId: string) {
 
   const patch = useCallback((id: string, next: Partial<Job>) => setJobs((all) => all.map((j) => (j.id === id ? { ...j, ...next } : j))), []);
 
-  const pump = useCallback(() => {
-    while (running.current < PARALLEL && queue.current.length) {
-      const job = queue.current.shift()!;
-      if (job.abort.signal.aborted) continue;
-      running.current += 1;
-      patch(job.id, { state: "uploading" });
-      uploadFile(
+  const runJob = async (job: Job) => {
+    patch(job.id, { state: "uploading" });
+    try {
+      await uploadFile(
         ceremonyId,
         job.file,
         job.mime,
         (sent, mediaId) => patch(job.id, { sent, mediaId, ...(sent >= job.file.size ? { state: "verifying" as const } : {}) }),
         job.abort.signal,
-      )
-        .then(() => patch(job.id, { state: "done", sent: job.file.size }))
-        .catch((err) => {
-          if (err instanceof UploadAborted) return patch(job.id, { state: "cancelled" });
-          const message = err instanceof ApiError ? err.message : "Yuklashda xato. Internetni tekshirib, qayta urinib ko'ring.";
-          patch(job.id, { state: "error", error: message });
-        })
-        .finally(() => {
-          running.current -= 1;
-          refresh();
-          pump();
-        });
+      );
+      patch(job.id, { state: "done", sent: job.file.size });
+    } catch (err) {
+      if (err instanceof UploadAborted) patch(job.id, { state: "cancelled" });
+      else patch(job.id, { state: "error", error: err instanceof ApiError ? err.message : "Yuklashda xato. Internetni tekshirib, qayta urinib ko'ring." });
+    } finally {
+      refresh();
     }
-  }, [ceremonyId, patch, refresh]);
+  };
+
+  /** Up to PARALLEL workers drain the shared queue; each exits when the queue is empty. */
+  const worker = async () => {
+    running.current += 1;
+    try {
+      for (let job = queue.current.shift(); job; job = queue.current.shift()) {
+        if (!job.abort.signal.aborted) await runJob(job);
+      }
+    } finally {
+      running.current -= 1;
+    }
+  };
+  const pump = () => {
+    while (running.current < PARALLEL && queue.current.length) void worker();
+  };
 
   const add = (files: FileList | File[]) => {
     const fresh: Job[] = [];
