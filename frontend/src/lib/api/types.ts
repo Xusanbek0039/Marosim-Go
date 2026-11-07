@@ -161,6 +161,9 @@ export interface RequestLogEntry {
   error_category: string;
 }
 
+/** Role classification of an operation. PUBLIC = no authentication needed. */
+export type ApiRole = "PUBLIC" | Role;
+
 export interface EndpointDoc {
   id: string;
   method: HttpMethod;
@@ -173,6 +176,20 @@ export interface EndpointDoc {
   roles: Role[];
   permission: PermissionCode | null;
   access_label: string;
+  /** Role metadata derived on the backend from the real DRF permission classes. */
+  allowed_roles: ApiRole[];
+  auth_type: "NONE" | "JWT" | "UNKNOWN";
+  required_permissions: string[];
+  role_requirements: Partial<Record<ApiRole, string[]>>;
+  ownership_scope: string | null;
+  conditions: string[];
+  permission_classes: string[];
+  access_status: "DERIVED" | "REVIEW_REQUIRED";
+  review_reasons: string[];
+  documentation_status: "DOCUMENTED" | "MISSING";
+  documentation_missing: string[];
+  contract_status: "MATCHES_CONTRACT" | "NOT_IN_CONTRACT" | "CONTRACT_MISMATCH" | "REVIEW_REQUIRED";
+  api_version: string;
   parameters: { name: string; in: "path" | "query" | "header" | "cookie"; required: boolean; type: string; description: string }[];
   request_content_type: string | null;
   request_example: unknown;
@@ -197,6 +214,52 @@ export interface EndpointCatalog {
   api_version: string;
   count: number;
   results: EndpointDoc[];
+}
+
+export interface ChangelogEntry {
+  revision: number;
+  date: string;
+  note: string;
+  added: string[];
+  removed: string[];
+  changed: Record<string, string[]>;
+  breaking: string[];
+  schema_changed: string[];
+}
+
+export interface DevcenterOverview {
+  api_version: string;
+  openapi_version: string;
+  schema_url: string;
+  docs_url: string;
+  versions: string[];
+  totals: {
+    operations: number;
+    documented: number;
+    documentation_missing: number;
+    review_required: number;
+    deprecated: number;
+    called_24h: number;
+  };
+  roles: { role: ApiRole; count: number }[];
+  methods: Partial<Record<HttpMethod, number>>;
+  contract: Partial<Record<EndpointDoc["contract_status"], number>>;
+  health: Partial<Record<EndpointStatus, number>>;
+  tags: string[];
+  last_change: ChangelogEntry | null;
+}
+
+export interface MobileFeature {
+  key: string;
+  label: string;
+  status: "AVAILABLE" | "PLANNED" | "INCOMPLETE";
+  planned: string;
+  missing_operations: string[];
+  operations: { id: string; method: HttpMethod; path: string; summary: string; allowed_roles: ApiRole[]; status: EndpointStatus }[];
+}
+
+export interface MobileGuide {
+  apps: { key: "user" | "studio"; label: string; role: Role; features: MobileFeature[] }[];
 }
 
 export interface HealthProbe {
