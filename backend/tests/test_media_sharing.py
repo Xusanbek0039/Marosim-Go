@@ -25,7 +25,8 @@ from apps.storage import vault
 from apps.storage.google import MediaStream
 from apps.storage.models import ConnectionStatus, StorageCredential
 
-from .test_ceremony_invitations import INV, MY, answer, owner_invite, studio_invite, wedding, world  # noqa: F401
+# ``world`` / ``wedding`` are pytest fixtures: imported so this module can use them.
+from .test_ceremony_invitations import INV, MY, answer, owner_invite, wedding, world  # noqa: F401
 from .test_media_upload import FakeDrive
 
 PHOTO = b"\xff\xd8\xff" + bytes(range(256)) * 40  # 10 243 bytes of "jpeg"

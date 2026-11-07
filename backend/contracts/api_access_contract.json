@@ -429,6 +429,68 @@
       "operation_id": "me_ceremonies_list",
       "schema_fingerprint": "4d3927e6bf5eb361"
     },
+    "GET /api/v1/me/ceremonies/{ceremony_id}/media/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_media_list",
+      "schema_fingerprint": "026dd264d87491c6"
+    },
+    "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosim EGASI; ko'ruvchi — 403",
+        "Har bir yuklab olish audit qilinadi"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_media_download_retrieve",
+      "schema_fingerprint": "cfd79301e87864d5"
+    },
+    "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
+      "conditions": [
+        "HTTP Range qo'llab-quvvatlanadi (video uchun)",
+        "Content-Disposition: inline"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_media_stream_retrieve",
+      "schema_fingerprint": "517b4b9a23aa6b5c"
+    },
+    "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_media_thumbnail_retrieve",
+      "schema_fingerprint": "ed8e5ee9f1c13414"
+    },
     "GET /api/v1/me/ceremonies/{id}/": {
       "allowed_roles": [
         "USER"
@@ -460,7 +522,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_invitations_list",
-      "schema_fingerprint": "de3f4e0f06397d39"
+      "schema_fingerprint": "87433548caf0ce15"
     },
     "GET /api/v1/me/ceremonies/{id}/members/": {
       "allowed_roles": [
@@ -476,7 +538,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_members_retrieve",
-      "schema_fingerprint": "86370e37047b824e"
+      "schema_fingerprint": "561ca895ffee2ddb"
     },
     "GET /api/v1/me/ceremonies/{id}/owner-requests/": {
       "allowed_roles": [
@@ -506,7 +568,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_invitations_list",
-      "schema_fingerprint": "d53c934aa421e4ec"
+      "schema_fingerprint": "d8307a774fbde360"
     },
     "GET /api/v1/me/invitations/{id}/": {
       "allowed_roles": [
@@ -520,7 +582,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_invitations_retrieve",
-      "schema_fingerprint": "edb84f6cd3460dd2"
+      "schema_fingerprint": "dbe5ecb4f45df2e6"
     },
     "GET /api/v1/monitoring/endpoints/": {
       "allowed_roles": [
@@ -1161,7 +1223,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_invitations_create",
-      "schema_fingerprint": "25c85db854e50daa"
+      "schema_fingerprint": "1c87630e8284dd86"
     },
     "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/": {
       "allowed_roles": [
@@ -1178,7 +1240,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_invitations_resend_create",
-      "schema_fingerprint": "5e908c3f2f930881"
+      "schema_fingerprint": "0a710cb5837a2695"
     },
     "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/revoke/": {
       "allowed_roles": [

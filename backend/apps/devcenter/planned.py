@@ -28,26 +28,7 @@ _ID = "{id}"
 MEMBER = "USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi)"
 
 PLANNED_ENDPOINTS: tuple[PlannedEndpoint, ...] = (
-    # ------------------------------------------------------------ Phase E
-    PlannedEndpoint(
-        "GET", f"/api/v1/me/ceremonies/{_ID}/media/", "Media galereya", (CEREMONY_OWNER, CEREMONY_VIEWER), "E", MEMBER
-    ),
-    *(
-        PlannedEndpoint(
-            "GET",
-            f"/api/v1/me/ceremonies/{_ID}/media/{{media_id}}/{kind}/",
-            label,
-            (CEREMONY_OWNER, CEREMONY_VIEWER),
-            "E",
-            MEMBER + "; Drive fayli hech qachon public qilinmaydi",
-        )
-        for kind, label in (
-            ("thumbnail", "Kichik rasm"),
-            ("preview", "Ko'rib chiqish"),
-            ("stream", "Video oqimi (Range)"),
-            ("download", "Asl faylni yuklab olish"),
-        )
-    ),
+    # Phase E (media gallery / stream / download) is live since 2026-11-07: apps/media/viewing.py
     # ------------------------------------------------------------ Phase F
     PlannedEndpoint("GET", "/api/v1/admin/ceremonies/", "Barcha marosimlar monitoringi", ("SUPER_ADMIN",), "F"),
     PlannedEndpoint(

@@ -3739,6 +3739,388 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/me/ceremonies/{ceremony_id}/media/:
+    get:
+      operationId: me_ceremonies_media_list
+      summary: Marosim rasm va videolari
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyMedia'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+        bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+        tekshiriladi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+          bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+          tekshiriladi.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/:
+    get:
+      operationId: me_ceremonies_media_download_retrieve
+      summary: Faylni yuklab olish (faqat ega)
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '403':
+          description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+        bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+        tekshiriladi.
+      x-access-conditions:
+      - Faqat marosim EGASI; ko'ruvchi — 403
+      - Har bir yuklab olish audit qilinadi
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+          bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+          tekshiriladi.
+        conditions:
+        - Faqat marosim EGASI; ko'ruvchi — 403
+        - Har bir yuklab olish audit qilinadi
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosim EGASI; ko'ruvchi — 403
+        * Har bir yuklab olish audit qilinadi
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/:
+    get:
+      operationId: me_ceremonies_media_stream_retrieve
+      summary: Faylni ko'rish (oqim, Range)
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '206':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+        bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+        tekshiriladi.
+      x-access-conditions:
+      - HTTP Range qo'llab-quvvatlanadi (video uchun)
+      - 'Content-Disposition: inline'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+          bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+          tekshiriladi.
+        conditions:
+        - HTTP Range qo'llab-quvvatlanadi (video uchun)
+        - 'Content-Disposition: inline'
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.
+
+        **Shartlar:**
+        * HTTP Range qo'llab-quvvatlanadi (video uchun)
+        * Content-Disposition: inline
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/:
+    get:
+      operationId: me_ceremonies_media_thumbnail_retrieve
+      summary: Kichik rasm (preview)
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: size
+        schema:
+          type: integer
+          enum:
+          - 240
+          - 480
+          - 960
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+          description: ''
+        '404':
+          description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+        bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+        tekshiriladi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi
+          bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta
+          tekshiriladi.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/me/ceremonies/{id}/:
     get:
       operationId: me_ceremonies_retrieve
@@ -8010,6 +8392,18 @@ components:
       - access_role
       - ceremony
       - status
+    AccessDurationEnum:
+      enum:
+      - 24H
+      - 3D
+      - 1W
+      - 1M
+      type: string
+      description: |-
+        * `24H` - 24 soat
+        * `3D` - 3 kun
+        * `1W` - 1 hafta
+        * `1M` - 1 oy
     AccessStatusEnum:
       enum:
       - INVITED
@@ -8596,6 +8990,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
           readOnly: true
+        access_duration:
+          allOf:
+          - $ref: '#/components/schemas/AccessDurationEnum'
+          readOnly: true
         participant_type:
           description: v1 qiymati; VIEWER uchun null
           nullable: true
@@ -8641,6 +9039,7 @@ components:
             approve.'
           readOnly: true
       required:
+      - access_duration
       - ceremony_id
       - ceremony_title
       - event_date
@@ -9074,9 +9473,15 @@ components:
           type: string
           format: date-time
           readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
       required:
       - accepted_at
       - can_revoke
+      - expires_at
       - full_name
       - granted_by_me
       - granted_by_name
@@ -9258,6 +9663,55 @@ components:
       - status
       - studio
       - title
+    MyMedia:
+      type: object
+      description: 'What an owner / viewer sees: no Drive ids, uploader identity or
+        upload internals.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/MediaKindEnum'
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+        size_bytes:
+          type: integer
+          readOnly: true
+        width:
+          type: integer
+          readOnly: true
+          nullable: true
+        height:
+          type: integer
+          readOnly: true
+          nullable: true
+        duration_ms:
+          type: integer
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        can_download:
+          type: boolean
+          readOnly: true
+      required:
+      - can_download
+      - completed_at
+      - duration_ms
+      - height
+      - id
+      - kind
+      - mime_type
+      - size_bytes
+      - width
     MyStudio:
       type: object
       description: A studio as seen by one of its members (no responsible user PII).
@@ -9342,6 +9796,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
           readOnly: true
+        access_duration:
+          allOf:
+          - $ref: '#/components/schemas/AccessDurationEnum'
+          readOnly: true
         status:
           allOf:
           - $ref: '#/components/schemas/InvitationStatusEnum'
@@ -9380,6 +9838,7 @@ components:
           readOnly: true
           nullable: true
       required:
+      - access_duration
       - can_resend
       - can_revoke
       - expires_at
@@ -9418,6 +9877,17 @@ components:
             * `OTHER_OWNER` - Boshqa mas'ul shaxs
           oneOf:
           - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        access_duration:
+          description: |-
+            Faqat VIEWER uchun majburiy: qabul qilingandan keyin ko'rish muddati (24H / 3D / 1W / 1M).
+
+            * `24H` - 24 soat
+            * `3D` - 3 kun
+            * `1W` - 1 hafta
+            * `1M` - 1 oy
+          oneOf:
+          - $ref: '#/components/schemas/AccessDurationEnum'
           - $ref: '#/components/schemas/BlankEnum'
       required:
       - identifier

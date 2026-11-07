@@ -249,6 +249,16 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_media_scope_is_own_studio",
     ),
+    # couple / guest media (Phase E) — tests live in tests/test_media_sharing.py
+    **dict.fromkeys(
+        [
+            "me_ceremonies_media_list",
+            "me_ceremonies_media_thumbnail_retrieve",
+            "me_ceremonies_media_stream_retrieve",
+            "me_ceremonies_media_download_retrieve",
+        ],
+        "ownership_member_media_scope",
+    ),
     # venues — tests live in tests/test_venues.py
     **dict.fromkeys(
         [
@@ -286,6 +296,10 @@ ownership_invitation_detail_is_recipient_only = _ownership_tests.test_wrong_user
 from . import test_media_upload as _media_tests  # noqa: E402
 
 ownership_media_scope_is_own_studio = _media_tests.test_upload_scope_and_roles
+
+from . import test_media_sharing as _sharing_tests  # noqa: E402
+
+ownership_member_media_scope = _sharing_tests.test_strangers_studio_and_other_ceremonies_get_404
 
 from . import test_venues as _venue_tests  # noqa: E402
 

@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { MediaCard } from "@/components/media-card";
 import { Badge, Button, Card, EmptyState, ErrorState, Field, Input, Modal, Select, Skeleton, Textarea } from "@/components/ui";
 import { ApiError } from "@/lib/api";
 import { ACCESS_LABELS, formatDateTime, formatEventDate, formatPhone, PARTICIPANT_LABELS, STATUS_LABELS, STATUS_TONE } from "@/lib/format";
@@ -279,6 +280,7 @@ export default function StudioCeremonyPage() {
               <p className="text-xs text-muted-foreground">Sizda faqat ko&apos;rish huquqi bor (Yuklovchi).</p>
             )}
           </Card>
+          <MediaCard ceremony={data} />
           <ParticipantsCard ceremony={data} />
           {editing && <EditModal ceremony={data} open={editing} onClose={() => setEditing(false)} />}
         </>

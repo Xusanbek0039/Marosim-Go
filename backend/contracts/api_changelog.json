@@ -362,6 +362,47 @@
         "POST /api/v1/venue-owner/venues/",
         "POST /api/v1/venue-owner/venues/{id}/halls/"
       ]
+    },
+    {
+      "revision": 9,
+      "date": "2026-11-07",
+      "note": "Media: ega/ko'ruvchi galereyasi (list/thumbnail/stream/download); VIEWER taklifi access_duration (24H/3D/1W/1M) talab qiladi; har bir ega 5 tagacha ko'ruvchi",
+      "added": [
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/",
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/",
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/",
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/me/ceremonies/{id}/invitations/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/{id}/members/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/invitations/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/invitations/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/ceremonies/{id}/invitations/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/me/ceremonies/{id}/invitations/",
+        "GET /api/v1/me/ceremonies/{id}/members/",
+        "GET /api/v1/me/invitations/",
+        "GET /api/v1/me/invitations/{id}/",
+        "POST /api/v1/me/ceremonies/{id}/invitations/",
+        "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/"
+      ]
     }
   ]
 }
