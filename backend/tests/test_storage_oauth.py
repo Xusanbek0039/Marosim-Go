@@ -98,7 +98,7 @@ def write_client_json(tmp_path, data):
 WEB = {
     "web": {
         "client_id": "1022061897605-abc.apps.googleusercontent.com",
-        "client_secret": "GOCSPX-very-secret",
+        "client_secret": "fake-client-secret-very-secret",
         "project_id": "marosimgo",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",

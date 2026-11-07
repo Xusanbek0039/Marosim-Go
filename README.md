@@ -88,6 +88,24 @@ login bloklash va throttling uchun umumiy kesh ham kerak: `CACHE_URL=redis://loc
 
 ---
 
+## Google Drive storage
+
+Media fayllar platforma egasining **shaxsiy Google Drive**'iga OAuth 2.0 orqali saqlanadi
+(scope: faqat `drive.file`). To'liq qo'llanma: [docs/GOOGLE_DRIVE_SETUP.md](docs/GOOGLE_DRIVE_SETUP.md).
+
+| O'zgaruvchi | Nima uchun | Qanday olinadi |
+|---|---|---|
+| `GOOGLE_TOKEN_ENCRYPTION_KEY` | refresh tokenni serverda shifrlash | `python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"` |
+| `GOOGLE_OAUTH_CLIENT_ID` / `_SECRET` | OAuth client (JSON fayl o'rniga, ixtiyoriy) | Cloud Console → Credentials → Web application client |
+| `GOOGLE_OAUTH_REDIRECT_URI` | Google qaytaradigan manzil | Cloud'dagi *Authorized redirect URIs* bilan aynan bir xil |
+| `GOOGLE_DRIVE_ROOT_FOLDER_ID` | boshlang'ich root papka (ixtiyoriy) | Drive papka URL'idagi `folders/<ID>` |
+| `PANEL_URL` | callback'dan keyin panelga qaytish | panel manzili, standart `http://localhost:3000` |
+
+OAuth client JSON: `backend/credentials/google_oauth_client.json` (git'dan chetlatilgan).
+Tekshirish: `python manage.py google_oauth_check` · jonli test: `python manage.py storage_selftest`.
+Hujjatlar: [ROADMAP](docs/ROADMAP.md) · [PROGRESS](docs/PROGRESS.md) · [API](docs/API_ENDPOINTS.md) ·
+[Storage arxitekturasi](docs/STORAGE_ARCHITECTURE.md).
+
 ## Xavfsizlik — qisqacha
 
 - **JWT:** access 10 daqiqa, refresh 7 kun; refresh har safar almashadi (rotation) va eskisi blacklist'ga tushadi.

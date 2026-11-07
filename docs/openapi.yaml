@@ -10,6 +10,226 @@ info:
 
     Har bir operatsiyada `x-access` (rol/ruxsat) va standart xato javoblari avtomatik hujjatlashtiriladi.
 paths:
+  /api/v1/admin/storage/google/callback/:
+    get:
+      operationId: admin_storage_google_callback_retrieve
+      description: |-
+        Google shu manzilga brauzerni yo'naltiradi. JWT talab qilinmaydi — so'rov bir martalik `state` va bog'lovchi cookie orqali aynan ulashni boshlagan Super Admin'ga bog'lanadi. Javob har doim panelga 302 redirect: `?google=connected` yoki `?google=error&reason=<kod>`.
+
+        **Ruxsat:** Ochiq (public)
+      summary: Google OAuth callback (brauzer redirect)
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+      - in: query
+        name: error
+        schema:
+          type: string
+      - in: query
+        name: state
+        schema:
+          type: string
+      tags:
+      - storage
+      security:
+      - {}
+      responses:
+        '302':
+          description: Panelga qaytish
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: false
+        roles: []
+        permission: null
+        label: Ochiq (public)
+  /api/v1/admin/storage/google/connect/:
+    get:
+      operationId: admin_storage_google_connect_retrieve
+      description: |-
+        Google rozilik sahifasi URL'ini qaytaradi; panel brauzerni shu URL'ga yo'naltiradi. Bir martalik `state` (10 daqiqa), PKCE va brauzerga bog'lovchi httpOnly cookie yaratiladi.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+      summary: Google Drive'ni ulashni boshlash
+      tags:
+      - storage
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleDriveConnect'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+  /api/v1/admin/storage/google/disconnect/:
+    post:
+      operationId: admin_storage_google_disconnect_create
+      description: |-
+        Refresh token Google'da revoke qilinadi (best effort) va serverdan o'chiriladi.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+      summary: Google Drive'ni uzish
+      tags:
+      - storage
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageConnection'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+  /api/v1/admin/storage/google/status/:
+    get:
+      operationId: admin_storage_google_status_retrieve
+      summary: Google Drive ulanish holati
+      tags:
+      - storage
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleDriveStatus'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      description: '**Ruxsat:** Faqat SUPER_ADMIN'
+  /api/v1/admin/storage/google/test/:
+    post:
+      operationId: admin_storage_google_test_create
+      description: |-
+        Refresh token orqali yangi access token oladi va Drive `about.get` ni chaqiradi.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+      summary: Ulanishni tekshirish
+      tags:
+      - storage
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleDriveTest'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
   /api/v1/admins/:
     get:
       operationId: admins_list
@@ -2084,6 +2304,58 @@ components:
               example:
                 phone_number:
                 - 'Telefon raqam noto''g''ri. Masalan: +998901234567'
+    GoogleDriveConnect:
+      type: object
+      properties:
+        authorization_url:
+          type: string
+          format: uri
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - authorization_url
+      - expires_at
+    GoogleDriveStatus:
+      type: object
+      properties:
+        connection:
+          $ref: '#/components/schemas/StorageConnection'
+        has_credential:
+          type: boolean
+        configuration:
+          type: object
+          additionalProperties: {}
+        picker:
+          type: object
+          additionalProperties: {}
+      required:
+      - configuration
+      - connection
+      - has_credential
+      - picker
+    GoogleDriveTest:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        account_email:
+          type: string
+          format: email
+        quota_limit:
+          type: integer
+          nullable: true
+        quota_usage:
+          type: integer
+          nullable: true
+        connection:
+          $ref: '#/components/schemas/StorageConnection'
+      required:
+      - account_email
+      - connection
+      - ok
+      - quota_limit
+      - quota_usage
     HealthLive:
       type: object
       properties:
@@ -2095,7 +2367,7 @@ components:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/HealthReadyStatusEnum'
         checks:
           type: object
           additionalProperties:
@@ -2109,6 +2381,16 @@ components:
       required:
       - checks
       - status
+    HealthReadyStatusEnum:
+      enum:
+      - ok
+      - degraded
+      - unavailable
+      type: string
+      description: |-
+        * `ok` - ok
+        * `degraded` - degraded
+        * `unavailable` - unavailable
     LoginRequest:
       type: object
       properties:
@@ -2700,6 +2982,11 @@ components:
           type: string
       required:
       - pinfl
+    ProviderEnum:
+      enum:
+      - GOOGLE_DRIVE
+      type: string
+      description: '* `GOOGLE_DRIVE` - Google Drive'
     RefreshRequest:
       type: object
       properties:
@@ -2790,16 +3077,77 @@ components:
         * `ADMIN` - Admin
         * `STUDIO` - Studiya
         * `USER` - Foydalanuvchi
-    StatusEnum:
+    StorageConnection:
+      type: object
+      description: Public facts only — the model holding the refresh token is a different
+        table.
+      properties:
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StorageConnectionStatusEnum'
+          readOnly: true
+        account_email:
+          type: string
+          format: email
+          readOnly: true
+        root_folder_id:
+          type: string
+          readOnly: true
+        root_folder_name:
+          type: string
+          readOnly: true
+        scopes:
+          readOnly: true
+        connected_by:
+          type: string
+          nullable: true
+          readOnly: true
+        connected_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        last_checked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        last_success_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        last_error_code:
+          type: string
+          readOnly: true
+      required:
+      - account_email
+      - connected_at
+      - connected_by
+      - last_checked_at
+      - last_error_code
+      - last_success_at
+      - provider
+      - root_folder_id
+      - root_folder_name
+      - scopes
+      - status
+    StorageConnectionStatusEnum:
       enum:
-      - ok
-      - degraded
-      - unavailable
+      - DISCONNECTED
+      - CONNECTED
+      - RECONNECT_REQUIRED
+      - ERROR
       type: string
       description: |-
-        * `ok` - ok
-        * `degraded` - degraded
-        * `unavailable` - unavailable
+        * `DISCONNECTED` - Ulanmagan
+        * `CONNECTED` - Ulangan
+        * `RECONNECT_REQUIRED` - Qayta ulash kerak
+        * `ERROR` - Xatolik
     Studio:
       type: object
       properties:
