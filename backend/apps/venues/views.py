@@ -18,11 +18,13 @@ from apps.accounts.access import AccessNote
 from apps.audit.services import AuditAction, diff, record, snapshot
 
 from . import services
-from .models import Capability, Venue, VenueHall, VenueMembership
+from .models import Capability, Venue, VenueHall, VenueImage, VenueMembership
 from .permissions import IsVenueAccount
 from .serializers import (
     OwnerVenueSerializer,
     VenueHallSerializer,
+    VenueImageSerializer,
+    VenueImageUploadSerializer,
     VenueMemberCreateSerializer,
     VenueMemberSerializer,
     VenueMemberUpdateSerializer,
@@ -78,6 +80,14 @@ class VenueOwnerVenueViewSet(
                 "Throttle: venue_member_add",
             )
         ),
+        "images": AccessNote(
+            conditions=(
+                "POST: " + _needs(Capability.EDIT_PROFILE),
+                BLOCKED,
+                f"Ko'pi bilan {services.MAX_GALLERY_IMAGES} ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)",
+            )
+        ),
+        "delete_image": AccessNote(conditions=(_needs(Capability.EDIT_PROFILE), BLOCKED)),
         "update_member": AccessNote(
             conditions=(_needs(Capability.MANAGE_MEMBERS), BLOCKED, "Oxirgi faol OWNER olib tashlanmaydi.")
         ),
@@ -87,7 +97,7 @@ class VenueOwnerVenueViewSet(
         if getattr(self, "swagger_fake_view", False):
             return Venue.objects.none()
         halls = Prefetch("halls", queryset=VenueHall.objects.filter(deleted_at__isnull=True))
-        return services.venues_for(self.request.user).prefetch_related(halls)
+        return services.venues_for(self.request.user).prefetch_related(halls, "images")
 
     def get_throttles(self):
         if self.action == "members" and self.request.method == "POST":
@@ -205,3 +215,39 @@ class VenueOwnerVenueViewSet(
         serializer.is_valid(raise_exception=True)
         membership = services.update_member(request, membership, **serializer.validated_data)
         return Response(VenueMemberSerializer(membership).data)
+
+    # ----------------------------------------------------------- gallery
+    @extend_schema(
+        methods=["GET"], summary="Galereya rasmlari", tags=["venue-owner"], responses=VenueImageSerializer(many=True)
+    )
+    @extend_schema(
+        methods=["POST"],
+        summary="Galereyaga rasm qo'shish",
+        tags=["venue-owner"],
+        request={"multipart/form-data": VenueImageUploadSerializer},
+        responses={201: VenueImageSerializer},
+    )
+    @action(detail=True, methods=["get", "post"], pagination_class=None, filter_backends=[])
+    def images(self, request, pk=None):
+        venue = self.get_object()
+        if request.method == "GET":
+            return Response(VenueImageSerializer(venue.images.all(), many=True, context={"request": request}).data)
+        services.ensure_capability(request.user, venue, Capability.EDIT_PROFILE)
+        upload = VenueImageUploadSerializer(data=request.data)
+        upload.is_valid(raise_exception=True)
+        image = services.add_gallery_image(request, venue, upload.validated_data["image"])
+        return Response(VenueImageSerializer(image, context={"request": request}).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(summary="Galereyadan rasmni o'chirish", tags=["venue-owner"], responses={204: None})
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=rf"images/(?P<image_id>{UUID_RE})",
+        url_name="delete-image",
+        filter_backends=[],
+    )
+    def delete_image(self, request, pk=None, image_id=None):
+        venue = self.get_object()
+        services.ensure_capability(request.user, venue, Capability.EDIT_PROFILE)
+        services.delete_gallery_image(request, get_object_or_404(VenueImage, pk=image_id, venue=venue))
+        return Response(status=status.HTTP_204_NO_CONTENT)

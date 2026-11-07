@@ -13,6 +13,7 @@ from apps.ceremonies.views import (
 )
 from apps.monitoring.health import LiveView, ReadyView
 from apps.studios.views import StudioViewSet
+from apps.venues.admin_views import AdminVenueViewSet
 from apps.venues.views import VenueOwnerVenueViewSet
 
 router = DefaultRouter()
@@ -24,6 +25,7 @@ router.register("ceremonies", CeremonyViewSet, basename="ceremony")
 router.register("me/ceremonies", MyCeremonyViewSet, basename="my-ceremony")
 router.register("me/invitations", InvitationViewSet, basename="my-invitation")
 router.register("venue-owner/venues", VenueOwnerVenueViewSet, basename="venue-owner-venue")
+router.register("admin/venues", AdminVenueViewSet, basename="admin-venue")
 
 urlpatterns = [
     path("auth/", include("apps.accounts.auth_urls")),
