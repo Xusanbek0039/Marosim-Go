@@ -147,3 +147,18 @@ def update_member(request, membership: VenueMembership, *, role: str | None = No
     if changes:
         record(request, AuditAction.UPDATE, membership, changes=changes)
     return membership
+
+
+MEMBER_NOT_FOUND = "Bu raqamga ega faol to'yxona (VENUE_OWNER) hisobi topilmadi."
+
+
+def add_member_by_phone(request, venue: Venue, phone_number: str, role: str) -> VenueMembership:
+    """Add a VENUE_OWNER account found by its login phone. One generic error for every miss."""
+    from apps.accounts.models import User
+
+    user = User.objects.alive().filter(phone_number=phone_number, role=Role.VENUE_OWNER, is_active=True).first()
+    if user is None:
+        raise ValidationError({"phone_number": [MEMBER_NOT_FOUND]})
+    if VenueMembership.objects.filter(venue=venue, user=user, is_active=True).exists():
+        raise ValidationError({"phone_number": ["Bu hisob allaqachon a'zo — rolini PATCH orqali o'zgartiring."]})
+    return add_member(request, venue, user, role)

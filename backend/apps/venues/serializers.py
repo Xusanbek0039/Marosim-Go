@@ -5,7 +5,7 @@ from apps.accounts.serializers import PhoneNumberField
 from apps.core.uploads import process_image
 
 from . import services
-from .models import MembershipRole, Venue, VenueHall
+from .models import MembershipRole, Venue, VenueHall, VenueMembership
 
 
 class VenueHallSerializer(serializers.ModelSerializer):
@@ -156,3 +156,31 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
         if (lat is None) != (lon is None):
             raise serializers.ValidationError({"latitude": ["latitude va longitude birga kiritilishi kerak."]})
         return attrs
+
+
+# ------------------------------------------------------------- members
+class MemberUserSerializer(serializers.Serializer):
+    """A colleague as other venue owners see them: no JSHSHIR, email or address."""
+
+    id = serializers.UUIDField(read_only=True)
+    full_name = serializers.CharField(read_only=True)
+    phone_number = serializers.CharField(read_only=True)
+
+
+class VenueMemberSerializer(serializers.ModelSerializer):
+    user = MemberUserSerializer(read_only=True)
+
+    class Meta:
+        model = VenueMembership
+        fields = ["id", "user", "role", "is_active", "created_at", "updated_at"]
+        read_only_fields = fields
+
+
+class VenueMemberCreateSerializer(serializers.Serializer):
+    phone_number = PhoneNumberField(help_text="Faol VENUE_OWNER hisobining login telefon raqami.")
+    role = serializers.ChoiceField(choices=MembershipRole.choices)
+
+
+class VenueMemberUpdateSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=MembershipRole.choices, required=False)
+    is_active = serializers.BooleanField(required=False)

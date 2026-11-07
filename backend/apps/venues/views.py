@@ -12,14 +12,21 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 
 from apps.accounts.access import AccessNote
 from apps.audit.services import AuditAction, diff, record, snapshot
 
 from . import services
-from .models import Capability, Venue, VenueHall
+from .models import Capability, Venue, VenueHall, VenueMembership
 from .permissions import IsVenueAccount
-from .serializers import OwnerVenueSerializer, VenueHallSerializer
+from .serializers import (
+    OwnerVenueSerializer,
+    VenueHallSerializer,
+    VenueMemberCreateSerializer,
+    VenueMemberSerializer,
+    VenueMemberUpdateSerializer,
+)
 
 VENUE_SCOPE = "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404."
 BLOCKED = "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
@@ -63,6 +70,17 @@ class VenueOwnerVenueViewSet(
         "partial_update": AccessNote(conditions=(_needs(Capability.EDIT_PROFILE), BLOCKED)),
         "halls": AccessNote(conditions=("POST: " + _needs(Capability.MANAGE_HALLS), BLOCKED)),
         "update_hall": AccessNote(conditions=(_needs(Capability.MANAGE_HALLS), BLOCKED)),
+        "members": AccessNote(
+            conditions=(
+                _needs(Capability.MANAGE_MEMBERS),
+                BLOCKED,
+                "POST: faqat faol VENUE_OWNER hisobi (telefon bo'yicha); topilmasa — bitta umumiy xato.",
+                "Throttle: venue_member_add",
+            )
+        ),
+        "update_member": AccessNote(
+            conditions=(_needs(Capability.MANAGE_MEMBERS), BLOCKED, "Oxirgi faol OWNER olib tashlanmaydi.")
+        ),
     }
 
     def get_queryset(self):
@@ -70,6 +88,12 @@ class VenueOwnerVenueViewSet(
             return Venue.objects.none()
         halls = Prefetch("halls", queryset=VenueHall.objects.filter(deleted_at__isnull=True))
         return services.venues_for(self.request.user).prefetch_related(halls)
+
+    def get_throttles(self):
+        if self.action == "members" and self.request.method == "POST":
+            self.throttle_scope = "venue_member_add"
+            return [*super().get_throttles(), ScopedRateThrottle()]
+        return super().get_throttles()
 
     def perform_create(self, serializer):
         serializer.instance = services.create_venue(self.request, self.request.user, **serializer.validated_data)
@@ -131,3 +155,53 @@ class VenueOwnerVenueViewSet(
             if changes:
                 record(request, AuditAction.UPDATE, hall, changes=changes)
         return Response(VenueHallSerializer(hall, context={"venue": venue}).data)
+
+    # ----------------------------------------------------------- members
+    @extend_schema(
+        methods=["GET"],
+        summary="To'yxona a'zolari",
+        tags=["venue-owner"],
+        responses=VenueMemberSerializer(many=True),
+    )
+    @extend_schema(
+        methods=["POST"],
+        summary="A'zo qo'shish (telefon raqam bo'yicha)",
+        tags=["venue-owner"],
+        request=VenueMemberCreateSerializer,
+        responses={201: VenueMemberSerializer},
+    )
+    @action(detail=True, methods=["get", "post"], pagination_class=None, filter_backends=[])
+    def members(self, request, pk=None):
+        venue = self.get_object()
+        services.ensure_capability(request.user, venue, Capability.MANAGE_MEMBERS)
+        if request.method == "GET":
+            rows = VenueMembership.objects.filter(venue=venue).select_related("user")
+            return Response(VenueMemberSerializer(rows, many=True).data)
+        serializer = VenueMemberCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        membership = services.add_member_by_phone(
+            request, venue, serializer.validated_data["phone_number"], serializer.validated_data["role"]
+        )
+        return Response(VenueMemberSerializer(membership).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="A'zoning rolini / faolligini o'zgartirish",
+        tags=["venue-owner"],
+        request=VenueMemberUpdateSerializer,
+        responses=VenueMemberSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path=rf"members/(?P<membership_id>{UUID_RE})",
+        url_name="update-member",
+        filter_backends=[],
+    )
+    def update_member(self, request, pk=None, membership_id=None):
+        venue = self.get_object()
+        services.ensure_capability(request.user, venue, Capability.MANAGE_MEMBERS)
+        membership = get_object_or_404(VenueMembership, pk=membership_id, venue=venue)
+        serializer = VenueMemberUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        membership = services.update_member(request, membership, **serializer.validated_data)
+        return Response(VenueMemberSerializer(membership).data)

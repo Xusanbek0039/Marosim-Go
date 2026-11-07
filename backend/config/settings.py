@@ -123,6 +123,7 @@ REST_FRAMEWORK = {
         "register": env.str("THROTTLE_REGISTER", default="10/hour"),
         "ceremony_invite": env.str("THROTTLE_CEREMONY_INVITE", default="60/hour"),
         "invitation_respond": env.str("THROTTLE_INVITATION_RESPOND", default="30/hour"),
+        "venue_member_add": env.str("THROTTLE_VENUE_MEMBER_ADD", default="30/hour"),
         "storage_connect": env.str("THROTTLE_STORAGE_CONNECT", default="20/hour"),
         "storage_callback": env.str("THROTTLE_STORAGE_CALLBACK", default="30/hour"),
         "token_refresh": env.str("THROTTLE_REFRESH", default="30/min"),
