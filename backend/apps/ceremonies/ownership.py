@@ -19,6 +19,7 @@ import hmac
 from datetime import timedelta
 
 from django.conf import settings
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.accounts import phone as phone_utils
@@ -189,8 +190,6 @@ def invitations_for(user):
     indexes = recipient_indexes(user)
     if not indexes:
         return CeremonyInvitation.objects.none()
-    from django.db.models import Q
-
     match = Q()
     for identifier_type, index in indexes.items():
         match |= Q(identifier_type=identifier_type, recipient_identifier_hash=index)

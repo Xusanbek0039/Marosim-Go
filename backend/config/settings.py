@@ -257,6 +257,10 @@ SPECTACULAR_SETTINGS = {
 # Accepting a ceremony invitation proves ownership of the invited phone number only if the
 # number is OTP-verified. Until an SMS provider exists this is relaxed in DEBUG only.
 CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE = env.bool("CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE", default=not DEBUG)
+# OWNER access is never granted on an unverified number — not even in DEBUG. Knowing a number
+# (or having registered it first) must not be enough to claim a ceremony.
+CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE = env.bool("CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE", default=True)
+CEREMONY_INVITATION_TTL_DAYS = env.int("CEREMONY_INVITATION_TTL_DAYS", default=14)
 
 # ----------------------------------------------------------- Google Drive storage
 # OAuth "Web application" client. Read from the JSON downloaded from Google Cloud Console
