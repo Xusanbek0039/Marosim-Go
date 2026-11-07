@@ -1,30 +1,111 @@
 "use client";
 
-import { BookOpenIcon, GlobeIcon, LockIcon, SearchIcon, ShieldCheckIcon, XIcon } from "lucide-react";
+import { AlertTriangleIcon, BookOpenIcon, GlobeIcon, LayersIcon, LockIcon, SearchIcon, ShieldCheckIcon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 
 import { EmptyState, ErrorState, GlassCard } from "@/components/common";
+import { API_ROLES, ROLE_LABELS, RoleBadge, endpointWarnings } from "@/components/devcenter/role-badge";
 import { CodeBlock, CopyButton } from "@/components/monitoring/code-block";
 import { AnimatedTabs, EndpointStatusBadge, MethodBadge, StatusCode } from "@/components/monitoring/primitives";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { EndpointCatalog, EndpointDoc } from "@/lib/api/types";
+import type { ApiRole, EndpointCatalog, EndpointDoc } from "@/lib/api/types";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { fadeUp, spring } from "@/motion/tokens";
 
-import { curl, fetchSnippet, prettyJson, pythonSnippet, requestSpec, type SnippetLanguage } from "./commands";
+import {
+  curl,
+  dartSnippet,
+  fetchSnippet,
+  kotlinSnippet,
+  prettyJson,
+  pythonSnippet,
+  requestSpec,
+  swiftSnippet,
+  type SnippetLanguage,
+} from "./commands";
 
 const METHODS = ["GET", "POST", "PATCH", "PUT", "DELETE"] as const;
-type SnippetTab = "curl" | "fetch" | "python" | "body" | "response";
+type SnippetTab = "curl" | "fetch" | "python" | "kotlin" | "swift" | "dart" | "body" | "response";
+type RoleFilter = "ALL" | ApiRole;
 
 const SNIPPET_TABS: { value: SnippetTab; label: string }[] = [
   { value: "curl", label: "cURL" },
   { value: "fetch", label: "JavaScript" },
   { value: "python", label: "Python" },
+  { value: "kotlin", label: "Kotlin" },
+  { value: "swift", label: "Swift" },
+  { value: "dart", label: "Dart" },
   { value: "body", label: "Request JSON" },
   { value: "response", label: "Response" },
 ];
+
+const AUTH_LABELS: Record<EndpointDoc["auth_type"], string> = {
+  NONE: "Auth talab qilinmaydi",
+  JWT: "JWT — mobil: Bearer, web: cookie + X-CSRFToken",
+  UNKNOWN: "Aniqlanmagan",
+};
+
+/** Who may call the endpoint and under which extra rules — all derived on the backend from the real permission classes. */
+function AccessPolicy({ endpoint }: { endpoint: EndpointDoc }) {
+  const warnings = endpointWarnings(endpoint);
+  const requirements = Object.entries(endpoint.role_requirements) as [ApiRole, string[]][];
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-glass-border p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-bold">Kirish siyosati</p>
+        <span className="font-mono text-[11px] text-muted-foreground">{endpoint.permission_classes.join(" · ")}</span>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {endpoint.allowed_roles.length ? (
+          endpoint.allowed_roles.map((r) => <RoleBadge key={r} role={r} />)
+        ) : (
+          <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">Rol aniqlanmadi</span>
+        )}
+        <span className="text-xs text-muted-foreground">· {AUTH_LABELS[endpoint.auth_type]}</span>
+      </div>
+      {warnings.length > 0 && (
+        <ul className="flex flex-col gap-1">
+          {[...warnings, ...endpoint.review_reasons].map((w) => (
+            <li key={w} className="flex items-start gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+              <AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0" /> {w}
+            </li>
+          ))}
+        </ul>
+      )}
+      {requirements.length > 0 && (
+        <ul className="flex flex-col gap-1 text-xs text-muted-foreground">
+          {requirements.map(([role, codes]) => (
+            <li key={role} className="flex flex-wrap items-center gap-1.5">
+              <RoleBadge role={role} compact />
+              faqat
+              {codes.map((c) => (
+                <code key={c} className="rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-foreground">
+                  {c}
+                </code>
+              ))}
+              ruxsati bilan · SUPER_ADMIN&apos;da hammasi bor
+            </li>
+          ))}
+        </ul>
+      )}
+      {endpoint.ownership_scope && (
+        <p className="text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Ma&apos;lumot doirasi: </span>
+          {endpoint.ownership_scope}
+        </p>
+      )}
+      {endpoint.conditions.length > 0 && (
+        <ul className="list-disc pl-5 text-xs text-muted-foreground">
+          {endpoint.conditions.map((c) => (
+            <li key={c}>{c}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 /** Schema descriptions are Markdown-lite; render **bold** and `code`, nothing else (no HTML). */
 function Prose({ text }: { text: string }) {
@@ -61,6 +142,9 @@ function EndpointDetail({ endpoint, baseUrl }: { endpoint: EndpointDoc; baseUrl:
     curl: { code: curl(spec), lang: "bash" },
     fetch: { code: fetchSnippet(spec), lang: "javascript" },
     python: { code: pythonSnippet(spec), lang: "python" },
+    kotlin: { code: kotlinSnippet(spec, endpoint), lang: "kotlin" },
+    swift: { code: swiftSnippet(spec), lang: "swift" },
+    dart: { code: dartSnippet(spec), lang: "dart" },
     body: { code: prettyJson(spec.body) || "// Bu so'rov tanasiz yuboriladi", lang: spec.body ? "json" : "javascript" },
     response: {
       code: prettyJson(endpoint.response_example) || `// ${endpoint.success_status ?? 204} — javob tanasi yo'q`,
@@ -92,12 +176,14 @@ function EndpointDetail({ endpoint, baseUrl }: { endpoint: EndpointDoc; baseUrl:
           </p>
         </div>
         <div className="rounded-2xl bg-muted/60 p-3">
-          <p className="text-xs text-muted-foreground">Rol / ruxsat</p>
+          <p className="text-xs text-muted-foreground">Rollar</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm font-bold">
-            <ShieldCheckIcon className="size-4 text-violet-600 dark:text-violet-300" />
-            {endpoint.roles.length ? endpoint.roles.join(", ") : endpoint.auth_required ? "Istalgan foydalanuvchi" : "—"}
+            <ShieldCheckIcon className="size-4 shrink-0 text-violet-600 dark:text-violet-300" />
+            {endpoint.allowed_roles.length ? `${endpoint.allowed_roles.length} ta rol` : "Aniqlanmagan"}
           </p>
-          {endpoint.permission && <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">{endpoint.permission}</p>}
+          {endpoint.required_permissions.length > 0 && (
+            <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">{endpoint.required_permissions.join(", ")}</p>
+          )}
         </div>
         <div className="rounded-2xl bg-muted/60 p-3">
           <p className="text-xs text-muted-foreground">Holat (24 soat)</p>
@@ -114,6 +200,8 @@ function EndpointDetail({ endpoint, baseUrl }: { endpoint: EndpointDoc; baseUrl:
           <p className="mt-0.5 text-[11px] text-muted-foreground">{t.last_seen ? formatDateTime(t.last_seen) : "chaqirilmagan"}</p>
         </div>
       </div>
+
+      <AccessPolicy endpoint={endpoint} />
 
       {endpoint.parameters.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -179,24 +267,41 @@ export function EndpointsTab({
   error,
   isPending,
   onRetry,
+  roleTabs = true,
 }: {
   data: EndpointCatalog | undefined;
   error: unknown;
   isPending: boolean;
   onRetry: () => void;
+  /** Show the role filter (off when the page already lists a single role's endpoints). */
+  roleTabs?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [methods, setMethods] = useState<Set<string>>(new Set());
+  const [role, setRole] = useState<RoleFilter>("ALL");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return (data?.results ?? []).filter(
       (e) =>
+        (role === "ALL" || e.allowed_roles.includes(role)) &&
         (methods.size === 0 || methods.has(e.method)) &&
         (!q || e.path.toLowerCase().includes(q) || e.summary.toLowerCase().includes(q) || e.tags.some((t) => t.includes(q))),
     );
-  }, [data, query, methods]);
+  }, [data, query, methods, role]);
+
+  const roleOptions = useMemo(
+    () => [
+      { value: "ALL" as RoleFilter, label: "Barchasi", icon: LayersIcon, count: data?.results.length },
+      ...API_ROLES.map((r) => ({
+        value: r as RoleFilter,
+        label: ROLE_LABELS[r],
+        count: data?.results.filter((e) => e.allowed_roles.includes(r)).length,
+      })),
+    ],
+    [data],
+  );
 
   if (isPending) {
     return (
@@ -222,6 +327,16 @@ export function EndpointsTab({
     });
 
   return (
+    <div className="flex flex-col gap-4">
+      {roleTabs && (
+        <div className="flex flex-col gap-1.5">
+          <AnimatedTabs tabs={roleOptions} value={role} onChange={setRole} layoutId="endpoint-role-tab" size="sm" />
+          <p className="px-1 text-xs text-muted-foreground">
+            Rollar backenddagi haqiqiy permission class&apos;lardan olinadi va testlarda tekshiriladi. Bitta endpoint bir
+            nechta rolda ko&apos;rinishi tabiiy.
+          </p>
+        </div>
+      )}
     <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
       <GlassCard className="flex flex-col gap-3 p-4 lg:sticky lg:top-4">
         <label className="relative flex items-center">
@@ -295,6 +410,16 @@ export function EndpointsTab({
                   <span className="relative flex min-w-0 flex-1 flex-col">
                     <span className="truncate font-mono text-xs font-semibold">{e.path.replace("/api/v1", "")}</span>
                     <span className="truncate text-[11px] text-muted-foreground">{e.summary || e.tags.join(", ")}</span>
+                    <span className="mt-1 flex flex-wrap gap-0.5">
+                      {e.allowed_roles.map((r) => (
+                        <RoleBadge key={r} role={r} compact />
+                      ))}
+                      {endpointWarnings(e).length > 0 && (
+                        <span className="inline-flex items-center rounded-md bg-amber-500/15 px-1 text-[9px] leading-4 font-semibold text-amber-700 dark:text-amber-300">
+                          {e.documentation_status === "MISSING" ? "DOCS MISSING" : e.access_status === "REVIEW_REQUIRED" ? "REVIEW" : "!"}
+                        </span>
+                      )}
+                    </span>
                   </span>
                   <span className="relative flex shrink-0 items-center gap-1.5">
                     {e.auth_required ? <LockIcon className="size-3.5 text-muted-foreground" aria-label="Auth" /> : <GlobeIcon className="size-3.5 text-emerald-500" aria-label="Ochiq" />}
@@ -316,6 +441,7 @@ export function EndpointsTab({
       <GlassCard className="min-w-0">
         {selected ? <EndpointDetail endpoint={selected} baseUrl={data.api_base_url} /> : <EmptyState title="Endpoint tanlang" />}
       </GlassCard>
+    </div>
     </div>
   );
 }
