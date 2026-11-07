@@ -8,7 +8,15 @@ import { useMotionPreference } from "@/motion/preference";
 import { duration } from "@/motion/tokens";
 
 /** Counts up from the previous value to `value` once visible. */
-export function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+export function AnimatedNumber({
+  value,
+  className,
+  format = formatNumber,
+}: {
+  value: number;
+  className?: string;
+  format?: (n: number) => string;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const previous = useRef(0);
   const inView = useInView(ref, { once: true });
@@ -19,7 +27,7 @@ export function AnimatedNumber({ value, className }: { value: number; className?
     const node = ref.current;
     if (!node || !inView) return;
     if (reduced || systemReduced) {
-      node.textContent = formatNumber(value);
+      node.textContent = format(value);
       previous.current = value;
       return;
     }
@@ -27,15 +35,15 @@ export function AnimatedNumber({ value, className }: { value: number; className?
       duration: duration.counter,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (latest) => {
-        node.textContent = formatNumber(latest);
+        node.textContent = format(latest);
       },
     });
     previous.current = value;
     return () => controls.stop();
-  }, [value, inView, reduced, systemReduced]);
+  }, [value, inView, reduced, systemReduced, format]);
 
   return (
-    <span ref={ref} className={className} aria-label={formatNumber(value)}>
+    <span ref={ref} className={className} aria-label={format(value)}>
       0
     </span>
   );

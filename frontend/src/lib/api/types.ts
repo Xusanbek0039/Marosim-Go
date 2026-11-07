@@ -107,3 +107,102 @@ export interface ListParams {
   role?: Role;
   [key: string]: string | number | undefined;
 }
+
+// --------------------------------------------------------------- monitoring
+export type MonitoringWindow = "15m" | "1h" | "24h" | "7d";
+export type EndpointStatus = "healthy" | "degraded" | "failing" | "idle";
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export interface MonitoringOverview {
+  window: MonitoringWindow;
+  bucket: "minute" | "hour";
+  from: string;
+  to: string;
+  totals: {
+    total: number;
+    success: number;
+    client_errors: number;
+    server_errors: number;
+    throttled: number;
+    avg_ms: number | null;
+    p95_ms: number | null;
+    rpm: number;
+    rpm_last_minute: number;
+    active_endpoints: number;
+    documented_endpoints: number;
+    success_rate: number | null;
+  };
+  series: { t: string; total: number; client_errors: number; server_errors: number; avg_ms: number | null }[];
+  top_endpoints: {
+    method: HttpMethod;
+    route: string;
+    count: number;
+    client_errors: number;
+    server_errors: number;
+    avg_ms: number | null;
+    max_ms: number | null;
+    status: EndpointStatus;
+  }[];
+  status_codes: { status_code: number; count: number }[];
+  error_categories: { error_category: string; count: number }[];
+  security: { logins: number; failed_logins: number; lockouts: number; token_reuse: number; registrations: number };
+}
+
+export interface RequestLogEntry {
+  id: number;
+  timestamp: string;
+  method: HttpMethod;
+  path: string;
+  route: string;
+  status_code: number;
+  duration_ms: number;
+  request_id: string;
+  user_id: string | null;
+  error_category: string;
+}
+
+export interface EndpointDoc {
+  id: string;
+  method: HttpMethod;
+  path: string;
+  summary: string;
+  description: string;
+  tags: string[];
+  deprecated: boolean;
+  auth_required: boolean;
+  roles: Role[];
+  permission: PermissionCode | null;
+  access_label: string;
+  parameters: { name: string; in: "path" | "query" | "header" | "cookie"; required: boolean; type: string; description: string }[];
+  request_content_type: string | null;
+  request_example: unknown;
+  success_status: number | null;
+  response_example: unknown;
+  responses: { status: number; description: string }[];
+  status: EndpointStatus;
+  traffic_24h: {
+    count: number;
+    client_errors: number;
+    server_errors: number;
+    avg_ms: number | null;
+    last_seen: string | null;
+  };
+}
+
+export interface EndpointCatalog {
+  api_base_url: string;
+  schema_url: string;
+  docs_url: string;
+  openapi_version: string;
+  api_version: string;
+  count: number;
+  results: EndpointDoc[];
+}
+
+export interface HealthProbe {
+  live: boolean;
+  ready: "ok" | "degraded" | "unavailable";
+  checks: Record<string, "ok" | "fail">;
+  latency_ms: number | null;
+  checked_at: string;
+}
