@@ -292,6 +292,20 @@
         "GET /api/v1/me/invitations/",
         "POST /api/v1/me/invitations/{id}/accept/"
       ]
+    },
+    {
+      "revision": 6,
+      "date": "2026-11-07",
+      "note": "V5.0 Phase B: to'yxona a'zolari (/venue-owner/venues/{id}/members/)",
+      "added": [
+        "GET /api/v1/venue-owner/venues/{id}/members/",
+        "PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/",
+        "POST /api/v1/venue-owner/venues/{id}/members/"
+      ],
+      "removed": [],
+      "changed": {},
+      "breaking": [],
+      "schema_changed": []
     }
   ]
 }

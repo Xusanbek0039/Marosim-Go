@@ -7109,6 +7109,343 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/venue-owner/venues/{id}/members/:
+    get:
+      operationId: venue_owner_venues_members_list
+      summary: To'yxona a'zolari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VenueMember'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      - 'POST: faqat faol VENUE_OWNER hisobi (telefon bo''yicha); topilmasa — bitta
+        umumiy xato.'
+      - 'Throttle: venue_member_add'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        - 'POST: faqat faol VENUE_OWNER hisobi (telefon bo''yicha); topilmasa — bitta
+          umumiy xato.'
+        - 'Throttle: venue_member_add'
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        * POST: faqat faol VENUE_OWNER hisobi (telefon bo'yicha); topilmasa — bitta umumiy xato.
+        * Throttle: venue_member_add
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: venue_owner_venues_members_create
+      summary: A'zo qo'shish (telefon raqam bo'yicha)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueMemberCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VenueMemberCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VenueMemberCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueMember'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      - 'POST: faqat faol VENUE_OWNER hisobi (telefon bo''yicha); topilmasa — bitta
+        umumiy xato.'
+      - 'Throttle: venue_member_add'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        - 'POST: faqat faol VENUE_OWNER hisobi (telefon bo''yicha); topilmasa — bitta
+          umumiy xato.'
+        - 'Throttle: venue_member_add'
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        * POST: faqat faol VENUE_OWNER hisobi (telefon bo'yicha); topilmasa — bitta umumiy xato.
+        * Throttle: venue_member_add
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/venue-owner/venues/{id}/members/{membership_id}/:
+    patch:
+      operationId: venue_owner_venues_members_partial_update
+      summary: A'zoning rolini / faolligini o'zgartirish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: membership_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueMemberUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueMemberUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueMemberUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueMember'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      - Oxirgi faol OWNER olib tashlanmaydi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        - Oxirgi faol OWNER olib tashlanmaydi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        * Oxirgi faol OWNER olib tashlanmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
 components:
   schemas:
     AcceptResult:
@@ -8063,6 +8400,25 @@ components:
       - id
       - is_me
       - owner_type
+    MemberUser:
+      type: object
+      description: 'A colleague as other venue owners see them: no JSHSHIR, email
+        or address.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        phone_number:
+          type: string
+          readOnly: true
+      required:
+      - full_name
+      - id
+      - phone_number
     MemberViewer:
       type: object
       properties:
@@ -9188,6 +9544,13 @@ components:
           description: Bo'sh (null) bo'lsa to'yxonaning base_price narxi ishlatiladi.
         is_active:
           type: boolean
+    PatchedVenueMemberUpdateRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/VenueMembershipRoleEnum'
+        is_active:
+          type: boolean
     PermissionDef:
       type: object
       properties:
@@ -9716,6 +10079,52 @@ components:
       required:
       - capacity
       - name
+    VenueMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/MemberUser'
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/VenueMembershipRoleEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_active
+      - role
+      - updated_at
+      - user
+    VenueMemberCreateRequest:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          minLength: 1
+          description: Faol VENUE_OWNER hisobining login telefon raqami.
+          maxLength: 32
+        role:
+          $ref: '#/components/schemas/VenueMembershipRoleEnum'
+      required:
+      - phone_number
+      - role
     VenueMembershipRoleEnum:
       enum:
       - OWNER

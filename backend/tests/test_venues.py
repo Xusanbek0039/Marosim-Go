@@ -146,6 +146,10 @@ def test_venue_scope_is_own_membership(make_user, make_venue, client_for):
     assert client.get(f"{foreign}halls/").status_code == 404
     assert client.post(f"{foreign}halls/", {"name": "X", "capacity": 10}, format="json").status_code == 404
     assert client.patch(f"{foreign}halls/{hall_b.pk}/", {"capacity": 1}, format="json").status_code == 404
+    member_b = VenueMembership.objects.get(venue=venue_b)
+    assert client.get(f"{foreign}members/").status_code == 404
+    assert client.post(f"{foreign}members/", {"phone_number": owner_a.phone_number, "role": "OWNER"}).status_code == 404
+    assert client.patch(f"{foreign}members/{member_b.pk}/", {"is_active": False}, format="json").status_code == 404
     # a foreign hall through one's own venue URL is a 404 as well (hall isolation)
     own_url_foreign_hall = f"{BASE}{venue_a.pk}/halls/{hall_b.pk}/"
     assert client.patch(own_url_foreign_hall, {"capacity": 1}, format="json").status_code == 404

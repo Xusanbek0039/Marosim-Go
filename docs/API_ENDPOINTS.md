@@ -83,6 +83,9 @@
 | GET | `/api/v1/venue-owner/venues/{id}/halls/` | To'yxona zallari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/halls/` | Zal qo'shish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/halls/{hall_id}/` | Zalni tahrirlash | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venue-owner/venues/{id}/members/` | To'yxona a'zolari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/members/` | A'zo qo'shish (telefon raqam bo'yicha) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| PATCH | `/api/v1/venue-owner/venues/{id}/members/{membership_id}/` | A'zoning rolini / faolligini o'zgartirish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 
 ## Rollar bo'yicha
 
@@ -134,7 +137,7 @@
 * `GET /api/v1/studios/me/` — Mening studiyalarim
 * `GET /api/v1/studios/me/ceremonies/` — Mening studiyamning marosimlari
 
-### VENUE_OWNER (9)
+### VENUE_OWNER (12)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -145,6 +148,9 @@
 * `GET /api/v1/venue-owner/venues/{id}/halls/` — To'yxona zallari
 * `POST /api/v1/venue-owner/venues/{id}/halls/` — Zal qo'shish
 * `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash
+* `GET /api/v1/venue-owner/venues/{id}/members/` — To'yxona a'zolari
+* `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
+* `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
 ### ADMIN (15)
 
@@ -309,6 +315,20 @@
 * `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/`
   * A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `GET /api/v1/venue-owner/venues/{id}/members/`
+  * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * POST: faqat faol VENUE_OWNER hisobi (telefon bo'yicha); topilmasa — bitta umumiy xato.
+  * Throttle: venue_member_add
+* `POST /api/v1/venue-owner/venues/{id}/members/`
+  * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * POST: faqat faol VENUE_OWNER hisobi (telefon bo'yicha); topilmasa — bitta umumiy xato.
+  * Throttle: venue_member_add
+* `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/`
+  * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Oxirgi faol OWNER olib tashlanmaydi.
 
 ## Rejalashtirilgan (PLANNED — hali ishlamaydi)
 
