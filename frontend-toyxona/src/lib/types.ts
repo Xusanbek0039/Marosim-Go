@@ -148,6 +148,13 @@ export interface VenueHall {
   updated_at: string;
 }
 
+export interface VenueImage {
+  id: string;
+  image: string;
+  position: number;
+  created_at: string;
+}
+
 export interface Venue {
   id: string;
   name: string;
@@ -167,6 +174,7 @@ export interface Venue {
   is_active: boolean;
   publication_status: PublicationStatus;
   halls: VenueHall[];
+  images: VenueImage[];
   membership_role: MembershipRole | null;
   membership_capabilities: Capability[];
   created_at: string;

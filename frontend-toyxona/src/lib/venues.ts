@@ -3,7 +3,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { Capability, MembershipRole, Paginated, PublicationStatus, Region, Venue, VenueHall, VenueMember, VenueType } from "./types";
+import type { Capability, MembershipRole, Paginated, PublicationStatus, Region, Venue, VenueHall, VenueImage, VenueMember, VenueType } from "./types";
 
 // ------------------------------------------------------------------ labels
 export const REGION_LABELS: Record<Region, string> = {
@@ -147,5 +147,29 @@ export function useUpdateMember(venueId: string) {
     mutationFn: ({ id, ...body }: { id: string; role?: MembershipRole; is_active?: boolean }) =>
       api.patch<VenueMember>(`/venue-owner/venues/${venueId}/members/${id}/`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.members(venueId) }),
+  });
+}
+
+// ------------------------------------------------------------------ gallery
+export const MAX_GALLERY_IMAGES = 20;
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+export function useUploadImage(venueId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData();
+      form.append("image", file);
+      return api.post<VenueImage>(`/venue-owner/venues/${venueId}/images/`, form);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.venue(venueId) }),
+  });
+}
+
+export function useDeleteImage(venueId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (imageId: string) => api.delete(`/venue-owner/venues/${venueId}/images/${imageId}/`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.venue(venueId) }),
   });
 }
