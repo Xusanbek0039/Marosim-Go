@@ -1,16 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EyeIcon, EyeOffIcon, Loader2Icon, LockKeyholeIcon, PhoneIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, Loader2Icon, LockKeyholeIcon } from "lucide-react";
 import { motion, useAnimationControls } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Field } from "@/components/common/form";
+import { PhoneInput } from "@/components/common/phone-input";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,20 +102,22 @@ export function LoginForm() {
 
           <motion.div variants={fadeUp}>
             <Field label="Telefon raqam" htmlFor="phone_number" error={errors.phone_number?.message}>
-              <div className="relative">
-                <PhoneIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="phone_number"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="username"
-                  autoFocus
-                  placeholder="+998 90 123 45 67"
-                  className="pl-10 tabular-nums"
-                  aria-invalid={Boolean(errors.phone_number)}
-                  {...form.register("phone_number")}
-                />
-              </div>
+              <Controller
+                control={form.control}
+                name="phone_number"
+                render={({ field }) => (
+                  <PhoneInput
+                    id="phone_number"
+                    autoComplete="username"
+                    autoFocus
+                    aria-invalid={Boolean(errors.phone_number)}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  />
+                )}
+              />
             </Field>
           </motion.div>
 

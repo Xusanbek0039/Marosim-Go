@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Field, ImageUpload } from "@/components/common/form";
+import { PhoneInput } from "@/components/common/phone-input";
 import { MotionDialog } from "@/components/motion/motion-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,15 +188,20 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
                 : PHONE_HINT
             }
           >
-            <Input
-              id="phone_number"
-              type="tel"
-              inputMode="tel"
-              autoComplete="off"
-              placeholder="+998 90 123 45 67"
-              className="tabular-nums"
-              aria-invalid={Boolean(errors.phone_number)}
-              {...form.register("phone_number")}
+            <Controller
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <PhoneInput
+                  id="phone_number"
+                  autoComplete="off"
+                  aria-invalid={Boolean(errors.phone_number)}
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              )}
             />
           </Field>
           <Field label="Email (ixtiyoriy)" htmlFor="email" error={errors.email?.message}>
