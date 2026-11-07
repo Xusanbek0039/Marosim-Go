@@ -40,18 +40,21 @@ Batafsil: [VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md).
   Migratsiya `venues/0001_initial`. DB cheklovlari: sig'im, narx ≥ 0, faqat UZS, koordinatalar, E.164, zal nomi unikal, a'zolik unikal.
 * Servislar: `create_venue` (OWNER a'zolik + "Asosiy zal", PRIVATE), `add_member`/`update_member` (faqat VENUE_OWNER hisoblar,
   oxirgi OWNER himoyasi, venue qatori lock), `venues_for`/`ensure_capability` (blocked venue — faqat o'qish).
-* Endpointlar: `GET/POST /venue-owner/venues/`, `GET/PATCH /venue-owner/venues/{id}/`, `GET/POST …/halls/`, `PATCH …/halls/{hall_id}/`.
+* Endpointlar: `GET/POST /venue-owner/venues/`, `GET/PATCH /venue-owner/venues/{id}/`, `GET/POST …/halls/`, `PATCH …/halls/{hall_id}/`,
+  `GET/POST …/members/`, `PATCH …/members/{membership_id}/` (faqat OWNER; telefon bo'yicha, umumiy xato, throttle `venue_member_add`).
 * Audit: `Decimal` qiymatlar endi string sifatida yoziladi (avval JSON xatosi bo'lardi).
 * Panel (minimal, buzilmasligi uchun): `VENUE_OWNER` rol turi, badge, foydalanuvchi filtri va formasi (avval tahrirlash rolni USER'ga tushirib yuborardi),
   Developer Center rol bo'limi `/developer/venue-owner`.
 
-**Testlar**: `tests/test_venues.py` — 36 (yaratish, egalik, cross-venue/hall izolyatsiyasi, a'zolik imkoniyatlari, bloklangan venue,
-admin maydonlari himoyasi, boshqa rollar 403, shaxsiy ma'lumot yo'qligi, DB constraint'lar, a'zolik servislari).
+**Testlar**: `tests/test_venues.py` — 41 (yaratish, egalik, cross-venue/hall izolyatsiyasi, a'zolik imkoniyatlari, bloklangan venue,
+admin maydonlari himoyasi, boshqa rollar 403, shaxsiy ma'lumot yo'qligi, DB constraint'lar, a'zolik servislari va API).
+To'liq to'plam: **1108 passed**. Kontrakt: revision 4 + 6 (79 operatsiya), `API_ENDPOINTS.md`, `openapi.yaml` qayta yaratildi (0 warning).
 Kontrakt runtime matritsasiga `VENUE_OWNER` chaqiruvchisi qo'shildi. `ruff`, `makemigrations --check`, `tsc`, `eslint` toza.
 Migratsiyalar dev DB nusxasida oldinga/orqaga/oldinga tekshirildi.
-To'liq to'plamdagi qolgan yiqilishlar — parallel V4.1 Phase C sessiyasining tugallanmagan ceremony o'zgarishlari (venues'ga bog'liq emas).
 
-**Keyingi**: Phase C (umumiy scheduling engine) — tasdiq va PostgreSQL test muhiti qarori kutilmoqda.
+Qarorlar: PostgreSQL o'rnatiladi; studiya va to'yxona — alohida hisoblar; a'zolar endpointi — ha.
+
+**Keyingi**: Phase C (umumiy scheduling engine) — PostgreSQL o'rnatilgach, tasdiq bilan.
 
 ## 2026-11-07 — V4.1 Ceremony Ownership: Phase A (audit) + Phase B (modellar, ruxsatlar) ✅
 

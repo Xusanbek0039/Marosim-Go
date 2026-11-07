@@ -99,10 +99,13 @@ Admin bloklagan to'yxonada (`is_active=false`) a'zolarda faqat VIEW qoladi. Nofa
 
 **Ruxsat qatlami:** `IsVenueAccount` (rol darvozasi: faol VENUE_OWNER) → `services.venues_for` (faqat faol a'zolik; begonasi 404) → `services.ensure_capability` (amal). `User.role` faqat hisob turi; bitta hisob bir nechta to'yxonada turli rolda bo'lishi mumkin.
 
-**Endpointlar (Phase B)**: `GET/POST /api/v1/venue-owner/venues/`, `GET/PATCH /api/v1/venue-owner/venues/{id}/`, `GET/POST …/{id}/halls/`, `PATCH …/{id}/halls/{hall_id}/`. Yaratuvchi OWNER bo'ladi, standart "Asosiy zal" ochiladi, holat PRIVATE. `is_active`, `publication_status` va `currency` maydonlarini mijoz o'zgartira olmaydi. VENUE_OWNER hisoblarini Super Admin / `users.create` ruxsatli Admin `/api/v1/users/` orqali yaratadi (ommaviy ro'yxatdan o'tish har doim USER yaratadi).
+**Endpointlar (Phase B)**: `GET/POST /api/v1/venue-owner/venues/`, `GET/PATCH /api/v1/venue-owner/venues/{id}/`, `GET/POST …/{id}/halls/`, `PATCH …/{id}/halls/{hall_id}/`, `GET/POST …/{id}/members/`, `PATCH …/{id}/members/{membership_id}/` (faqat OWNER — `MANAGE_MEMBERS`; a'zo telefon raqami bo'yicha qo'shiladi, topilmasa bitta umumiy xato, throttle `venue_member_add`; hamkasbga faqat id / ism / telefon ko'rinadi). Yaratuvchi OWNER bo'ladi, standart "Asosiy zal" ochiladi, holat PRIVATE. `is_active`, `publication_status` va `currency` maydonlarini mijoz o'zgartira olmaydi. VENUE_OWNER hisoblarini Super Admin / `users.create` ruxsatli Admin `/api/v1/users/` orqali yaratadi (ommaviy ro'yxatdan o'tish har doim USER yaratadi).
 
-## Ochiq savollar (keyingi bosqichlar uchun)
-1. **PostgreSQL test muhiti (Phase C uchun zarur):** lokal PostgreSQL o'rnatish yoki CI'ga (`.github/workflows/backend-ci.yml`) `postgres` service container qo'shish. Concurrency testlari faqat shu muhitda ishlaydi (SQLite'da `skip`).
-2. **Bitta hisob ham studiya, ham to'yxona xodimi bo'la oladimi?** Hozir rol darvozasi `User.role` bo'yicha ishlaydi (studiya uchun ham xuddi shunday). Ikkala biznesda ishlaydigan odamga ikki hisob kerak. Agar bitta hisob kerak bo'lsa, darvozani "faol a'zoligi borlar" qilib o'zgartirish mumkin (kontrakt mexanizmini kengaytirishni talab qiladi).
-3. A'zolarni boshqarish endpointlari (`/venue-owner/venues/{id}/members/`) spec ro'yxatida yo'q. Servislar tayyor, endpoint qo'shilsinmi?
-4. APPROVED to'yxona profili (nom, manzil, narx) o'zgartirilsa, qayta tasdiq talab qilinsinmi (Phase E)?
+## Qarorlar (foydalanuvchi, 2026-11-07)
+1. **PostgreSQL o'rnatiladi** — Phase C concurrency/exclusion constraint testlari shu muhitda (SQLite'da `skip`).
+2. **Studiya va to'yxona — alohida hisoblar** (rol darvozasi `User.role` bo'yicha qoladi).
+3. **A'zolar endpointi qo'shildi** (`/venue-owner/venues/{id}/members/`).
+
+## Ochiq savollar
+1. APPROVED to'yxona profili (nom, manzil, narx) o'zgartirilsa, qayta tasdiq talab qilinsinmi (Phase E)?
+2. APPROVED to'yxona profili (nom, manzil, narx) o'zgartirilsa, qayta tasdiq talab qilinsinmi (Phase E)?

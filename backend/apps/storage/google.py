@@ -230,3 +230,106 @@ class GoogleGateway:
             self.drive(creds).files().delete(fileId=file_id).execute()
         except HttpError as exc:
             raise _drive_error(exc) from exc
+
+    # --- media upload (Phase D): resumable sessions -------------------------------------
+    def find_child_folder(self, creds, name: str, parent_id: str) -> str | None:
+        """An app-created folder with ``name`` under ``parent_id`` (drive.file: only ours are visible)."""
+        from googleapiclient.errors import HttpError
+
+        safe = name.replace("\\", "\\\\").replace("'", "\\'")
+        query = (
+            f"name = '{safe}' and '{parent_id}' in parents and trashed = false "
+            "and mimeType = 'application/vnd.google-apps.folder'"
+        )
+        try:
+            found = self.drive(creds).files().list(q=query, fields="files(id)", pageSize=1).execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+        files = found.get("files") or []
+        return files[0]["id"] if files else None
+
+    def start_resumable_upload(
+        self, creds, *, name: str, parent_id: str, mime_type: str, size: int, app_properties: dict
+    ) -> str:
+        """Open a resumable upload session for one file; returns the session URI.
+
+        The URI authorizes uploading the bytes of *this one file* only (no OAuth token is shared),
+        and expires after about a week. Google enforces the declared length.
+        """
+        import requests
+        from google.auth.transport.requests import AuthorizedSession
+
+        body = {"name": name, "parents": [parent_id], "mimeType": mime_type, "appProperties": app_properties}
+        try:
+            res = AuthorizedSession(creds).post(
+                f"{UPLOAD_URL}?uploadType=resumable&fields={FILE_FIELDS}",
+                json=body,
+                headers={"X-Upload-Content-Type": mime_type, "X-Upload-Content-Length": str(size)},
+                timeout=TIMEOUT,
+            )
+        except requests.RequestException as exc:
+            raise GoogleError("network_error") from exc
+        if res.status_code != 200 or not res.headers.get("Location"):
+            raise _http_error(res)
+        return res.headers["Location"]
+
+    def upload_status(self, session_uri: str, size: int) -> "UploadProgress":
+        """Ask Google how far a session got. Completed sessions return the created file."""
+        import requests
+
+        try:
+            res = requests.put(
+                session_uri, headers={"Content-Range": f"bytes */{size}", "Content-Length": "0"}, timeout=TIMEOUT
+            )
+        except requests.RequestException as exc:
+            raise GoogleError("network_error") from exc
+        if res.status_code in (200, 201):
+            return UploadProgress(state="complete", received=size, file=res.json())
+        if res.status_code == 308:
+            # "Range: bytes=0-<last>" — absent when nothing arrived yet.
+            last = (res.headers.get("Range") or "").rpartition("-")[2]
+            return UploadProgress(state="in_progress", received=int(last) + 1 if last.isdigit() else 0)
+        if res.status_code in (404, 410):
+            return UploadProgress(state="expired", received=0)
+        raise _http_error(res)
+
+    def cancel_upload(self, session_uri: str) -> None:
+        import requests
+
+        try:
+            requests.delete(session_uri, timeout=TIMEOUT)  # Google answers 499; best effort
+        except requests.RequestException:
+            pass
+
+    def file_metadata(self, creds, file_id: str) -> dict:
+        from googleapiclient.errors import HttpError
+
+        try:
+            return self.drive(creds).files().get(fileId=file_id, fields=FILE_FIELDS).execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+
+
+UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files"
+FILE_FIELDS = (
+    "id,name,mimeType,size,md5Checksum,parents,appProperties,trashed,"
+    "imageMediaMetadata(width,height),videoMediaMetadata(width,height,durationMillis)"
+)
+
+
+@dataclass
+class UploadProgress:
+    state: str  # in_progress | complete | expired
+    received: int
+    file: dict | None = None
+
+
+def _http_error(res) -> GoogleError:
+    """Map a raw ``requests`` response from the Drive upload endpoint like ``_drive_error``."""
+
+    class _Shim:
+        def __init__(self, response):
+            self.resp = type("R", (), {"status": response.status_code})()
+            self.content = response.content or b"{}"
+
+    return _drive_error(_Shim(res))

@@ -52,3 +52,4 @@ Qarorlar (V5.0):
 * Bandlik zal (`VenueHall`) / studiya resursi darajasida; har bir venue standart zal bilan yaratiladi.
 * Studiya URL'lari mavjud standartda: `/studios/me/calendar/` (spec'dagi `/studio/calendar/` o'rniga).
 * Pul — `Decimal(14,2)`, faqat UZS, API'da string.
+* Studiya va to'yxona uchun alohida hisoblar; PostgreSQL Phase C'dan oldin o'rnatiladi; a'zolar endpointi qo'shildi (2026-11-07, foydalanuvchi qarori).

@@ -80,3 +80,25 @@ class OAuthState(models.Model):
 
     def __str__(self) -> str:
         return f"OAuthState #{self.pk} by {self.initiated_by_id}"
+
+
+class DriveFolder(models.Model):
+    """Cache of app-created Drive folders, keyed by a logical path (``studio:<id>/ceremony:<id>/photos``).
+
+    Scoped to the Google account: after reconnecting another account the old ids are never reused.
+    The unique key makes folder creation idempotent across concurrent requests.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    account_email = models.EmailField()
+    key = models.CharField(max_length=255)
+    folder_id = models.CharField(max_length=128)
+    parent_id = models.CharField(max_length=128, blank=True)
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["account_email", "key"], name="storage_drivefolder_key_unique")]
+
+    def __str__(self) -> str:
+        return f"{self.key} → {self.folder_id}"
