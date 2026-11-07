@@ -95,6 +95,7 @@ login bloklash va throttling uchun umumiy kesh ham kerak: `CACHE_URL=redis://loc
 | `frontend/` | Super Admin, Admin | 3000 | `cd frontend && npm install && npm run dev` |
 | `frontend-studio/` | Studiya (OWNER / MANAGER / UPLOADER) | 3001 | `cd frontend-studio && npm install && npm run dev` |
 | `frontend-user/` | Kelin-kuyov va mehmonlar | 3002 | `cd frontend-user && npm install && npm run dev` |
+| `frontend-toyxona/` | To'yxona (OWNER / MANAGER / SCHEDULER / VIEWER) | 3003 | `cd frontend-toyxona && npm install && npm run dev` |
 
 Uchalasi ham `/api/v1` ni server tomonda Django'ga proxy qiladi (`BACKEND_URL`, standart `http://127.0.0.1:8000`).
 Studiya va foydalanuvchi ilovalari auth cookie'larini o'z prefiksi bilan saqlaydi (`mgs_*`, `mgu_*`), shuning uchun

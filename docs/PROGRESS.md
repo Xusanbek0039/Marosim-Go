@@ -1,5 +1,15 @@
 # Progress
 
+## 2026-11-07 (kech) — V5.0: PostgreSQL + `frontend-toyxona` + frontend kutubxonalari tiklandi ✅
+
+* **PostgreSQL 17** o'rnatildi, `marosimgo` rol/baza, `btree_gist`; dev ma'lumotlari ko'chirildi; `.env` → PG.
+* **Bug:** venue sxemasi bazaga bog'liq edi (`PositiveIntegerField` diapazoni) → `MAX_CAPACITY=100 000`, test, kontrakt yangilandi.
+* **`frontend-toyxona/`** (3003): to'yxonalar ro'yxati/yaratish, profil, muqova, zallar, jamoa, jadval to'ri (Phase C'da jonlanadi).
+* **Tiklandi:** `.gitignore`dagi `lib/` sabab yo'qolgan `frontend-studio/src/lib`, `frontend-user/src/lib`.
+* **Testlar:** backend 1186 passed (SQLite) / 1186 passed (PostgreSQL); ruff toza; `spectacular --validate` toza;
+  3 ta frontend: `tsc`, `eslint`, `next build` toza.
+* **Keyingi:** Phase C (scheduling engine) — tasdiq kutilmoqda. Batafsil: [VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md).
+
 ## 2026-11-07 — V4.1 Ceremony Ownership: Phase D (Google Drive media upload) ✅
 
 Batafsil: [STORAGE_ARCHITECTURE.md §6](STORAGE_ARCHITECTURE.md).

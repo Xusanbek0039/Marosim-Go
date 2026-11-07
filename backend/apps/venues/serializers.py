@@ -7,6 +7,10 @@ from apps.core.uploads import process_image
 from . import services
 from .models import MembershipRole, Venue, VenueHall, VenueMembership
 
+#: Explicit ceiling: without it DRF copies the DB's integer range into the schema
+#: (SQLite 2**63-1 vs PostgreSQL 2**31-1), so the API contract would depend on the database.
+MAX_CAPACITY = 100_000
+
 
 class VenueHallSerializer(serializers.ModelSerializer):
     effective_base_price = serializers.DecimalField(max_digits=14, decimal_places=2, read_only=True)
@@ -25,7 +29,7 @@ class VenueHallSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
         extra_kwargs = {
-            "capacity": {"min_value": 1},
+            "capacity": {"min_value": 1, "max_value": MAX_CAPACITY},
             "base_price": {"help_text": "Bo'sh (null) bo'lsa to'yxonaning base_price narxi ishlatiladi."},
         }
 
@@ -98,7 +102,8 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "currency", "is_active", "publication_status", "created_at", "updated_at"]
         extra_kwargs = {
             "description": {"required": False, "allow_blank": True},
-            "capacity_max": {"min_value": 1},
+            "capacity_min": {"max_value": MAX_CAPACITY},
+            "capacity_max": {"min_value": 1, "max_value": MAX_CAPACITY},
         }
 
     # ------------------------------------------------------------ read side

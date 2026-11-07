@@ -38,11 +38,12 @@ Qarorlar:
 | # | Bosqich | Holat |
 |---|---|---|
 | A | Loyiha auditi va DB arxitekturasi | ✅ 2026-11-07 |
-| B | `VENUE_OWNER` roli, `Venue` / `VenueHall` / `VenueImage` / `VenueMembership`, ruxsat qatlami, `/venue-owner/venues/` (+halls) | ✅ 2026-11-07 |
+| B | `VENUE_OWNER` roli, `Venue` / `VenueHall` / `VenueImage` / `VenueMembership`, ruxsat qatlami, `/venue-owner/venues/` (+halls, members) | ✅ 2026-11-07 |
+| B+ | PostgreSQL 17 (dev), `frontend-toyxona/` kabineti (to'yxonalar, zallar, jamoa, jadval to'ri) | ✅ 2026-11-07 |
 | C | Umumiy scheduling engine (Resource, CalendarEntry, ish vaqti, exclusion constraint), StudioResource | ⏳ tasdiq kutilmoqda |
 | D | Dinamik narx (`VenuePricingRule`, snapshot) | ⏳ |
 | E | Public visibility, `venue.*` admin ruxsatlari, approval oqimi | ⏳ |
-| F | Sana bo'yicha qidiruv (venue + studiya) | ⏳ |
+| F | Sana bo'yicha qidiruv (venue + studiya) + `frontend-user`: qidiruv, to'yxona/studiya sahifasi, online kalkulyator | ⏳ |
 | G | Bron so'rovlari, hold muddati, concurrency himoyasi | ⏳ |
 | H | Super Admin UI (kalendarlar, bronlar, narxlar, approval) | ⏳ |
 | I | API Developer Center (VENUE_OWNER bo'limi) va to'liq testlar | ⏳ |
@@ -54,3 +55,5 @@ Qarorlar (V5.0):
 * Pul — `Decimal(14,2)`, faqat UZS, API'da string.
 * Studiya va to'yxona uchun alohida hisoblar; PostgreSQL Phase C'dan oldin o'rnatiladi; a'zolar endpointi qo'shildi (2026-11-07, foydalanuvchi qarori).
 * APPROVED to'yxonaning ommaviy profili o'zgarsa — qayta PENDING_APPROVAL (Phase E, 2026-11-07, foydalanuvchi qarori).
+* To'yxonachi uchun alohida web kabinet `frontend-toyxona/` (oldingi "faqat mobil API" qarori o'rniga); foydalanuvchiga qidiruv + kalkulyator `frontend-user/` da (2026-11-07 kech, foydalanuvchi qarori).
+* Dev DB — lokal PostgreSQL 17 (`marosimgo`), SQLite faqat zaxira / testlar uchun.

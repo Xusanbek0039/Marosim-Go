@@ -6,7 +6,7 @@ Holat: **Phase A (audit + arxitektura) + Phase B (Venue/Hall modellari, a'zolikl
 
 | Soha | Mavjud holat | V5.0 uchun xulosa |
 |---|---|---|
-| DB | Dev: SQLite (`backend/db.sqlite3`, git'da avto-commit qilinadi); prod: `DATABASE_URL` (PostgreSQL), `psycopg` o'rnatilgan. Testlar: SQLite in-memory. Lokal PostgreSQL / Docker **yo'q**. | Phase B ikkala DB'da ishlaydi. Phase C'dagi exclusion constraint faqat PostgreSQL'da ishlaydi → PG test muhiti kerak (pastda, "Ochiq savollar"). |
+| DB | Dev: SQLite (`backend/db.sqlite3`, git'da avto-commit qilinadi); prod: `DATABASE_URL` (PostgreSQL), `psycopg` o'rnatilgan. Testlar: SQLite in-memory. **2026-11-07 kech: lokal PostgreSQL 17 o'rnatildi, dev endi PG'da** (pastda). | Phase B ikkala DB'da ishlaydi (1186/1186). Phase C'dagi exclusion constraint PG'da sinaladi. |
 | Modellar | `BaseModel` (UUID PK + `created_at`/`updated_at`), `SoftDeleteModel` (`deleted_at`). | Yangi modellar ham shu asosda. |
 | Rollar | `User.role`: SUPER_ADMIN / ADMIN / STUDIO / USER. ADMIN huquqlari `admin_permissions` (JSON, `permissions_catalog.py` kodlari); adminlarni **faqat SUPER_ADMIN** boshqaradi (`/admins/` — `IsSuperAdmin`). | `VENUE_OWNER` qo'shildi. Admin o'ziga yoki boshqa adminga ruxsat bera olmasligi mavjud dizaynda kafolatlangan. `venue.*` kodlari Phase E'da katalogga qo'shiladi. |
 | Biznes a'zoligi | `StudioMembership` OWNER / MANAGER / UPLOADER. Rol darvozasi `User.role == STUDIO`, qaysi studiya — a'zolik (`get_queryset`, begonasi 404). | Xuddi shu pattern: `VenueMembership` OWNER / MANAGER / SCHEDULER / VIEWER + imkoniyatlar matritsasi. |
@@ -14,7 +14,7 @@ Holat: **Phase A (audit + arxitektura) + Phase B (Venue/Hall modellari, a'zolikl
 | Audit | `AuditLog` (o'zgarmas), `record()`, `snapshot()`/`diff()`. | Venue/hall/a'zolik yozuvlari audit qilinadi. `Decimal` endi string sifatida yoziladi (pul aniq saqlanadi). |
 | API kontrakt | Rollar haqiqiy DRF permission class'laridan (`accounts/access.py`); `access_notes`; `contracts/api_access_contract.json`; runtime matritsa har endpointni har rol bilan chaqiradi. | Yangi `IsVenueAccount` o'z `access_grant`iga ega; matritsaga `VENUE_OWNER` chaqiruvchisi qo'shildi. Yangi endpointlar katalogga avtomatik tushadi. |
 | Vaqt | `TIME_ZONE = "Asia/Tashkent"`, `USE_TZ = True`. | Intervallar `timestamptz` (UTC) da saqlanadi, kalendar Asia/Tashkent'da hisoblanadi. |
-| Frontend | `frontend/` — Super Admin paneli (Next.js, TS, Tailwind, shadcn, Motion). `frontend-studio/`, `frontend-user/` — mavjud. | V5.0'da to'yxonachi/studiya/foydalanuvchi uchun yangi web yo'q — faqat mobil REST API. Panelga faqat minimal rol qo'llovi qo'shildi. |
+| Frontend | `frontend/` — Super Admin paneli (Next.js, TS, Tailwind, shadcn, Motion). `frontend-studio/`, `frontend-user/` — mavjud. | **Qaror o'zgardi (2026-11-07 kech):** to'yxonachi uchun alohida `frontend-toyxona/` web kabineti quriladi (studiya kabinetiga o'xshash). Mobil API saqlanadi. |
 
 **Aniqlangan xavflar**
 1. **Concurrency testlari SQLite'da isbotlanmaydi.** SQLite yozuvlarni butun DB bo'yicha ketma-ket bajaradi, `SELECT … FOR UPDATE` va exclusion constraint'larni qo'llamaydi. Double-booking himoyasi PostgreSQL'da sinalishi shart.
@@ -106,3 +106,30 @@ Admin bloklagan to'yxonada (`is_active=false`) a'zolarda faqat VIEW qoladi. Nofa
 2. **Studiya va to'yxona — alohida hisoblar** (rol darvozasi `User.role` bo'yicha qoladi).
 3. **A'zolar endpointi qo'shildi** (`/venue-owner/venues/{id}/members/`).
 4. **Tasdiqlangan profil o'zgarsa — qayta tasdiq (Phase E).** APPROVED to'yxonaning ommaga ko'rinadigan maydonlari (nom, manzil, hudud/tuman, narx, sig'im, turi, koordinatalar, muqova) o'zgarsa, holat PENDING_APPROVAL ga qaytadi va admin qayta ko'rib chiqadi. Kalendar (bandlik) o'zgarishlari qayta tasdiq talab qilmaydi.
+
+## 2026-11-07 (kech) — PostgreSQL, `frontend-toyxona`, tiklangan frontend kutubxonalari
+
+**PostgreSQL 17** (winget, `postgresql-x64-17` xizmati, port 5432)
+* Rol/baza: `marosimgo` (LOGIN, CREATEDB — testlar `test_marosimgo` yaratadi). Parol faqat `backend/.env` da (git'da yo'q).
+* `btree_gist` kengaytmasi `marosimgo` va `template1` da yoqilgan (Phase C exclusion constraint, test bazalari ham uni oladi).
+* Barcha migratsiyalar qo'llandi; dev ma'lumotlari SQLite'dan ko'chirildi (32 user, 4 studiya, marosim, audit). `db.sqlite3` zaxira sifatida qoldi.
+* Testlar PG'da: `DATABASE_URL=postgres://… pytest` → **1186 passed** (SQLite'da ham 1186).
+* **Topilgan bug:** `capacity_*` uchun DRF sxemadagi `maximum` qiymatini bazadan olardi (SQLite 2^63−1, PG 2^31−1), shuning uchun PG'da kontrakt testi yiqilardi. Tuzatish: `MAX_CAPACITY = 100 000` (serializer), regressiya testi qo'shildi, kontrakt qayta yozildi.
+
+**`frontend-toyxona/`** (port 3003, faqat `VENUE_OWNER`) — Phase B endpointlari ustida
+* `To'yxonalarim`: kartalar (muqova, ommaga chiqish holati, zallar soni, sig'im, narx), qidiruv, yaratish oynasi.
+* To'yxona sahifasi: muqova yuklash, tablar — **Jadval** (oylik to'r + holat ranglari; ma'lumot Phase C'da ulanadi va bu ekranda ochiq yozilgan), **Profil** (EDIT_PROFILE bo'lmasa faqat o'qish), **Zallar** (qo'shish / tahrirlash / o'chirish-yoqish, narx bo'sh bo'lsa umumiy narx), **Jamoa** (faqat MANAGE_MEMBERS: telefon bo'yicha qo'shish, rol, chetlatish).
+* Tugmalar `membership_capabilities` asosida ko'rsatiladi; haqiqiy tekshiruv backendda.
+
+**Tiklangan:** ildiz `.gitignore`dagi Python `lib/` qoidasi `frontend-studio/src/lib` va `frontend-user/src/lib` ni git'dan chiqarib yuborgan, fayllar diskdan ham yo'qolgan edi, ilovalar build bo'lmasdi. Qoidaga `!**/src/lib/` istisnosi qo'shildi, kutubxonalar backend kontraktidan qayta yozildi (api, auth, types, format, studio, ceremonies). Uchala ilova: `tsc` + `eslint` + `next build` toza.
+
+**Foydalanuvchi so'ragan funksiyalar → bosqichlar**
+| So'rov | Bosqich |
+|---|---|
+| To'yxona jadvalini kun/hafta/oy bo'yicha boshqarish, bir kunda bir nechta marosim | C (engine + `frontend-toyxona` Jadval tabi) |
+| Online kalkulyator (sana, zal, mehmonlar soni → narx) | D (server narx hisoblaydi) + F (UI `frontend-user`) |
+| Admin tasdig'idan keyin ommaga chiqish | E |
+| User sana tanlaydi (masalan 21-noyabr) → bo'sh to'yxonalar, to'liq ma'lumot, aloqa raqami | F (`frontend-user` qidiruv sahifasi) |
+| Studiya xizmatlari, bo'sh kun/soatlari, aloqa; user bron qiladi | C (StudioResource) + F + G |
+| Bron so'rovi va tasdiq | G |
+| Super Admin boshqaruvi (kalendarlar, bronlar, narxlar, approval) | H |

@@ -322,6 +322,46 @@
       "changed": {},
       "breaking": [],
       "schema_changed": []
+    },
+    {
+      "revision": 8,
+      "date": "2026-11-07",
+      "note": "venues: sig'im maydonlariga aniq chegara (100 000) — sxema endi SQLite/PostgreSQL'da bir xil",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/venue-owner/venues/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venue-owner/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venue-owner/venues/{id}/halls/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/venue-owner/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/venue-owner/venues/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/venue-owner/venues/{id}/halls/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/venue-owner/venues/",
+        "GET /api/v1/venue-owner/venues/{id}/",
+        "GET /api/v1/venue-owner/venues/{id}/halls/",
+        "PATCH /api/v1/venue-owner/venues/{id}/",
+        "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/",
+        "POST /api/v1/venue-owner/venues/",
+        "POST /api/v1/venue-owner/venues/{id}/halls/"
+      ]
     }
   ]
 }

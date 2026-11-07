@@ -712,7 +712,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_list",
-      "schema_fingerprint": "1050d0044c00f9c2"
+      "schema_fingerprint": "30b3a88ecc0da1fa"
     },
     "GET /api/v1/venue-owner/venues/{id}/": {
       "allowed_roles": [
@@ -726,7 +726,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_retrieve",
-      "schema_fingerprint": "f005c987fb1d176e"
+      "schema_fingerprint": "819b1a7dd281567c"
     },
     "GET /api/v1/venue-owner/venues/{id}/halls/": {
       "allowed_roles": [
@@ -743,7 +743,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_halls_list",
-      "schema_fingerprint": "b047a08b4b9b7410"
+      "schema_fingerprint": "0087f4da5b1d90e4"
     },
     "GET /api/v1/venue-owner/venues/{id}/members/": {
       "allowed_roles": [
@@ -873,7 +873,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_partial_update",
-      "schema_fingerprint": "771c3ef232c91075"
+      "schema_fingerprint": "cd3a71b118458aa2"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/": {
       "allowed_roles": [
@@ -890,7 +890,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_halls_partial_update",
-      "schema_fingerprint": "32f320a98a9feafa"
+      "schema_fingerprint": "a51a7b1ae7fe97d6"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/": {
       "allowed_roles": [
@@ -1374,7 +1374,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_create",
-      "schema_fingerprint": "5355664fabdf5596"
+      "schema_fingerprint": "34bd08286556eef8"
     },
     "POST /api/v1/venue-owner/venues/{id}/halls/": {
       "allowed_roles": [
@@ -1391,7 +1391,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_halls_create",
-      "schema_fingerprint": "dd1a9af4b5bd8af0"
+      "schema_fingerprint": "bca8478296c437fc"
     },
     "POST /api/v1/venue-owner/venues/{id}/members/": {
       "allowed_roles": [

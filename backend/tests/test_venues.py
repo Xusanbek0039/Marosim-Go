@@ -86,6 +86,8 @@ def test_cover_image_is_reencoded(venue_owner, client_for):
     [
         ({"capacity_min": 700}, "capacity_min"),
         ({"capacity_max": 0}, "capacity_max"),
+        # Explicit ceiling keeps the schema identical on SQLite and PostgreSQL (DB int range).
+        ({"capacity_max": 100_001}, "capacity_max"),
         ({"base_price": "-1"}, "base_price"),
         ({"region": "MARS"}, "region"),
         ({"latitude": "41.3"}, "latitude"),
