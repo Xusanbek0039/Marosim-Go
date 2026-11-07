@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Region, Venue, VenueType } from "@/lib/types";
 import { REGION_LABELS, VENUE_TYPE_LABELS, type VenueWrite } from "@/lib/venues";
 
+import { PhoneInput } from "@/components/phone-input";
 import { Button, Field, Input, Select, Textarea } from "./ui";
 
 export interface VenueFormValues {
@@ -81,6 +82,7 @@ export function VenueForm({
     if (!capMax) errs.capacity_max = "Maksimal sig'imni kiriting";
     else if (capMin > capMax) errs.capacity_min = "Minimal sig'im maksimaldan katta";
     if (!digits(values.base_price)) errs.base_price = "Narxni kiriting";
+    if (values.phone_number && !/^\+998\d{9}$/.test(values.phone_number)) errs.phone_number = "Raqam +998 dan keyin 9 ta raqam";
     setLocal(errs);
     if (Object.keys(errs).length) return;
     const payload: VenueWrite = {
@@ -115,7 +117,7 @@ export function VenueForm({
           </Select>
         </Field>
         <Field label="Aloqa telefoni" htmlFor="phone_number" error={errors.phone_number} hint="Mijozlar shu raqamga qo'ng'iroq qiladi">
-          <Input id="phone_number" type="tel" inputMode="tel" value={values.phone_number} onChange={set("phone_number")} placeholder="+998 90 123 45 67" className="tabular-nums" />
+          <PhoneInput id="phone_number" value={values.phone_number} onChange={(phone_number) => setValues((v) => ({ ...v, phone_number }))} />
         </Field>
         <Field label="Hudud" htmlFor="region" error={errors.region}>
           <Select id="region" value={values.region} onChange={set("region")}>

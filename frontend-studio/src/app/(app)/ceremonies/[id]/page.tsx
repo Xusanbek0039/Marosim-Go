@@ -1,12 +1,13 @@
 "use client";
 
-import { ArrowLeftIcon, CalendarDaysIcon, PencilIcon, PhoneIcon, SendIcon, ShieldCheckIcon, UserMinusIcon } from "lucide-react";
+import { ArrowLeftIcon, CalendarDaysIcon, PencilIcon, SendIcon, ShieldCheckIcon, UserMinusIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { PhoneInput } from "@/components/phone-input";
 import { MediaCard } from "@/components/media-card";
 import { Badge, Button, Card, EmptyState, ErrorState, Field, Input, Modal, Select, Skeleton, Textarea } from "@/components/ui";
 import { ApiError } from "@/lib/api";
@@ -100,19 +101,7 @@ function InviteForm({ ceremonyId, takenCouple }: { ceremonyId: string; takenCoup
       <p className="text-sm font-bold">Ishtirokchini taklif qilish</p>
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_auto] sm:items-start">
         <Field label="Telefon raqam" htmlFor="invite_phone" error={errors.phone_number}>
-          <div className="relative">
-            <PhoneIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="invite_phone"
-              type="tel"
-              inputMode="tel"
-              placeholder="+998 90 123 45 67"
-              className="pl-10 tabular-nums"
-              aria-invalid={Boolean(errors.phone_number)}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
+          <PhoneInput id="invite_phone" aria-invalid={Boolean(errors.phone_number)} value={phone} onChange={setPhone} />
         </Field>
         <Field label="Kim" htmlFor="invite_type" error={errors.participant_type}>
           <Select id="invite_type" value={type} onChange={(e) => setChosen(e.target.value as ParticipantType)}>

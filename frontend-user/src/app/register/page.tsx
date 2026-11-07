@@ -1,6 +1,6 @@
 "use client";
 
-import { LockKeyholeIcon, PhoneIcon } from "lucide-react";
+import { LockKeyholeIcon } from "lucide-react";
 import { motion, useAnimationControls } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AuthFrame } from "@/components/auth-frame";
+import { PhoneInput } from "@/components/phone-input";
 import { Button, Field, Input } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useLogin } from "@/lib/auth";
@@ -27,7 +28,7 @@ export default function RegisterPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const local: Record<string, string> = {};
-    if (!values.phone_number.trim()) local.phone_number = "Telefon raqamni kiriting";
+    if (!/^\+998\d{9}$/.test(values.phone_number)) local.phone_number = "Raqam +998 dan keyin 9 ta raqam bo'lishi kerak";
     if (values.password.length < 10) local.password = "Parol kamida 10 ta belgidan iborat bo'lsin";
     if (values.password !== values.password_confirm) local.password_confirm = "Parollar mos kelmadi";
     setErrors(local);
@@ -54,21 +55,15 @@ export default function RegisterPage() {
   return (
     <AuthFrame subtitle="Yangi hisob yaratish">
       <motion.form animate={controls} onSubmit={submit} noValidate className="flex flex-col gap-4">
-        <Field label="Telefon raqam" htmlFor="phone_number" error={errors.phone_number} hint="Masalan: +998 90 123 45 67">
-          <div className="relative">
-            <PhoneIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="phone_number"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              autoFocus
-              className="pl-10 tabular-nums"
-              aria-invalid={Boolean(errors.phone_number)}
-              value={values.phone_number}
-              onChange={set("phone_number")}
-            />
-          </div>
+        <Field label="Telefon raqam" htmlFor="phone_number" error={errors.phone_number} hint="Faqat O'zbekiston raqami">
+          <PhoneInput
+            id="phone_number"
+            autoComplete="tel-national"
+            autoFocus
+            aria-invalid={Boolean(errors.phone_number)}
+            value={values.phone_number}
+            onChange={(phone_number) => setValues((v) => ({ ...v, phone_number }))}
+          />
         </Field>
         <Field label="Parol" htmlFor="password" error={errors.password} hint="Kamida 10 ta belgi">
           <div className="relative">

@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeIcon, EyeOffIcon, LockKeyholeIcon, PhoneIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, LockKeyholeIcon } from "lucide-react";
 import { motion, useAnimationControls } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,6 +8,7 @@ import { Suspense, useState } from "react";
 import { toast } from "sonner";
 
 import { AuthFrame } from "@/components/auth-frame";
+import { PhoneInput } from "@/components/phone-input";
 import { Button, Field, Input } from "@/components/ui";
 import { ApiError } from "@/lib/api";
 import { APP } from "@/lib/app-config";
@@ -52,20 +53,7 @@ function LoginForm() {
   return (
     <motion.form animate={controls} onSubmit={submit} noValidate className="flex flex-col gap-4">
       <Field label="Telefon raqam" htmlFor="phone_number">
-        <div className="relative">
-          <PhoneIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            id="phone_number"
-            type="tel"
-            inputMode="tel"
-            autoComplete="username"
-            autoFocus
-            placeholder="+998 90 123 45 67"
-            className="pl-10 tabular-nums"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </div>
+        <PhoneInput id="phone_number" autoComplete="username" autoFocus value={phone} onChange={setPhone} />
       </Field>
       <Field label="Parol" htmlFor="password">
         <div className="relative">

@@ -22,6 +22,7 @@ import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { PhoneInput } from "@/components/phone-input";
 import { CalendarPreview } from "@/components/calendar-preview";
 import { GalleryTab } from "@/components/gallery-tab";
 import { Avatar, Badge, Button, Card, cn, EmptyState, ErrorState, Field, Input, Modal, Select, Skeleton } from "@/components/ui";
@@ -368,7 +369,7 @@ function AddMemberForm({ venueId }: { venueId: string }) {
       <p className="text-sm font-bold">Jamoaga qo&apos;shish</p>
       <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_190px_auto] sm:items-start">
         <Field label="Telefon raqam" htmlFor="member_phone" error={errors.phone_number}>
-          <Input id="member_phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+998 90 123 45 67" className="tabular-nums" />
+          <PhoneInput id="member_phone" value={phone} onChange={setPhone} />
         </Field>
         <Field label="Rol" htmlFor="member_role" error={errors.role}>
           <Select id="member_role" value={role} onChange={(e) => setRole(e.target.value as MembershipRole)}>
