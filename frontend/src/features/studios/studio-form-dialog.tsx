@@ -50,7 +50,7 @@ export function StudioFormDialog({
   );
   const ownerOptions = [...(owners.data?.results ?? [])];
   if (studio && !ownerOptions.some((o) => o.id === studio.responsible_user.id)) {
-    ownerOptions.unshift({ ...studio.responsible_user, address: "", last_login: null, updated_at: "" });
+    ownerOptions.unshift({ ...studio.responsible_user, address: "", is_phone_verified: false, last_login: null, updated_at: "" });
   }
 
   const form = useForm<Values>({
