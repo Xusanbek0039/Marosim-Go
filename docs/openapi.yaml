@@ -415,9 +415,11 @@ paths:
           enum:
           - STUDIO
           - USER
+          - VENUE_OWNER
         description: |-
           * `USER` - Foydalanuvchi
           * `STUDIO` - Studiya
+          * `VENUE_OWNER` - To'yxona
       - name: search
         required: false
         in: query
@@ -1341,6 +1343,7 @@ paths:
         roles:
         - USER
         - STUDIO
+        - VENUE_OWNER
         - ADMIN
         - SUPER_ADMIN
         permission: null
@@ -1348,6 +1351,7 @@ paths:
       x-allowed-roles:
       - USER
       - STUDIO
+      - VENUE_OWNER
       - ADMIN
       - SUPER_ADMIN
       x-auth-type: JWT
@@ -1359,6 +1363,7 @@ paths:
         allowed_roles:
         - USER
         - STUDIO
+        - VENUE_OWNER
         - ADMIN
         - SUPER_ADMIN
         auth_type: JWT
@@ -1449,6 +1454,7 @@ paths:
         roles:
         - USER
         - STUDIO
+        - VENUE_OWNER
         - ADMIN
         - SUPER_ADMIN
         permission: null
@@ -1456,6 +1462,7 @@ paths:
       x-allowed-roles:
       - USER
       - STUDIO
+      - VENUE_OWNER
       - ADMIN
       - SUPER_ADMIN
       x-auth-type: JWT
@@ -1468,6 +1475,7 @@ paths:
         allowed_roles:
         - USER
         - STUDIO
+        - VENUE_OWNER
         - ADMIN
         - SUPER_ADMIN
         auth_type: JWT
@@ -2088,10 +2096,10 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
-  /api/v1/ceremonies/{id}/participants/:
+  /api/v1/ceremonies/{id}/owners/:
     get:
-      operationId: ceremonies_participants_list
-      summary: Marosim ishtirokchilari
+      operationId: ceremonies_owners_list
+      summary: Marosim egalari va egalik takliflari
       parameters:
       - in: path
         name: id
@@ -2103,6 +2111,222 @@ paths:
       - ceremonies
       security:
       - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudioOwnerRow'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions: []
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{id}/owners/invite/:
+    post:
+      operationId: ceremonies_owners_invite_create
+      description: |-
+        Javob raqam/JSHSHIR ro'yxatdan o'tganmi-yo'qmi bildirmaydi. Taklif o'zi hech qanday huquq bermaydi: oluvchi tizimga kirib, tasdiqlangan telefon bilan qabul qilishi kerak; marosimda egalar bo'lsa — ular ham tasdiqlaydi.
+
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        * Marosimda egalar bo'lsa, yangi ega ularning tasdig'idan keyin ochiladi.
+        * JSHSHIR orqali faqat egalar bor bo'lganda (birinchi egalar — telefon orqali).
+        * Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat maskalangan qaytadi.
+      summary: Marosim egasini telefon yoki JSHSHIR orqali taklif qilish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerInviteRequest'
+            examples:
+              KelinniTelefonOrqaliTaklifQilish:
+                value:
+                  identifier_type: PHONE
+                  identifier: '+998901234567'
+                  owner_type: BRIDE
+                summary: Kelinni telefon orqali taklif qilish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OwnerInviteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OwnerInviteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudioOwnerRow'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      - Marosimda egalar bo'lsa, yangi ega ularning tasdig'idan keyin ochiladi.
+      - JSHSHIR orqali faqat egalar bor bo'lganda (birinchi egalar — telefon orqali).
+      - Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat
+        maskalangan qaytadi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions:
+        - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        - Marosimda egalar bo'lsa, yangi ega ularning tasdig'idan keyin ochiladi.
+        - JSHSHIR orqali faqat egalar bor bo'lganda (birinchi egalar — telefon orqali).
+        - Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR
+          faqat maskalangan qaytadi.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{id}/participants/:
+    get:
+      operationId: ceremonies_participants_list
+      summary: Marosim ishtirokchilari (deprecated — /owners/)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      security:
+      - jwtAuth: []
+      deprecated: true
       responses:
         '200':
           content:
@@ -2151,6 +2375,7 @@ paths:
       x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
         SUPER_ADMIN: barchasi.'
       x-access-conditions:
+      - 'Deprecated: /owners/ ishlating.'
       - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
         ko''rish).'
       x-access-status: DERIVED
@@ -2164,6 +2389,7 @@ paths:
         ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
           SUPER_ADMIN: barchasi.'
         conditions:
+        - 'Deprecated: /owners/ ishlating.'
         - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
           ko''rish).'
         permission_classes:
@@ -2178,6 +2404,7 @@ paths:
         **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
 
         **Shartlar:**
+        * Deprecated: /owners/ ishlating.
         * POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
       x-documentation:
         status: DOCUMENTED
@@ -2185,15 +2412,16 @@ paths:
     post:
       operationId: ceremonies_participants_create
       description: |-
-        Javob raqam ro'yxatdan o'tganmi-yo'qmi bildirmaydi. Ism faqat taklif qabul qilingandan keyin ko'rinadi.
+        v1 shakli: OWNER taklifini yaratadi (OTHER → OTHER_OWNER). Javobda raqam maskalangan.
 
         **Ruxsat:** SUPER_ADMIN yoki STUDIO
 
         **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
 
         **Shartlar:**
+        * Deprecated: /owners/ ishlating.
         * POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
-      summary: Ishtirokchini telefon orqali taklif qilish
+      summary: Ishtirokchini telefon orqali taklif qilish (deprecated — /owners/invite/)
       parameters:
       - in: path
         name: id
@@ -2223,6 +2451,7 @@ paths:
         required: true
       security:
       - jwtAuth: []
+      deprecated: true
       responses:
         '201':
           content:
@@ -2275,6 +2504,7 @@ paths:
       x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
         SUPER_ADMIN: barchasi.'
       x-access-conditions:
+      - 'Deprecated: /owners/ ishlating.'
       - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
         ko''rish).'
       x-access-status: DERIVED
@@ -2288,6 +2518,7 @@ paths:
         ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
           SUPER_ADMIN: barchasi.'
         conditions:
+        - 'Deprecated: /owners/ ishlating.'
         - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
           ko''rish).'
         permission_classes:
@@ -2302,7 +2533,7 @@ paths:
   /api/v1/ceremonies/{id}/participants/{participant_id}/:
     delete:
       operationId: ceremonies_participants_destroy
-      summary: Ishtirokchini olib tashlash (kirish bekor qilinadi)
+      summary: Ishtirokchini olib tashlash (deprecated)
       parameters:
       - in: path
         name: id
@@ -2320,6 +2551,7 @@ paths:
       - ceremonies
       security:
       - jwtAuth: []
+      deprecated: true
       responses:
         '204':
           description: No response body
@@ -2362,7 +2594,9 @@ paths:
       x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
         SUPER_ADMIN: barchasi.'
       x-access-conditions:
-      - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      - Deprecated.
+      - 'Javob kutilayotgan taklif: studiya OWNER/MANAGER bekor qiladi.'
+      - Tasdiqlangan egani faqat SUPER_ADMIN olib tashlaydi.
       x-access-status: DERIVED
       x-access-policy:
         allowed_roles:
@@ -2374,7 +2608,9 @@ paths:
         ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
           SUPER_ADMIN: barchasi.'
         conditions:
-        - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        - Deprecated.
+        - 'Javob kutilayotgan taklif: studiya OWNER/MANAGER bekor qiladi.'
+        - Tasdiqlangan egani faqat SUPER_ADMIN olib tashlaydi.
         permission_classes:
         - IsStudioMemberOrSuperAdmin
         status: DERIVED
@@ -2387,7 +2623,9 @@ paths:
         **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
 
         **Shartlar:**
-        * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        * Deprecated.
+        * Javob kutilayotgan taklif: studiya OWNER/MANAGER bekor qiladi.
+        * Tasdiqlangan egani faqat SUPER_ADMIN olib tashlaydi.
       x-documentation:
         status: DOCUMENTED
         missing: []
@@ -2569,6 +2807,7 @@ paths:
           - STUDIO
           - SUPER_ADMIN
           - USER
+          - VENUE_OWNER
       - in: query
         name: version
         schema:
@@ -2932,8 +3171,9 @@ paths:
       - USER
       x-auth-type: JWT
       x-required-permissions: []
-      x-ownership-scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
-        marosimlar.
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -2942,8 +3182,9 @@ paths:
         auth_type: JWT
         required_permissions: []
         role_requirements: {}
-        ownership_scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
-          marosimlar.
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
         conditions: []
         permission_classes:
         - IsClientUser
@@ -2954,7 +3195,7 @@ paths:
       description: |-
         **Ruxsat:** USER
 
-        **Ma'lumot doirasi:** Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
       x-documentation:
         status: DOCUMENTED
         missing: []
@@ -3014,8 +3255,9 @@ paths:
       - USER
       x-auth-type: JWT
       x-required-permissions: []
-      x-ownership-scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
-        marosimlar.
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -3024,8 +3266,9 @@ paths:
         auth_type: JWT
         required_permissions: []
         role_requirements: {}
-        ownership_scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
-          marosimlar.
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
         conditions: []
         permission_classes:
         - IsClientUser
@@ -3036,14 +3279,21 @@ paths:
       description: |-
         **Ruxsat:** USER
 
-        **Ma'lumot doirasi:** Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
       x-documentation:
         status: DOCUMENTED
         missing: []
-  /api/v1/me/invitations/:
+  /api/v1/me/ceremonies/{id}/invitations/:
     get:
-      operationId: me_invitations_list
-      summary: Menga kelgan takliflar
+      operationId: me_ceremonies_invitations_list
+      summary: Marosim takliflari tarixi
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
       tags:
       - me
       security:
@@ -3055,7 +3305,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Invitation'
+                  $ref: '#/components/schemas/OwnerInvitation'
           description: ''
         '401':
           description: not_authenticated / invalid_credentials / session_invalid
@@ -3065,6 +3315,12 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '403':
           description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
           content:
             application/json:
               schema:
@@ -3085,8 +3341,15 @@ paths:
       - USER
       x-auth-type: JWT
       x-required-permissions: []
-      x-ownership-scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
-      x-access-conditions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - 'POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.'
+      - JSHSHIR — faqat identifikator, autentifikatsiya emas.
+      - Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat
+        maskalangan qaytadi.
       x-access-status: DERIVED
       x-access-policy:
         allowed_roles:
@@ -3094,10 +3357,17 @@ paths:
         auth_type: JWT
         required_permissions: []
         role_requirements: {}
-        ownership_scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
-        conditions: []
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - 'POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.'
+        - JSHSHIR — faqat identifikator, autentifikatsiya emas.
+        - Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR
+          faqat maskalangan qaytadi.
         permission_classes:
-        - IsClientUser
+        - IsCeremonyOwner
         status: DERIVED
         review_reasons: []
         label: USER
@@ -3105,14 +3375,357 @@ paths:
       description: |-
         **Ruxsat:** USER
 
-        **Ma'lumot doirasi:** Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.
+        * JSHSHIR — faqat identifikator, autentifikatsiya emas.
+        * Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat maskalangan qaytadi.
       x-documentation:
         status: DOCUMENTED
         missing: []
-  /api/v1/me/invitations/{id}/accept/:
     post:
-      operationId: me_invitations_accept_create
-      summary: Taklifni qabul qilish
+      operationId: me_ceremonies_invitations_create
+      description: |-
+        Javob oluvchining akkaunti bor-yo'qligini bildirmaydi. VIEWER: oluvchi qabul qilgach galereyani ko'radi. OWNER: oluvchi qabul qilgach marosimning boshqa egalari tasdiqlaydi (sizning taklifingiz — sizning tasdig'ingiz).
+
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.
+        * JSHSHIR — faqat identifikator, autentifikatsiya emas.
+        * Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat maskalangan qaytadi.
+      summary: VIEWER yoki OWNER taklifi yuborish (telefon / JSHSHIR)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerInvitationCreateRequest'
+            examples:
+              Ko'ruvchiniTelefonOrqaliTaklifQilish:
+                value:
+                  identifier_type: PHONE
+                  identifier: '+998901234567'
+                  requested_role: VIEWER
+                summary: Ko'ruvchini telefon orqali taklif qilish
+              Ota-onaniEgaSifatidaTaklifQilish:
+                value:
+                  identifier_type: PHONE
+                  identifier: '+998907654321'
+                  requested_role: OWNER
+                  owner_type: FAMILY_OWNER
+                summary: Ota-onani ega sifatida taklif qilish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OwnerInvitationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OwnerInvitationCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerInvitation'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - 'POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.'
+      - JSHSHIR — faqat identifikator, autentifikatsiya emas.
+      - Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat
+        maskalangan qaytadi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - 'POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.'
+        - JSHSHIR — faqat identifikator, autentifikatsiya emas.
+        - Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR
+          faqat maskalangan qaytadi.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/:
+    post:
+      operationId: me_ceremonies_invitations_resend_create
+      summary: Taklifni qayta yuborish (muddat yangilanadi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: invitation_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerInvitation'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - Faqat taklifni o'zi yuborgan ega.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - Faqat taklifni o'zi yuborgan ega.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * Faqat taklifni o'zi yuborgan ega.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/revoke/:
+    post:
+      operationId: me_ceremonies_invitations_revoke_create
+      summary: O'zi yuborgan taklifni bekor qilish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: invitation_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - Faqat taklifni o'zi yuborgan ega.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - Faqat taklifni o'zi yuborgan ega.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * Faqat taklifni o'zi yuborgan ega.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/leave/:
+    post:
+      operationId: me_ceremonies_leave_create
+      summary: Marosimdan chiqish (egalik / ko'rish huquqidan voz kechish)
       parameters:
       - in: path
         name: id
@@ -3171,7 +3784,585 @@ paths:
       - USER
       x-auth-type: JWT
       x-required-permissions: []
-      x-ownership-scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Ega yoki ko'ruvchi o'z huquqidan voz kechadi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Ega yoki ko'ruvchi o'z huquqidan voz kechadi.
+        permission_classes:
+        - IsCeremonyMember
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Ega yoki ko'ruvchi o'z huquqidan voz kechadi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/members/:
+    get:
+      operationId: me_ceremonies_members_retrieve
+      summary: Marosim egalari va ko'ruvchilari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Members'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/owner-requests/:
+    get:
+      operationId: me_ceremonies_owner_requests_list
+      summary: Tasdiq kutayotgan yangi egalar
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOwnerRequestList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/approve/:
+    post:
+      operationId: me_ceremonies_owner_requests_approve_create
+      summary: Yangi egani tasdiqlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: request_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerRequest'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/reject/:
+    post:
+      operationId: me_ceremonies_owner_requests_reject_create
+      summary: Yangi egani rad etish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: request_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerRequest'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/viewers/{access_id}/revoke/:
+    post:
+      operationId: me_ceremonies_viewers_revoke_create
+      summary: O'zi bergan ko'rish huquqini bekor qilish
+      parameters:
+      - in: path
+        name: access_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+        ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+        404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+      x-access-conditions:
+      - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+      - Faqat ko'rish huquqini o'zi bergan ega.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED
+          ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi
+          404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+        conditions:
+        - Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        - Faqat ko'rish huquqini o'zi bergan ega.
+        permission_classes:
+        - IsCeremonyOwner
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.
+
+        **Shartlar:**
+        * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
+        * Faqat ko'rish huquqini o'zi bergan ega.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/invitations/:
+    get:
+      operationId: me_invitations_list
+      summary: Menga kelgan takliflar
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+        aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+        boshqasi 404.
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -3180,7 +4371,9 @@ paths:
         auth_type: JWT
         required_permissions: []
         role_requirements: {}
-        ownership_scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        ownership_scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+          aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+          boshqasi 404.
         conditions: []
         permission_classes:
         - IsClientUser
@@ -3191,7 +4384,192 @@ paths:
       description: |-
         **Ruxsat:** USER
 
-        **Ma'lumot doirasi:** Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        **Ma'lumot doirasi:** Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/invitations/{id}/:
+    get:
+      operationId: me_invitations_retrieve
+      summary: Taklif tafsilotlari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+        aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+        boshqasi 404.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+          aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+          boshqasi 404.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/invitations/{id}/accept/:
+    post:
+      operationId: me_invitations_accept_create
+      summary: Taklifni qabul qilish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptResult'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+        aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+        boshqasi 404.
+      x-access-conditions:
+      - OWNER taklifini qabul qilish uchun telefon tasdiqlangan bo'lishi shart.
+      - Taklif qabul qilinmaguncha hech qanday kirish huquqi berilmaydi.
+      - Muddati o'tgan — 410.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+          aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+          boshqasi 404.
+        conditions:
+        - OWNER taklifini qabul qilish uchun telefon tasdiqlangan bo'lishi shart.
+        - Taklif qabul qilinmaguncha hech qanday kirish huquqi berilmaydi.
+        - Muddati o'tgan — 410.
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.
+
+        **Shartlar:**
+        * OWNER taklifini qabul qilish uchun telefon tasdiqlangan bo'lishi shart.
+        * Taklif qabul qilinmaguncha hech qanday kirish huquqi berilmaydi.
+        * Muddati o'tgan — 410.
       x-documentation:
         status: DOCUMENTED
         missing: []
@@ -3253,7 +4631,9 @@ paths:
       - USER
       x-auth-type: JWT
       x-required-permissions: []
-      x-ownership-scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-ownership-scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+        aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+        boshqasi 404.
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -3262,7 +4642,9 @@ paths:
         auth_type: JWT
         required_permissions: []
         role_requirements: {}
-        ownership_scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        ownership_scope: Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha
+          aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar;
+          boshqasi 404.
         conditions: []
         permission_classes:
         - IsClientUser
@@ -3273,7 +4655,7 @@ paths:
       description: |-
         **Ruxsat:** USER
 
-        **Ma'lumot doirasi:** Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        **Ma'lumot doirasi:** Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.
       x-documentation:
         status: DOCUMENTED
         missing: []
@@ -4283,12 +5665,12 @@ paths:
     get:
       operationId: users_list
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
-      summary: Mijozlar ro'yxati (USER, STUDIO)
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      summary: Mijozlar ro'yxati (USER, STUDIO, VENUE_OWNER)
       parameters:
       - in: query
         name: created_after
@@ -4334,9 +5716,11 @@ paths:
           enum:
           - STUDIO
           - USER
+          - VENUE_OWNER
         description: |-
           * `USER` - Foydalanuvchi
           * `STUDIO` - Studiya
+          * `VENUE_OWNER` - To'yxona
       - name: search
         required: false
         in: query
@@ -4385,8 +5769,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.view
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -4399,8 +5784,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.view
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions: []
         permission_classes:
         - HasAdminPermission
@@ -4414,11 +5800,11 @@ paths:
     post:
       operationId: users_create
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.create` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
       summary: Mijoz qo'shish
       tags:
       - users
@@ -4479,8 +5865,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.create
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -4493,8 +5880,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.create
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions: []
         permission_classes:
         - HasAdminPermission
@@ -4509,11 +5897,11 @@ paths:
     get:
       operationId: users_retrieve
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
       summary: Mijoz ma'lumotlari
       parameters:
       - in: path
@@ -4571,8 +5959,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.view
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -4585,8 +5974,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.view
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions: []
         permission_classes:
         - HasAdminPermission
@@ -4600,11 +5990,11 @@ paths:
     patch:
       operationId: users_partial_update
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
       summary: Mijozni tahrirlash
       parameters:
       - in: path
@@ -4679,8 +6069,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.update
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -4693,8 +6084,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.update
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions: []
         permission_classes:
         - HasAdminPermission
@@ -4708,11 +6100,11 @@ paths:
     delete:
       operationId: users_destroy
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
 
         **Shartlar:**
         * Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
@@ -4769,8 +6161,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.delete
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions:
       - Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
       x-access-status: DERIVED
@@ -4784,8 +6177,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.delete
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions:
         - Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
         permission_classes:
@@ -4801,11 +6195,11 @@ paths:
     get:
       operationId: users_pinfl_retrieve
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
 
         **Shartlar:**
         * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
@@ -4867,8 +6261,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.view_pinfl
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions:
       - Har bir ko'rish audit qilinadi (PINFL_REVEAL)
       - 'Throttle: pinfl_reveal'
@@ -4883,8 +6278,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.view_pinfl
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions:
         - Har bir ko'rish audit qilinadi (PINFL_REVEAL)
         - 'Throttle: pinfl_reveal'
@@ -4901,11 +6297,11 @@ paths:
     post:
       operationId: users_verify_phone_create
       description: |-
-        Clients of the platform: USER and STUDIO accounts.
+        Clients of the platform: USER, STUDIO and VENUE_OWNER accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
 
-        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        **Ma'lumot doirasi:** Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
       summary: Telefon raqamini qo'lda tasdiqlash
       parameters:
       - in: path
@@ -4969,8 +6365,9 @@ paths:
       x-auth-type: JWT
       x-required-permissions:
       - users.update
-      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-ownership-scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+        hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+        (404).
       x-access-conditions: []
       x-access-status: DERIVED
       x-access-policy:
@@ -4983,8 +6380,9 @@ paths:
         role_requirements:
           ADMIN:
           - users.update
-        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
-          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        ownership_scope: Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan
+          hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi
+          (404).
         conditions: []
         permission_classes:
         - HasAdminPermission
@@ -4995,8 +6393,758 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/venue-owner/venues/:
+    get:
+      operationId: venue_owner_venues_list
+      summary: Mening to'yxonalarim
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - venue-owner
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOwnerVenueList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions: []
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: venue_owner_venues_create
+      summary: To'yxona yaratish (PRIVATE holatda)
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnerVenueRequest'
+            examples:
+              To'yxonaYaratish:
+                value:
+                  name: Navro'z to'yxonasi
+                  address: Toshkent, Chilonzor 9-kvartal
+                  region: TASHKENT_CITY
+                  district: Chilonzor
+                  phone_number: '+998901234567'
+                  capacity_min: 100
+                  capacity_max: 600
+                  base_price: '45000000.00'
+                summary: To'yxona yaratish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OwnerVenueRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OwnerVenueRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerVenue'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions:
+      - Yaratuvchi OWNER a'zo bo'ladi; standart 'Asosiy zal' ochiladi.
+      - publication_status=PRIVATE, is_active — faqat admin o'zgartiradi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions:
+        - Yaratuvchi OWNER a'zo bo'ladi; standart 'Asosiy zal' ochiladi.
+        - publication_status=PRIVATE, is_active — faqat admin o'zgartiradi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Shartlar:**
+        * Yaratuvchi OWNER a'zo bo'ladi; standart 'Asosiy zal' ochiladi.
+        * publication_status=PRIVATE, is_active — faqat admin o'zgartiradi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/venue-owner/venues/{id}/:
+    get:
+      operationId: venue_owner_venues_retrieve
+      summary: To'yxona ma'lumotlari (egasi uchun)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerVenue'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions: []
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    patch:
+      operationId: venue_owner_venues_partial_update
+      summary: To'yxonani tahrirlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOwnerVenueRequest'
+            examples:
+              To'yxonaYaratish:
+                value:
+                  name: Navro'z to'yxonasi
+                  address: Toshkent, Chilonzor 9-kvartal
+                  region: TASHKENT_CITY
+                  district: Chilonzor
+                  phone_number: '+998901234567'
+                  capacity_min: 100
+                  capacity_max: 600
+                  base_price: '45000000.00'
+                summary: To'yxona yaratish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOwnerVenueRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOwnerVenueRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerVenue'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/venue-owner/venues/{id}/halls/:
+    get:
+      operationId: venue_owner_venues_halls_list
+      summary: To'yxona zallari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VenueHall'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - 'POST: A''zolik roli `MANAGE_HALLS` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).'
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - 'POST: A''zolik roli `MANAGE_HALLS` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).'
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * POST: A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: venue_owner_venues_halls_create
+      summary: Zal qo'shish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueHallRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VenueHallRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VenueHallRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueHall'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - 'POST: A''zolik roli `MANAGE_HALLS` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).'
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - 'POST: A''zolik roli `MANAGE_HALLS` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).'
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * POST: A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/venue-owner/venues/{id}/halls/{hall_id}/:
+    patch:
+      operationId: venue_owner_venues_halls_partial_update
+      summary: Zalni tahrirlash
+      parameters:
+      - in: path
+        name: hall_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueHallRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueHallRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueHallRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueHall'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
 components:
   schemas:
+    AcceptResult:
+      type: object
+      properties:
+        status:
+          allOf:
+          - $ref: '#/components/schemas/InvitationAcceptStatusEnum'
+          description: |-
+            PENDING_APPROVAL: egalik marosimning mavjud egalari tasdiqlagandan keyin ochiladi.
+
+            * `ACCEPTED` - ACCEPTED
+            * `PENDING_APPROVAL` - PENDING_APPROVAL
+        access_role:
+          $ref: '#/components/schemas/CeremonyAccessRoleEnum'
+        ceremony:
+          allOf:
+          - $ref: '#/components/schemas/MyCeremony'
+          nullable: true
+          description: Kirish ochilgan bo'lsa (va marosim DRAFT emas).
+      required:
+      - access_role
+      - ceremony
+      - status
+    AccessStatusEnum:
+      enum:
+      - INVITED
+      - ACTIVE
+      - DECLINED
+      - REVOKED
+      type: string
+      description: |-
+        * `INVITED` - INVITED
+        * `ACTIVE` - ACTIVE
+        * `DECLINED` - DECLINED
+        * `REVOKED` - REVOKED
     Admin:
       type: object
       description: |-
@@ -5130,6 +7278,25 @@ components:
       - ADMIN
       type: string
       description: '* `ADMIN` - Admin'
+    ApprovalBrief:
+      type: object
+      properties:
+        approver_name:
+          type: string
+          nullable: true
+        is_me:
+          type: boolean
+        decision:
+          type: string
+        decided_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - approver_name
+      - decided_at
+      - decision
+      - is_me
     BlankEnum:
       enum:
       - ''
@@ -5182,6 +7349,26 @@ components:
       - studio
       - title
       - updated_at
+    CeremonyAccessRoleEnum:
+      enum:
+      - VIEWER
+      - OWNER
+      type: string
+      description: |-
+        * `VIEWER` - Ko'ruvchi
+        * `OWNER` - Egasi
+    CeremonyOwnerTypeEnum:
+      enum:
+      - BRIDE
+      - GROOM
+      - FAMILY_OWNER
+      - OTHER_OWNER
+      type: string
+      description: |-
+        * `BRIDE` - Kelin
+        * `GROOM` - Kuyov
+        * `FAMILY_OWNER` - Oila vakili
+        * `OTHER_OWNER` - Boshqa mas'ul shaxs
     CeremonyRequest:
       type: object
       properties:
@@ -5222,20 +7409,11 @@ components:
         * `PROCESSING` - Qayta ishlanmoqda
         * `READY` - Tayyor
         * `ARCHIVED` - Arxivlangan
-    CoupleMember:
-      type: object
-      properties:
-        participant_type:
-          allOf:
-          - $ref: '#/components/schemas/ParticipantTypeEnum'
-          readOnly: true
-        full_name:
-          type: string
-          nullable: true
-          readOnly: true
-      required:
-      - full_name
-      - participant_type
+    CurrencyEnum:
+      enum:
+      - UZS
+      type: string
+      description: '* `UZS` - O''zbek so''mi'
     DashboardOverview:
       type: object
       properties:
@@ -5525,42 +7703,120 @@ components:
         * `unavailable` - unavailable
     Invitation:
       type: object
-      description: Just enough for the invitee to recognise the event before accepting.
+      description: |-
+        What the invitee sees before answering. While the invitation still needs a verified phone,
+        the ceremony details are withheld, so a squatted number reveals nothing.
       properties:
         id:
           type: string
           format: uuid
           readOnly: true
-        participant_type:
+        requested_role:
           allOf:
-          - $ref: '#/components/schemas/ParticipantTypeEnum'
+          - $ref: '#/components/schemas/CeremonyAccessRoleEnum'
           readOnly: true
+        owner_type:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          readOnly: true
+        participant_type:
+          description: v1 qiymati; VIEWER uchun null
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ParticipantTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
         ceremony_id:
           type: string
           format: uuid
           readOnly: true
         ceremony_title:
           type: string
+          nullable: true
           readOnly: true
         event_date:
           type: string
           format: date
+          nullable: true
           readOnly: true
         studio_name:
           type: string
+          nullable: true
+          readOnly: true
+        inviter_display:
+          type: string
+          nullable: true
           readOnly: true
         invited_at:
           type: string
           format: date-time
           readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        phone_verification_required:
+          type: boolean
+          readOnly: true
+        requires_owner_approval:
+          type: boolean
+          description: 'OWNER: after accepting, the ceremony''s current owners must
+            approve.'
+          readOnly: true
       required:
       - ceremony_id
       - ceremony_title
       - event_date
+      - expires_at
       - id
       - invited_at
+      - inviter_display
+      - owner_type
       - participant_type
+      - phone_verification_required
+      - requested_role
+      - requires_owner_approval
       - studio_name
+    InvitationAcceptStatusEnum:
+      enum:
+      - ACCEPTED
+      - PENDING_APPROVAL
+      type: string
+      description: |-
+        * `ACCEPTED` - ACCEPTED
+        * `PENDING_APPROVAL` - PENDING_APPROVAL
+    InvitationIdentifierTypeEnum:
+      enum:
+      - PHONE
+      - PINFL
+      type: string
+      description: |-
+        * `PHONE` - Telefon raqam
+        * `PINFL` - JSHSHIR
+    InvitationStatusEnum:
+      enum:
+      - PENDING
+      - ACCEPTED
+      - DECLINED
+      - EXPIRED
+      - REVOKED
+      type: string
+      description: |-
+        * `PENDING` - Kutilmoqda
+        * `ACCEPTED` - Qabul qilingan
+        * `DECLINED` - Rad etilgan
+        * `EXPIRED` - Muddati tugagan
+        * `REVOKED` - Bekor qilingan
+    InviterKindEnum:
+      enum:
+      - STUDIO
+      - OWNER
+      - SUPER_ADMIN
+      type: string
+      description: |-
+        * `STUDIO` - Studiya
+        * `OWNER` - Marosim egasi
+        * `SUPER_ADMIN` - Super Admin
     LoginRequest:
       type: object
       properties:
@@ -5696,10 +7952,12 @@ components:
       enum:
       - USER
       - STUDIO
+      - VENUE_OWNER
       type: string
       description: |-
         * `USER` - Foydalanuvchi
         * `STUDIO` - Studiya
+        * `VENUE_OWNER` - To'yxona
     Me:
       type: object
       description: The caller's own profile. PINFL is only ever exposed masked.
@@ -5776,6 +8034,84 @@ components:
       - pinfl_masked
       - profile_picture
       - role
+    MemberOwner:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        owner_type:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          readOnly: true
+        full_name:
+          type: string
+          nullable: true
+          readOnly: true
+        is_me:
+          type: boolean
+          readOnly: true
+        accepted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - accepted_at
+      - full_name
+      - id
+      - is_me
+      - owner_type
+    MemberViewer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        full_name:
+          type: string
+          nullable: true
+          readOnly: true
+        granted_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        granted_by_me:
+          type: boolean
+          readOnly: true
+        can_revoke:
+          type: boolean
+          readOnly: true
+        accepted_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - accepted_at
+      - can_revoke
+      - full_name
+      - granted_by_me
+      - granted_by_name
+      - id
+    Members:
+      type: object
+      properties:
+        owners:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberOwner'
+        viewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberViewer'
+        pending_owner_requests:
+          type: integer
+      required:
+      - owners
+      - pending_owner_requests
+      - viewers
     MonitoringEndpointCatalog:
       type: object
       properties:
@@ -5857,8 +8193,8 @@ components:
       - window
     MyCeremony:
       type: object
-      description: 'A ceremony as its bride/groom/guest sees it: no phone numbers,
-        no internal fields.'
+      description: 'A ceremony as an owner / viewer sees it: no phone numbers, JSHSHIR
+        or internal fields.'
       properties:
         id:
           type: string
@@ -5886,16 +8222,23 @@ components:
           allOf:
           - $ref: '#/components/schemas/StudioBrief'
           readOnly: true
+        access_role:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyAccessRoleEnum'
+          readOnly: true
         my_role:
-          type: string
           nullable: true
           readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ParticipantTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
         participants:
           type: array
           items:
-            $ref: '#/components/schemas/CoupleMember'
+            $ref: '#/components/schemas/OwnerBrief'
           readOnly: true
       required:
+      - access_role
       - description
       - event_date
       - event_type
@@ -5942,6 +8285,380 @@ components:
       - is_active
       - name
       - profile_picture
+    NullEnum:
+      enum:
+      - null
+    OwnerBrief:
+      type: object
+      properties:
+        participant_type:
+          allOf:
+          - $ref: '#/components/schemas/ParticipantTypeEnum'
+          description: v1 qiymati (BRIDE / GROOM / OTHER)
+          readOnly: true
+        owner_type:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          readOnly: true
+        full_name:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - full_name
+      - owner_type
+      - participant_type
+    OwnerInvitation:
+      type: object
+      description: One row of a ceremony's invitation history, as an owner sees it
+        (masked identifier only).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier_type:
+          allOf:
+          - $ref: '#/components/schemas/InvitationIdentifierTypeEnum'
+          readOnly: true
+        recipient_hint:
+          type: string
+          readOnly: true
+        requested_role:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyAccessRoleEnum'
+          readOnly: true
+        owner_type:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/InvitationStatusEnum'
+          readOnly: true
+        inviter_kind:
+          allOf:
+          - $ref: '#/components/schemas/InviterKindEnum'
+          readOnly: true
+        invited_by_display:
+          type: string
+          nullable: true
+          readOnly: true
+        is_mine:
+          type: boolean
+          readOnly: true
+        can_revoke:
+          type: boolean
+          readOnly: true
+        can_resend:
+          type: boolean
+          readOnly: true
+        send_count:
+          type: integer
+          readOnly: true
+        invited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        responded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - can_resend
+      - can_revoke
+      - expires_at
+      - id
+      - identifier_type
+      - invited_at
+      - invited_by_display
+      - inviter_kind
+      - is_mine
+      - owner_type
+      - recipient_hint
+      - requested_role
+      - responded_at
+      - send_count
+      - status
+    OwnerInvitationCreateRequest:
+      type: object
+      properties:
+        identifier_type:
+          $ref: '#/components/schemas/InvitationIdentifierTypeEnum'
+        identifier:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Telefon (+998XXXXXXXXX) yoki 14 xonali JSHSHIR. Javobda qaytmaydi.
+          maxLength: 32
+        requested_role:
+          $ref: '#/components/schemas/CeremonyAccessRoleEnum'
+        owner_type:
+          description: |-
+            Faqat OWNER uchun majburiy.
+
+            * `BRIDE` - Kelin
+            * `GROOM` - Kuyov
+            * `FAMILY_OWNER` - Oila vakili
+            * `OTHER_OWNER` - Boshqa mas'ul shaxs
+          oneOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+      required:
+      - identifier
+      - identifier_type
+      - requested_role
+    OwnerInviteRequest:
+      type: object
+      properties:
+        identifier_type:
+          $ref: '#/components/schemas/InvitationIdentifierTypeEnum'
+        identifier:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Telefon (+998XXXXXXXXX) yoki 14 xonali JSHSHIR. Javobda qaytmaydi.
+          maxLength: 32
+        owner_type:
+          $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+      required:
+      - identifier
+      - identifier_type
+      - owner_type
+    OwnerRequest:
+      type: object
+      description: 'A PENDING ownership: who accepted which OWNER invitation, and
+        the approvals so far.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        owner_type:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OwnershipStatusEnum'
+          readOnly: true
+        candidate_name:
+          type: string
+          nullable: true
+          readOnly: true
+        recipient_hint:
+          type: string
+          nullable: true
+          readOnly: true
+        invited_by_display:
+          type: string
+          nullable: true
+          readOnly: true
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalBrief'
+          readOnly: true
+        can_decide:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - approvals
+      - can_decide
+      - candidate_name
+      - created_at
+      - id
+      - invited_by_display
+      - owner_type
+      - recipient_hint
+      - status
+    OwnerVenue:
+      type: object
+      description: A venue as seen by its own members. ``is_active`` / ``publication_status``
+        are read-only here.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 4000
+        venue_type:
+          $ref: '#/components/schemas/VenueTypeEnum'
+        address:
+          type: string
+          maxLength: 255
+        region:
+          $ref: '#/components/schemas/VenueRegionEnum'
+        district:
+          type: string
+          maxLength: 100
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        phone_number:
+          type: string
+          maxLength: 32
+        cover_image:
+          type: string
+          format: uri
+          nullable: true
+        capacity_min:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        capacity_max:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/CurrencyEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        publication_status:
+          allOf:
+          - $ref: '#/components/schemas/VenuePublicationStatusEnum'
+          readOnly: true
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/VenueHall'
+          readOnly: true
+        membership_role:
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/VenueMembershipRoleEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        membership_capabilities:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - base_price
+      - capacity_max
+      - created_at
+      - currency
+      - halls
+      - id
+      - is_active
+      - membership_capabilities
+      - membership_role
+      - name
+      - publication_status
+      - region
+      - updated_at
+    OwnerVenueRequest:
+      type: object
+      description: A venue as seen by its own members. ``is_active`` / ``publication_status``
+        are read-only here.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 4000
+        venue_type:
+          $ref: '#/components/schemas/VenueTypeEnum'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        region:
+          $ref: '#/components/schemas/VenueRegionEnum'
+        district:
+          type: string
+          maxLength: 100
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        phone_number:
+          type: string
+          maxLength: 32
+        cover_image:
+          type: string
+          format: binary
+          nullable: true
+        capacity_min:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        capacity_max:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+      required:
+      - address
+      - base_price
+      - capacity_max
+      - name
+      - region
+    OwnershipStatusEnum:
+      enum:
+      - PENDING
+      - ACCEPTED
+      - REJECTED
+      - REVOKED
+      type: string
+      description: |-
+        * `PENDING` - Tasdiq kutilmoqda
+        * `ACCEPTED` - Tasdiqlangan
+        * `REJECTED` - Rad etilgan
+        * `REVOKED` - Bekor qilingan
     PaginatedAdminList:
       type: object
       required:
@@ -6058,6 +8775,64 @@ components:
           type: integer
         total_pages:
           type: integer
+    PaginatedOwnerRequestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnerRequest'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PaginatedOwnerVenueList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnerVenue'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
     PaginatedRequestLogList:
       type: object
       required:
@@ -6118,8 +8893,9 @@ components:
           type: integer
     Participant:
       type: object
-      description: Studio view of an invitation. The person's name appears only after
-        they accept.
+      description: |-
+        v1 shape of a studio OWNER invitation (deprecated ``/participants/``). The number comes back
+        masked; the person's name appears only once their ownership is ACCEPTED.
       properties:
         id:
           type: string
@@ -6127,17 +8903,18 @@ components:
           readOnly: true
         phone_number:
           type: string
+          description: 'Javobda maskalangan: +99890***4567'
           maxLength: 32
         participant_type:
           $ref: '#/components/schemas/ParticipantTypeEnum'
         access_status:
           allOf:
-          - $ref: '#/components/schemas/ParticipantAccessStatusEnum'
+          - $ref: '#/components/schemas/AccessStatusEnum'
           readOnly: true
         display_name:
           type: string
-          nullable: true
           readOnly: true
+          nullable: true
         invited_at:
           type: string
           format: date-time
@@ -6155,26 +8932,16 @@ components:
       - participant_type
       - phone_number
       - responded_at
-    ParticipantAccessStatusEnum:
-      enum:
-      - INVITED
-      - ACTIVE
-      - DECLINED
-      - REVOKED
-      type: string
-      description: |-
-        * `INVITED` - Taklif yuborilgan
-        * `ACTIVE` - Faol
-        * `DECLINED` - Rad etilgan
-        * `REVOKED` - Bekor qilingan
     ParticipantRequest:
       type: object
-      description: Studio view of an invitation. The person's name appears only after
-        they accept.
+      description: |-
+        v1 shape of a studio OWNER invitation (deprecated ``/participants/``). The number comes back
+        masked; the person's name appears only once their ownership is ACCEPTED.
       properties:
         phone_number:
           type: string
           minLength: 1
+          description: 'Javobda maskalangan: +99890***4567'
           maxLength: 32
         participant_type:
           $ref: '#/components/schemas/ParticipantTypeEnum'
@@ -6187,10 +8954,6 @@ components:
       - GROOM
       - OTHER
       type: string
-      description: |-
-        * `BRIDE` - Kelin
-        * `GROOM` - Kuyov
-        * `OTHER` - Boshqa
     PatchedAdminRequest:
       type: object
       description: |-
@@ -6327,6 +9090,60 @@ components:
         address:
           type: string
           maxLength: 255
+    PatchedOwnerVenueRequest:
+      type: object
+      description: A venue as seen by its own members. ``is_active`` / ``publication_status``
+        are read-only here.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 4000
+        venue_type:
+          $ref: '#/components/schemas/VenueTypeEnum'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        region:
+          $ref: '#/components/schemas/VenueRegionEnum'
+        district:
+          type: string
+          maxLength: 100
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        phone_number:
+          type: string
+          maxLength: 32
+        cover_image:
+          type: string
+          format: binary
+          nullable: true
+        capacity_min:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        capacity_max:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
     PatchedStudioRequest:
       type: object
       properties:
@@ -6349,6 +9166,26 @@ components:
           type: string
           format: uuid
           writeOnly: true
+        is_active:
+          type: boolean
+    PatchedVenueHallRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        capacity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+          description: Bo'sh (null) bo'lsa to'yxonaning base_price narxi ishlatiladi.
         is_active:
           type: boolean
     PermissionDef:
@@ -6486,12 +9323,14 @@ components:
       - SUPER_ADMIN
       - ADMIN
       - STUDIO
+      - VENUE_OWNER
       - USER
       type: string
       description: |-
         * `SUPER_ADMIN` - Super Admin
         * `ADMIN` - Admin
         * `STUDIO` - Studiya
+        * `VENUE_OWNER` - To'yxona
         * `USER` - Foydalanuvchi
     StorageConnection:
       type: object
@@ -6644,6 +9483,69 @@ components:
       - ceremonies_count
       - role
       - studio
+    StudioOwnerRow:
+      type: object
+      description: An OWNER invitation and what became of it, as the studio sees it
+        (masked identifier only).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        identifier_type:
+          allOf:
+          - $ref: '#/components/schemas/InvitationIdentifierTypeEnum'
+          readOnly: true
+        recipient_hint:
+          type: string
+          readOnly: true
+        owner_type:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyOwnerTypeEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/InvitationStatusEnum'
+          readOnly: true
+        ownership_status:
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/OwnershipStatusEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        display_name:
+          type: string
+          nullable: true
+          readOnly: true
+        inviter_kind:
+          allOf:
+          - $ref: '#/components/schemas/InviterKindEnum'
+          readOnly: true
+        invited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        responded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - display_name
+      - expires_at
+      - id
+      - identifier_type
+      - invited_at
+      - inviter_kind
+      - owner_type
+      - ownership_status
+      - recipient_hint
+      - responded_at
+      - status
     StudioRequest:
       type: object
       properties:
@@ -6748,6 +9650,144 @@ components:
       - pinfl_masked
       - profile_picture
       - role
+    VenueHall:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        capacity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+          description: Bo'sh (null) bo'lsa to'yxonaning base_price narxi ishlatiladi.
+        effective_base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          readOnly: true
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - capacity
+      - created_at
+      - effective_base_price
+      - id
+      - name
+      - updated_at
+    VenueHallRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        capacity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1
+          format: int64
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+          description: Bo'sh (null) bo'lsa to'yxonaning base_price narxi ishlatiladi.
+        is_active:
+          type: boolean
+      required:
+      - capacity
+      - name
+    VenueMembershipRoleEnum:
+      enum:
+      - OWNER
+      - MANAGER
+      - SCHEDULER
+      - VIEWER
+      type: string
+      description: |-
+        * `OWNER` - Egasi
+        * `MANAGER` - Menejer
+        * `SCHEDULER` - Jadval yurituvchi
+        * `VIEWER` - Kuzatuvchi
+    VenuePublicationStatusEnum:
+      enum:
+      - PRIVATE
+      - PENDING_APPROVAL
+      - APPROVED
+      - REJECTED
+      - SUSPENDED
+      type: string
+      description: |-
+        * `PRIVATE` - Yopiq
+        * `PENDING_APPROVAL` - Tasdiq kutilmoqda
+        * `APPROVED` - Tasdiqlangan
+        * `REJECTED` - Rad etilgan
+        * `SUSPENDED` - To'xtatilgan
+    VenueRegionEnum:
+      enum:
+      - TASHKENT_CITY
+      - TASHKENT
+      - ANDIJAN
+      - BUKHARA
+      - FERGANA
+      - JIZZAKH
+      - KHOREZM
+      - NAMANGAN
+      - NAVOI
+      - KASHKADARYA
+      - KARAKALPAKSTAN
+      - SAMARKAND
+      - SIRDARYO
+      - SURKHANDARYA
+      type: string
+      description: |-
+        * `TASHKENT_CITY` - Toshkent shahri
+        * `TASHKENT` - Toshkent viloyati
+        * `ANDIJAN` - Andijon viloyati
+        * `BUKHARA` - Buxoro viloyati
+        * `FERGANA` - Farg'ona viloyati
+        * `JIZZAKH` - Jizzax viloyati
+        * `KHOREZM` - Xorazm viloyati
+        * `NAMANGAN` - Namangan viloyati
+        * `NAVOI` - Navoiy viloyati
+        * `KASHKADARYA` - Qashqadaryo viloyati
+        * `KARAKALPAKSTAN` - Qoraqalpog'iston Respublikasi
+        * `SAMARKAND` - Samarqand viloyati
+        * `SIRDARYO` - Sirdaryo viloyati
+        * `SURKHANDARYA` - Surxondaryo viloyati
+    VenueTypeEnum:
+      enum:
+      - BANQUET_HALL
+      - RESTAURANT
+      - CAFE
+      - OUTDOOR
+      - OTHER
+      type: string
+      description: |-
+        * `BANQUET_HALL` - To'yxona
+        * `RESTAURANT` - Restoran
+        * `CAFE` - Kafe
+        * `OUTDOOR` - Ochiq maydon
+        * `OTHER` - Boshqa
   securitySchemes:
     jwtAuth:
       type: http

@@ -230,6 +230,68 @@
         "POST /api/v1/users/",
         "POST /api/v1/users/{id}/verify-phone/"
       ]
+    },
+    {
+      "revision": 5,
+      "date": "2026-11-07",
+      "note": "V4.1 Phase C: ceremony ownership — studio /owners/, owner invitations/members/owner-requests, viewer revoke, leave, invitation detail; v1 /participants/ deprecated (alias); accept javobi {status, access_role, ceremony}",
+      "added": [
+        "GET /api/v1/ceremonies/{id}/owners/",
+        "GET /api/v1/me/ceremonies/{id}/invitations/",
+        "GET /api/v1/me/ceremonies/{id}/members/",
+        "GET /api/v1/me/ceremonies/{id}/owner-requests/",
+        "GET /api/v1/me/invitations/{id}/",
+        "POST /api/v1/ceremonies/{id}/owners/invite/",
+        "POST /api/v1/me/ceremonies/{id}/invitations/",
+        "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/",
+        "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/revoke/",
+        "POST /api/v1/me/ceremonies/{id}/leave/",
+        "POST /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/approve/",
+        "POST /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/reject/",
+        "POST /api/v1/me/ceremonies/{id}/viewers/{access_id}/revoke/"
+      ],
+      "removed": [],
+      "changed": {
+        "DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/": [
+          "conditions",
+          "deprecated"
+        ],
+        "GET /api/v1/ceremonies/{id}/participants/": [
+          "conditions",
+          "deprecated"
+        ],
+        "GET /api/v1/me/ceremonies/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/{id}/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/invitations/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/ceremonies/{id}/participants/": [
+          "conditions",
+          "deprecated"
+        ],
+        "POST /api/v1/me/invitations/{id}/accept/": [
+          "conditions",
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/invitations/{id}/decline/": [
+          "ownership_scope"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/me/ceremonies/",
+        "GET /api/v1/me/ceremonies/{id}/",
+        "GET /api/v1/me/invitations/",
+        "POST /api/v1/me/invitations/{id}/accept/"
+      ]
     }
   ]
 }

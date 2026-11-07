@@ -25,10 +25,12 @@
       "role_requirements": {},
       "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
       "conditions": [
-        "STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish)."
+        "Deprecated.",
+        "Javob kutilayotgan taklif: studiya OWNER/MANAGER bekor qiladi.",
+        "Tasdiqlangan egani faqat SUPER_ADMIN olib tashlaydi."
       ],
       "access_status": "DERIVED",
-      "deprecated": false,
+      "deprecated": true,
       "operation_id": "ceremonies_participants_destroy",
       "schema_fingerprint": "4dfd36b68f103d2d"
     },
@@ -240,6 +242,21 @@
       "operation_id": "ceremonies_retrieve",
       "schema_fingerprint": "98d368c508498584"
     },
+    "GET /api/v1/ceremonies/{id}/owners/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_owners_list",
+      "schema_fingerprint": "09eab06f410b271b"
+    },
     "GET /api/v1/ceremonies/{id}/participants/": {
       "allowed_roles": [
         "STUDIO",
@@ -250,10 +267,11 @@
       "role_requirements": {},
       "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
       "conditions": [
+        "Deprecated: /owners/ ishlating.",
         "POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish)."
       ],
       "access_status": "DERIVED",
-      "deprecated": false,
+      "deprecated": true,
       "operation_id": "ceremonies_participants_list",
       "schema_fingerprint": "ce787e9f5728e0d5"
     },
@@ -372,12 +390,12 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.",
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_list",
-      "schema_fingerprint": "5e8739c996694ac5"
+      "schema_fingerprint": "4d3927e6bf5eb361"
     },
     "GET /api/v1/me/ceremonies/{id}/": {
       "allowed_roles": [
@@ -386,12 +404,63 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.",
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_retrieve",
-      "schema_fingerprint": "9b36a7202baff8b4"
+      "schema_fingerprint": "de3f00e1ee10a617"
+    },
+    "GET /api/v1/me/ceremonies/{id}/invitations/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.",
+        "JSHSHIR — faqat identifikator, autentifikatsiya emas.",
+        "Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat maskalangan qaytadi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_invitations_list",
+      "schema_fingerprint": "de3f4e0f06397d39"
+    },
+    "GET /api/v1/me/ceremonies/{id}/members/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_members_retrieve",
+      "schema_fingerprint": "86370e37047b824e"
+    },
+    "GET /api/v1/me/ceremonies/{id}/owner-requests/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_owner_requests_list",
+      "schema_fingerprint": "591704ca9b044ce5"
     },
     "GET /api/v1/me/invitations/": {
       "allowed_roles": [
@@ -400,12 +469,26 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchining telefon raqamiga yuborilgan takliflar.",
+      "ownership_scope": "Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_invitations_list",
-      "schema_fingerprint": "484973d2a5d2ae4e"
+      "schema_fingerprint": "d53c934aa421e4ec"
+    },
+    "GET /api/v1/me/invitations/{id}/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_invitations_retrieve",
+      "schema_fingerprint": "edb84f6cd3460dd2"
     },
     "GET /api/v1/monitoring/endpoints/": {
       "allowed_roles": [
@@ -900,6 +983,26 @@
       "operation_id": "ceremonies_create",
       "schema_fingerprint": "147f91d4ba36c976"
     },
+    "POST /api/v1/ceremonies/{id}/owners/invite/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).",
+        "Marosimda egalar bo'lsa, yangi ega ularning tasdig'idan keyin ochiladi.",
+        "JSHSHIR orqali faqat egalar bor bo'lganda (birinchi egalar — telefon orqali).",
+        "Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat maskalangan qaytadi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_owners_invite_create",
+      "schema_fingerprint": "914323f9fb5703ac"
+    },
     "POST /api/v1/ceremonies/{id}/participants/": {
       "allowed_roles": [
         "STUDIO",
@@ -910,12 +1013,133 @@
       "role_requirements": {},
       "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
       "conditions": [
+        "Deprecated: /owners/ ishlating.",
         "POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish)."
       ],
       "access_status": "DERIVED",
-      "deprecated": false,
+      "deprecated": true,
       "operation_id": "ceremonies_participants_create",
       "schema_fingerprint": "677d6f30693f23ba"
+    },
+    "POST /api/v1/me/ceremonies/{id}/invitations/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.",
+        "JSHSHIR — faqat identifikator, autentifikatsiya emas.",
+        "Javob oluvchining akkaunti bor-yo'qligiga bog'liq emas; telefon/JSHSHIR faqat maskalangan qaytadi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_invitations_create",
+      "schema_fingerprint": "25c85db854e50daa"
+    },
+    "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "Faqat taklifni o'zi yuborgan ega."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_invitations_resend_create",
+      "schema_fingerprint": "5e908c3f2f930881"
+    },
+    "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/revoke/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "Faqat taklifni o'zi yuborgan ega."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_invitations_revoke_create",
+      "schema_fingerprint": "aa27d4603308860b"
+    },
+    "POST /api/v1/me/ceremonies/{id}/leave/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Ega yoki ko'ruvchi o'z huquqidan voz kechadi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_leave_create",
+      "schema_fingerprint": "31188fc30a041b55"
+    },
+    "POST /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/approve/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_owner_requests_approve_create",
+      "schema_fingerprint": "aad74b6e60820486"
+    },
+    "POST /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/reject/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "Faqat so'rov ochilganda ACCEPTED bo'lgan va hozir ham ega bo'lganlar."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_owner_requests_reject_create",
+      "schema_fingerprint": "aad74b6e60820486"
+    },
+    "POST /api/v1/me/ceremonies/{id}/viewers/{access_id}/revoke/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [
+        "Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.",
+        "Faqat ko'rish huquqini o'zi bergan ega."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_viewers_revoke_create",
+      "schema_fingerprint": "57b45a1daeb29387"
     },
     "POST /api/v1/me/invitations/{id}/accept/": {
       "allowed_roles": [
@@ -924,12 +1148,16 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchining telefon raqamiga yuborilgan takliflar.",
-      "conditions": [],
+      "ownership_scope": "Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.",
+      "conditions": [
+        "OWNER taklifini qabul qilish uchun telefon tasdiqlangan bo'lishi shart.",
+        "Taklif qabul qilinmaguncha hech qanday kirish huquqi berilmaydi.",
+        "Muddati o'tgan — 410."
+      ],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_invitations_accept_create",
-      "schema_fingerprint": "f4f4eab7f2087fec"
+      "schema_fingerprint": "920ae66bd0a27fd0"
     },
     "POST /api/v1/me/invitations/{id}/decline/": {
       "allowed_roles": [
@@ -938,7 +1166,7 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchining telefon raqamiga yuborilgan takliflar.",
+      "ownership_scope": "Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404.",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
