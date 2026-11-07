@@ -2,6 +2,7 @@ from django.db import transaction
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 
@@ -13,6 +14,7 @@ from .access import AccessNote
 from .filters import AdminFilter, ManagedUserFilter
 from .models import CLIENT_ROLES, Role, User
 from .permissions import HasAdminPermission, IsSuperAdmin
+from .phone_verification import mark_verified
 from .serializers import AdminSerializer, ManagedUserSerializer, PermissionDefSerializer, PinflRevealSerializer
 from .tokens import revoke_all_sessions
 
@@ -100,6 +102,19 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
         record(request, AuditAction.PINFL_REVEAL, user)
         return Response(PinflRevealSerializer({"pinfl": value or ""}).data)
 
+    @extend_schema(request=None, responses=ManagedUserSerializer, summary="Telefon raqamini qo'lda tasdiqlash")
+    @action(detail=True, methods=["post"], url_path="verify-phone")
+    @transaction.atomic
+    def verify_phone(self, request, pk=None):
+        user = self.get_object()
+        user = User.objects.select_for_update().get(pk=user.pk)
+        if not user.phone_number:
+            raise ValidationError({"phone_number": ["Avval telefon raqamini kiriting."]})
+        if not user.is_phone_verified:
+            mark_verified(user)
+            record(request, AuditAction.UPDATE, user, changes={"is_phone_verified": {"from": False, "to": True}})
+        return Response(self.get_serializer(user).data)
+
 
 @extend_schema_view(
     list=extend_schema(summary="Mijozlar ro'yxati (USER, STUDIO)"),
@@ -116,7 +131,7 @@ class UserViewSet(ManagedUserViewSetBase):
     filterset_class = ManagedUserFilter
     permission_classes = [HasAdminPermission]
     permission_module = "users"
-    action_permissions = {"pinfl": "users.view_pinfl"}
+    action_permissions = {"pinfl": "users.view_pinfl", "verify_phone": "users.update"}
     access_notes = {
         "*": AccessNote(
             ownership="Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). "

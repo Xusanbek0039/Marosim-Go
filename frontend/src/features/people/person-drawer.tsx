@@ -9,7 +9,7 @@ import { RoleBadge, StatusBadge, UserAvatar } from "@/components/common";
 import { MotionDrawer } from "@/components/motion/motion-dialog";
 import { Button } from "@/components/ui/button";
 import { useCan, useMe } from "@/features/auth/hooks";
-import { useRevealPinfl } from "@/features/resources";
+import { adminsResource, usersResource, useRevealPinfl, useVerifyPhone } from "@/features/resources";
 import { ApiError } from "@/lib/api/client";
 import type { Admin, ManagedUser } from "@/lib/api/types";
 import { formatDate, formatDateTime, formatPhone } from "@/lib/format";
@@ -43,7 +43,7 @@ function PhoneVerifiedBadge({ verified }: { verified: boolean }) {
 
 export function PersonDrawer({
   kind,
-  person,
+  person: initialPerson,
   open,
   onOpenChange,
   onEdit,
@@ -58,6 +58,11 @@ export function PersonDrawer({
 }) {
   const can = useCan();
   const { data: me } = useMe();
+  const resource = kind === "admin" ? "admins" : "users";
+  const detail = (kind === "admin" ? adminsResource : usersResource).useDetail(open ? initialPerson?.id ?? null : null);
+  const person = detail.data ?? initialPerson;
+  const verifyPhone = useVerifyPhone(resource);
+  const canVerify = kind === "admin" ? me?.role === "SUPER_ADMIN" : can("users.update");
   const reveal = useRevealPinfl(kind === "admin" ? "admins" : "users");
   const [revealed, setRevealed] = useState<{ id: string; value: string } | null>(null);
   const plain = open && person && revealed?.id === person.id ? revealed.value : null;
@@ -122,6 +127,19 @@ export function PersonDrawer({
           <span className="inline-flex items-center gap-2 tabular-nums">
             {formatPhone(person.phone_number)}
             {person.phone_number && <PhoneVerifiedBadge verified={person.is_phone_verified} />}
+            {person.phone_number && !person.is_phone_verified && canVerify && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={verifyPhone.isPending}
+                onClick={() => verifyPhone.mutate(person.id, {
+                  onSuccess: () => toast.success("Telefon raqami tasdiqlandi"),
+                  onError: (e) => toast.error(e instanceof ApiError ? e.message : "Tasdiqlab bo'lmadi"),
+                })}
+              >
+                {verifyPhone.isPending ? "Tasdiqlanmoqda..." : "Tasdiqlash"}
+              </Button>
+            )}
           </span>
         </Row>
         <Row label="Email">{person.email || "—"}</Row>

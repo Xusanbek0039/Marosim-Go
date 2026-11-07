@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "@/lib/api/client";
 import type { Admin, DashboardOverview, ManagedUser, PermissionDef, Studio } from "@/lib/api/types";
@@ -10,6 +10,17 @@ import { createResource } from "./crud";
 export const usersResource = createResource<ManagedUser>("users");
 export const adminsResource = createResource<Admin>("admins");
 export const studiosResource = createResource<Studio>("studios");
+
+export function useVerifyPhone(resource: "users" | "admins") {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<ManagedUser | Admin>(`/${resource}/${id}/verify-phone/`),
+    onSuccess: (data) => {
+      qc.setQueryData([resource, "detail", data.id], data);
+      qc.invalidateQueries({ queryKey: [resource] });
+    },
+  });
+}
 
 export function useDashboardOverview() {
   return useQuery({

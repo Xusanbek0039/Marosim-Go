@@ -298,6 +298,47 @@ def test_pinfl_privacy_in_profile_and_register(make_user, client_for):
 
 # ------------------------------------------------------- panel phone admin
 @pytest.mark.django_db
+@pytest.mark.parametrize("role", [Role.ADMIN, Role.SUPER_ADMIN])
+def test_panel_verify_phone(role, make_user, plain_user, client_for):
+    from apps.audit.models import AuditLog
+
+    actor = make_user(role, admin_permissions=["users.update"])
+    client = client_for(actor)
+    url = f"/api/v1/users/{plain_user.pk}/verify-phone/"
+    res = client.post(url)
+    assert res.status_code == 200, res.data
+    assert res.data["is_phone_verified"] is True
+    plain_user.refresh_from_db()
+    assert plain_user.phone_verified_at is not None
+    verified_at = plain_user.phone_verified_at
+    assert client.post(url).status_code == 200
+    plain_user.refresh_from_db()
+    assert plain_user.phone_verified_at == verified_at
+    logs = AuditLog.objects.filter(actor=actor, target_id=str(plain_user.pk), action="UPDATE")
+    assert logs.count() == 1
+    assert logs.get().changes == {"is_phone_verified": {"from": False, "to": True}}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("role", [Role.USER, Role.STUDIO, Role.ADMIN])
+def test_verify_phone_requires_management_permission(role, make_user, plain_user, client_for):
+    actor = make_user(role, admin_permissions=["users.view"] if role == Role.ADMIN else [])
+    res = client_for(actor).post(f"/api/v1/users/{plain_user.pk}/verify-phone/")
+    assert res.status_code == 403
+    plain_user.refresh_from_db()
+    assert not plain_user.is_phone_verified
+
+
+@pytest.mark.django_db
+def test_verify_phone_missing_number_and_admin_scope(super_admin, admin_user, plain_user, client_for):
+    client = client_for(super_admin)
+    User.objects.filter(pk=plain_user.pk).update(phone_number=None)
+    assert client.post(f"/api/v1/users/{plain_user.pk}/verify-phone/").status_code == 400
+    assert client.post(f"/api/v1/users/{admin_user.pk}/verify-phone/").status_code == 404
+    assert client.post(f"/api/v1/admins/{admin_user.pk}/verify-phone/").status_code == 200
+
+
+@pytest.mark.django_db
 def test_panel_phone_change_revokes_sessions_and_resets_verification(super_admin, plain_user, client_for):
     victim = mobile()
     tokens = victim.post(LOGIN, {"phone_number": plain_user.phone_number, "password": PASSWORD}, format="json").data
