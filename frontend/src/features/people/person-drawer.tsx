@@ -62,7 +62,7 @@ export function PersonDrawer({
   const detail = (kind === "admin" ? adminsResource : usersResource).useDetail(open ? initialPerson?.id ?? null : null);
   const person = (detail.data ?? initialPerson) as ManagedUser | Admin | null;
   const verifyPhone = useVerifyPhone(resource);
-  const canVerify = kind === "admin" ? me?.role === "SUPER_ADMIN" : can("users.update");
+  const canVerify = me?.role === "SUPER_ADMIN" || (kind !== "admin" && can("users.update"));
   const reveal = useRevealPinfl(kind === "admin" ? "admins" : "users");
   const [revealed, setRevealed] = useState<{ id: string; value: string } | null>(null);
   const plain = open && person && revealed?.id === person.id ? revealed.value : null;
@@ -124,24 +124,34 @@ export function PersonDrawer({
 
       <div className="rounded-2xl border border-glass-border bg-muted/40 px-4">
         <Row label="Telefon">
-          <span className="inline-flex items-center gap-2 tabular-nums">
+          <span className="inline-flex flex-wrap justify-end gap-2 tabular-nums">
             {formatPhone(person.phone_number)}
             {person.phone_number && <PhoneVerifiedBadge verified={person.is_phone_verified} />}
-            {person.phone_number && !person.is_phone_verified && canVerify && (
+          </span>
+        </Row>
+        {!person.is_phone_verified && (
+          <div className="border-b border-border/70 py-3">
+            {canVerify ? (
               <Button
-                size="sm"
-                variant="outline"
-                disabled={verifyPhone.isPending}
+                className="w-full"
+                disabled={!person.phone_number || verifyPhone.isPending}
                 onClick={() => verifyPhone.mutate(person.id, {
                   onSuccess: () => toast.success("Telefon raqami tasdiqlandi"),
                   onError: (e) => toast.error(e instanceof ApiError ? e.message : "Tasdiqlab bo'lmadi"),
                 })}
               >
-                {verifyPhone.isPending ? "Tasdiqlanmoqda..." : "Tasdiqlash"}
+                {verifyPhone.isPending ? "Tasdiqlanmoqda..." : "Telefon raqamini tasdiqlash"}
               </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Telefonni tasdiqlash uchun foydalanuvchini tahrirlash ruxsati kerak.
+              </p>
             )}
-          </span>
-        </Row>
+            {!person.phone_number && (
+              <p className="mt-2 text-sm text-muted-foreground">Avval tahrirlash orqali telefon raqamini kiriting.</p>
+            )}
+          </div>
+        )}
         <Row label="Email">{person.email || "—"}</Row>
         <Row label="JSHSHIR">
           <span className="inline-flex items-center gap-2 tabular-nums tracking-wider">
