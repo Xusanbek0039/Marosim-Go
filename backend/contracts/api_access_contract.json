@@ -67,7 +67,7 @@
           "users.delete"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [
         "Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)"
       ],
@@ -132,7 +132,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_list",
-      "schema_fingerprint": "ad633af609abb0d1"
+      "schema_fingerprint": "1649f56ede69ed1c"
     },
     "GET /api/v1/admins/permissions/": {
       "allowed_roles": [
@@ -196,6 +196,7 @@
       "allowed_roles": [
         "USER",
         "STUDIO",
+        "VENUE_OWNER",
         "ADMIN",
         "SUPER_ADMIN"
       ],
@@ -207,7 +208,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_me_retrieve",
-      "schema_fingerprint": "53a4c996b4119b09"
+      "schema_fingerprint": "c51e94478662ae15"
     },
     "GET /api/v1/ceremonies/": {
       "allowed_roles": [
@@ -278,7 +279,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "dashboard_overview_retrieve",
-      "schema_fingerprint": "f07b30c60ed01d95"
+      "schema_fingerprint": "7a523cf53cd955ae"
     },
     "GET /api/v1/devcenter/changelog/": {
       "allowed_roles": [
@@ -306,7 +307,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "devcenter_endpoints_retrieve",
-      "schema_fingerprint": "417971fff6e2b0d9"
+      "schema_fingerprint": "79d57b6590e10e47"
     },
     "GET /api/v1/devcenter/mobile/": {
       "allowed_roles": [
@@ -467,7 +468,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_list",
-      "schema_fingerprint": "ea2934b247bee1f0"
+      "schema_fingerprint": "fef2c0e58aa8b66a"
     },
     "GET /api/v1/studios/me/": {
       "allowed_roles": [
@@ -516,7 +517,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_retrieve",
-      "schema_fingerprint": "c6ecdb5280862e09"
+      "schema_fingerprint": "03d01b3d0df61518"
     },
     "GET /api/v1/users/": {
       "allowed_roles": [
@@ -532,12 +533,12 @@
           "users.view"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_list",
-      "schema_fingerprint": "28e4100e0f615fc5"
+      "schema_fingerprint": "383f487bfe77962e"
     },
     "GET /api/v1/users/{id}/": {
       "allowed_roles": [
@@ -553,12 +554,12 @@
           "users.view"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_retrieve",
-      "schema_fingerprint": "95bafe04489700f8"
+      "schema_fingerprint": "548e6dff2aa05ba0"
     },
     "GET /api/v1/users/{id}/pinfl/": {
       "allowed_roles": [
@@ -574,7 +575,7 @@
           "users.view_pinfl"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [
         "Har bir ko'rish audit qilinadi (PINFL_REVEAL)",
         "Throttle: pinfl_reveal"
@@ -583,6 +584,51 @@
       "deprecated": false,
       "operation_id": "users_pinfl_retrieve",
       "schema_fingerprint": "6750d08521ad02a4"
+    },
+    "GET /api/v1/venue-owner/venues/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_list",
+      "schema_fingerprint": "e9625545ae4cf869"
+    },
+    "GET /api/v1/venue-owner/venues/{id}/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_retrieve",
+      "schema_fingerprint": "cc590f5416e43482"
+    },
+    "GET /api/v1/venue-owner/venues/{id}/halls/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "POST: A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_halls_list",
+      "schema_fingerprint": "b047a08b4b9b7410"
     },
     "PATCH /api/v1/admins/{id}/": {
       "allowed_roles": [
@@ -602,6 +648,7 @@
       "allowed_roles": [
         "USER",
         "STUDIO",
+        "VENUE_OWNER",
         "ADMIN",
         "SUPER_ADMIN"
       ],
@@ -615,7 +662,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_me_partial_update",
-      "schema_fingerprint": "70adc3fd404f1cda"
+      "schema_fingerprint": "d3d9c82e1e4e76cb"
     },
     "PATCH /api/v1/ceremonies/{id}/": {
       "allowed_roles": [
@@ -654,7 +701,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_partial_update",
-      "schema_fingerprint": "4da54ffe5a06e6d2"
+      "schema_fingerprint": "bccad7f1764917c7"
     },
     "PATCH /api/v1/users/{id}/": {
       "allowed_roles": [
@@ -670,12 +717,46 @@
           "users.update"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_partial_update",
-      "schema_fingerprint": "74f9b158e8c13fc1"
+      "schema_fingerprint": "6681081948a6e302"
+    },
+    "PATCH /api/v1/venue-owner/venues/{id}/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_partial_update",
+      "schema_fingerprint": "e2742c9c570f361e"
+    },
+    "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_halls_partial_update",
+      "schema_fingerprint": "32f320a98a9feafa"
     },
     "POST /api/v1/admin/storage/google/disconnect/": {
       "allowed_roles": [
@@ -731,7 +812,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_verify_phone_create",
-      "schema_fingerprint": "55c909a345200edf"
+      "schema_fingerprint": "79d53be4b6c4ebf1"
     },
     "POST /api/v1/auth/login/": {
       "allowed_roles": [
@@ -748,7 +829,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_login_create",
-      "schema_fingerprint": "40776306d0430e66"
+      "schema_fingerprint": "18de5bbf2e55c793"
     },
     "POST /api/v1/auth/logout/": {
       "allowed_roles": [
@@ -781,7 +862,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_refresh_create",
-      "schema_fingerprint": "2477704bc7293ca9"
+      "schema_fingerprint": "7e38e157f02d6eff"
     },
     "POST /api/v1/auth/register/": {
       "allowed_roles": [
@@ -799,7 +880,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_register_create",
-      "schema_fingerprint": "ffa59874a58d9d1a"
+      "schema_fingerprint": "772e1dcbec5606fb"
     },
     "POST /api/v1/ceremonies/": {
       "allowed_roles": [
@@ -883,7 +964,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_create",
-      "schema_fingerprint": "2b69a53ee0d18f81"
+      "schema_fingerprint": "fe6f2b40f73558ad"
     },
     "POST /api/v1/users/": {
       "allowed_roles": [
@@ -899,12 +980,12 @@
           "users.create"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_create",
-      "schema_fingerprint": "b870407ff87d65a3"
+      "schema_fingerprint": "0a77219256292fe2"
     },
     "POST /api/v1/users/{id}/verify-phone/": {
       "allowed_roles": [
@@ -920,12 +1001,46 @@
           "users.update"
         ]
       },
-      "ownership_scope": "Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_verify_phone_create",
-      "schema_fingerprint": "55c909a345200edf"
+      "schema_fingerprint": "79d53be4b6c4ebf1"
+    },
+    "POST /api/v1/venue-owner/venues/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Yaratuvchi OWNER a'zo bo'ladi; standart 'Asosiy zal' ochiladi.",
+        "publication_status=PRIVATE, is_active — faqat admin o'zgartiradi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_create",
+      "schema_fingerprint": "8478db7c49c96d4f"
+    },
+    "POST /api/v1/venue-owner/venues/{id}/halls/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "POST: A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_halls_create",
+      "schema_fingerprint": "dd1a9af4b5bd8af0"
     }
   }
 }

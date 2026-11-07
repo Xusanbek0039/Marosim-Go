@@ -122,6 +122,114 @@
         "POST /api/v1/ceremonies/",
         "POST /api/v1/me/invitations/{id}/accept/"
       ]
+    },
+    {
+      "revision": 4,
+      "date": "2026-11-07",
+      "note": "V5.0 Phase B: VENUE_OWNER roli; /venue-owner/venues/ (+halls) endpointlari; /users/ VENUE_OWNER hisoblarini boshqaradi",
+      "added": [
+        "GET /api/v1/venue-owner/venues/",
+        "GET /api/v1/venue-owner/venues/{id}/",
+        "GET /api/v1/venue-owner/venues/{id}/halls/",
+        "PATCH /api/v1/venue-owner/venues/{id}/",
+        "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/",
+        "POST /api/v1/venue-owner/venues/",
+        "POST /api/v1/venue-owner/venues/{id}/halls/"
+      ],
+      "removed": [],
+      "changed": {
+        "DELETE /api/v1/users/{id}/": [
+          "ownership_scope"
+        ],
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/auth/me/": [
+          "allowed_roles",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/dashboard/overview/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/devcenter/endpoints/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/users/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/users/{id}/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/users/{id}/pinfl/": [
+          "ownership_scope"
+        ],
+        "PATCH /api/v1/auth/me/": [
+          "allowed_roles",
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/users/{id}/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/{id}/verify-phone/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/auth/login/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/auth/refresh/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/auth/register/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/users/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/users/{id}/verify-phone/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [
+        "GET /api/v1/auth/me/",
+        "PATCH /api/v1/auth/me/"
+      ],
+      "schema_changed": [
+        "GET /api/v1/admins/",
+        "GET /api/v1/auth/me/",
+        "GET /api/v1/dashboard/overview/",
+        "GET /api/v1/devcenter/endpoints/",
+        "GET /api/v1/studios/",
+        "GET /api/v1/studios/{id}/",
+        "GET /api/v1/users/",
+        "GET /api/v1/users/{id}/",
+        "PATCH /api/v1/auth/me/",
+        "PATCH /api/v1/studios/{id}/",
+        "PATCH /api/v1/users/{id}/",
+        "POST /api/v1/admins/{id}/verify-phone/",
+        "POST /api/v1/auth/login/",
+        "POST /api/v1/auth/refresh/",
+        "POST /api/v1/auth/register/",
+        "POST /api/v1/studios/",
+        "POST /api/v1/users/",
+        "POST /api/v1/users/{id}/verify-phone/"
+      ]
     }
   ]
 }
