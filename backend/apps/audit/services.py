@@ -1,5 +1,6 @@
 import logging
 from datetime import date, datetime
+from decimal import Decimal
 from uuid import UUID
 
 from django.db.models import Model
@@ -18,7 +19,7 @@ SENSITIVE_FIELDS = frozenset(
 
 
 def _plain(value):
-    if isinstance(value, (UUID, date, datetime)):
+    if isinstance(value, (UUID, date, datetime, Decimal)):  # Decimal as string: exact money in JSON
         return str(value)
     if isinstance(value, Model):
         return str(value.pk)

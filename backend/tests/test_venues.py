@@ -19,7 +19,7 @@ from apps.venues.models import (
     VenueMembership,
 )
 
-from .conftest import image_file
+from .conftest import PASSWORD, image_file, next_pinfl
 
 BASE = "/api/v1/venue-owner/venues/"
 VENUE_DATA = {
@@ -113,7 +113,15 @@ def test_super_admin_manages_venue_owner_accounts(super_admin, client_for):
     client = client_for(super_admin)
     res = client.post(
         "/api/v1/users/",
-        {"phone_number": "+998935550011", "first_name": "To'yxona", "last_name": "Egasi", "role": "VENUE_OWNER"},
+        {
+            "phone_number": "+998935550011",
+            "first_name": "To'yxona",
+            "last_name": "Egasi",
+            "role": "VENUE_OWNER",
+            "password": PASSWORD,
+            "password_confirm": PASSWORD,
+            "pinfl": next_pinfl(),
+        },
         format="json",
     )
     assert res.status_code == 201, res.data

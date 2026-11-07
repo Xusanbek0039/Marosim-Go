@@ -16,6 +16,7 @@ class VenueHallSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "capacity", "base_price", "effective_base_price", "is_active", "created_at", "updated_at"]
         read_only_fields = ["id", "created_at", "updated_at"]
         extra_kwargs = {
+            "capacity": {"min_value": 1},
             "base_price": {"help_text": "Bo'sh (null) bo'lsa to'yxonaning base_price narxi ishlatiladi."},
         }
 
@@ -86,7 +87,10 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "currency", "is_active", "publication_status", "created_at", "updated_at"]
-        extra_kwargs = {"description": {"required": False, "allow_blank": True}}
+        extra_kwargs = {
+            "description": {"required": False, "allow_blank": True},
+            "capacity_max": {"min_value": 1},
+        }
 
     # ------------------------------------------------------------ read side
     def _membership(self, venue):
@@ -134,8 +138,6 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         cap_min = attrs.get("capacity_min", getattr(self.instance, "capacity_min", 0))
         cap_max = attrs.get("capacity_max", getattr(self.instance, "capacity_max", None))
-        if cap_max is not None and cap_max < 1:
-            raise serializers.ValidationError({"capacity_max": ["Sig'im kamida 1 bo'lishi kerak."]})
         if cap_max is not None and cap_min > cap_max:
             raise serializers.ValidationError({"capacity_min": ["capacity_min capacity_max dan katta bo'lmasligi kerak."]})
         lat = attrs.get("latitude", getattr(self.instance, "latitude", None))
