@@ -27,7 +27,9 @@ def csrf_headers(client) -> dict:
 
 
 def web_login(client, user):
-    return client.post(LOGIN, {"email": user.email, "password": PASSWORD}, format="json", **csrf_headers(client))
+    return client.post(
+        LOGIN, {"phone_number": user.phone_number, "password": PASSWORD}, format="json", **csrf_headers(client)
+    )
 
 
 # ----------------------------------------------------------------- web flow
@@ -46,7 +48,7 @@ def test_web_login_sets_httponly_cookies_and_hides_tokens(super_admin):
 
 def test_web_login_requires_csrf(super_admin):
     client = APIClient(enforce_csrf_checks=True)
-    res = client.post(LOGIN, {"email": super_admin.email, "password": PASSWORD}, format="json")
+    res = client.post(LOGIN, {"phone_number": super_admin.phone_number, "password": PASSWORD}, format="json")
     assert res.status_code == 403
 
 
@@ -83,7 +85,7 @@ def test_web_logout_clears_cookies_and_blacklists(super_admin):
 # -------------------------------------------------------------- mobile flow
 def mobile_login(user):
     client = APIClient(HTTP_X_CLIENT="mobile")
-    return client, client.post(LOGIN, {"email": user.email, "password": PASSWORD}, format="json")
+    return client, client.post(LOGIN, {"phone_number": user.phone_number, "password": PASSWORD}, format="json")
 
 
 def test_mobile_login_returns_tokens(plain_user):
@@ -111,8 +113,8 @@ def test_refresh_token_reuse_revokes_all_sessions(plain_user):
 
 def test_wrong_password_is_generic_and_audited(plain_user):
     client = APIClient(HTTP_X_CLIENT="mobile")
-    res = client.post(LOGIN, {"email": plain_user.email, "password": "wrong-password"}, format="json")
-    unknown = client.post(LOGIN, {"email": "nobody@example.uz", "password": "wrong-password"}, format="json")
+    res = client.post(LOGIN, {"phone_number": plain_user.phone_number, "password": "wrong-password"}, format="json")
+    unknown = client.post(LOGIN, {"phone_number": "+998939999999", "password": "wrong-password"}, format="json")
     assert res.status_code == unknown.status_code == 401
     assert res.data["error"]["message"] == unknown.data["error"]["message"]
     assert AuditLog.objects.filter(action=AuditAction.LOGIN_FAILED).count() == 2
@@ -121,8 +123,8 @@ def test_wrong_password_is_generic_and_audited(plain_user):
 def test_account_lockout_after_repeated_failures(plain_user):
     client = APIClient(HTTP_X_CLIENT="mobile")
     for _ in range(settings.LOGIN_LOCKOUT["MAX_FAILURES"]):
-        client.post(LOGIN, {"email": plain_user.email, "password": "wrong-password"}, format="json")
-    res = client.post(LOGIN, {"email": plain_user.email, "password": PASSWORD}, format="json")
+        client.post(LOGIN, {"phone_number": plain_user.phone_number, "password": "wrong-password"}, format="json")
+    res = client.post(LOGIN, {"phone_number": plain_user.phone_number, "password": PASSWORD}, format="json")
     assert res.status_code == 429
     assert res.data["error"]["code"] == "account_locked"
 

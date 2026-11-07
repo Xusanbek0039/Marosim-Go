@@ -3,7 +3,7 @@ import json
 from apps.accounts.models import Role, User
 from apps.audit.models import AuditAction, AuditLog
 
-from .conftest import image_file, next_pinfl
+from .conftest import image_file, next_phone, next_pinfl
 
 USERS = "/api/v1/users/"
 ADMINS = "/api/v1/admins/"
@@ -11,6 +11,7 @@ ADMINS = "/api/v1/admins/"
 
 def payload(**extra):
     return {
+        "phone_number": extra.pop("phone_number", next_phone()),
         "email": extra.pop("email", f"new{next_pinfl()}@example.uz"),
         "password": "Yangi-Xavfsiz-Parol-1",
         "first_name": "Dilnoza",

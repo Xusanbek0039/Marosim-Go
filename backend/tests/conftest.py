@@ -15,10 +15,16 @@ from apps.studios.models import Studio
 
 PASSWORD = "Xavfsiz-Parol-2026"
 _pinfl_seq = itertools.count(30101990000001)
+_phone_seq = itertools.count(1)
 
 
 def next_pinfl() -> str:
     return str(next(_pinfl_seq))
+
+
+def next_phone() -> str:
+    """Unique, valid Uzbek mobile numbers in E.164 (+99891xxxxxxx)."""
+    return f"+99891{next(_phone_seq):07d}"
 
 
 @pytest.fixture(autouse=True)
@@ -36,7 +42,8 @@ def make_user(db):
     def factory(role=Role.USER, **extra) -> User:
         n = next(counter)
         data = {
-            "email": f"{role.lower()}{n}-{next_pinfl()}@example.uz",
+            "phone_number": extra.pop("phone_number", next_phone()),
+            "email": extra.pop("email", f"{role.lower()}{n}-{next_pinfl()}@example.uz"),
             "first_name": extra.pop("first_name", f"Ism{n}"),
             "last_name": extra.pop("last_name", f"Familiya{n}"),
             "pinfl": extra.pop("pinfl", next_pinfl()),

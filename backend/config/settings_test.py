@@ -15,7 +15,9 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
     "anon": "10000/min",
     "user": "10000/min",
     "login": "10000/min",
+    "register": "10000/min",
     "token_refresh": "10000/min",
     "pinfl_reveal": "10000/min",
 }
 MEDIA_ROOT = BASE_DIR / ".test-media"  # noqa: F405
+MONITORING = {**MONITORING, "ASYNC": False}  # noqa: F405 - deterministic, inline writes

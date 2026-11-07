@@ -7,6 +7,7 @@ session, against the documented same-origin paths only.
 """
 
 from django.conf import settings
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import generics, serializers
 from rest_framework.filters import OrderingFilter
@@ -87,26 +88,15 @@ class OverviewView(MonitoringBase, APIView):
 
 class RequestLogListView(MonitoringBase, generics.ListAPIView):
     serializer_class = RequestLogSerializer
+    queryset = RequestLog.objects.all()
     filterset_class = RequestLogFilter
-    filter_backends = [*generics.ListAPIView.filter_backends]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]  # structured filters only, no free-text search
     ordering_fields = ["created_at", "duration_ms", "status_code"]
     ordering = ["-created_at"]
-    queryset = RequestLog.objects.all()
 
     @extend_schema(summary="So'rovlar jurnali", tags=["monitoring"])
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        return RequestLog.objects.all()
-
-    def filter_queryset(self, queryset):
-        # Search over free text is deliberately not offered; only structured filters + ordering.
-        for backend in (b for b in self.filter_backends if b is not OrderingFilter):
-            if backend.__name__ == "SearchFilter":
-                continue
-            queryset = backend().filter_queryset(self.request, queryset, self)
-        return OrderingFilter().filter_queryset(self.request, queryset, self)
 
 
 class EndpointCatalogView(MonitoringBase, APIView):

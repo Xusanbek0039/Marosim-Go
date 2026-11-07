@@ -35,9 +35,12 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.studios",
     "apps.dashboard",
+    "apps.monitoring",
 ]
 
 MIDDLEWARE = [
+    # Outermost, so request timing covers the whole stack.
+    "apps.monitoring.middleware.RequestMetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -77,7 +80,10 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
 ]
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "OPTIONS": {"user_attributes": ("phone_number", "first_name", "last_name", "email")},
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 10}},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -110,12 +116,13 @@ REST_FRAMEWORK = {
         "anon": env.str("THROTTLE_ANON", default="60/min"),
         "user": env.str("THROTTLE_USER", default="600/min"),
         "login": env.str("THROTTLE_LOGIN", default="5/min"),
+        "register": env.str("THROTTLE_REGISTER", default="10/hour"),
         "token_refresh": env.str("THROTTLE_REFRESH", default="30/min"),
         "pinfl_reveal": env.str("THROTTLE_PINFL_REVEAL", default="20/hour"),
     },
     "NUM_PROXIES": NUM_PROXIES or None,
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "apps.core.schema.MarosimAutoSchema",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 if DEBUG:
@@ -148,7 +155,13 @@ AUTH_COOKIES = {
     "DOMAIN": env.str("AUTH_COOKIE_DOMAIN", default=None),
 }
 
-# Brute-force protection (per email), on top of IP-based throttling.
+# Login identifier: E.164 phone numbers from these regions (ISO 3166-1 alpha-2, first = default).
+PHONE_ALLOWED_REGIONS = tuple(env.list("PHONE_ALLOWED_REGIONS", default=["UZ"]))
+
+# Optional challenge verifier for public sign-up: dotted path to ``guard(request) -> bool``.
+BOT_PROTECTION = {"GUARD": env.str("BOT_PROTECTION_GUARD", default="") or None}
+
+# Brute-force protection (per phone number), on top of IP-based throttling.
 LOGIN_LOCKOUT = {
     "MAX_FAILURES": env.int("LOGIN_MAX_FAILURES", default=5),
     "WINDOW_SECONDS": env.int("LOGIN_FAILURE_WINDOW", default=15 * 60),
@@ -211,8 +224,13 @@ USE_TZ = True
 # ----------------------------------------------------------------------- OpenAPI
 SPECTACULAR_SETTINGS = {
     "TITLE": "MarosimGo API",
-    "DESCRIPTION": "MarosimGo REST API (v1). Web panel: httpOnly cookie; mobil: Bearer token.",
-    "VERSION": "1.0.0",
+    "DESCRIPTION": (
+        "MarosimGo REST API (v1). Login identifikatori — telefon raqam (E.164).\n\n"
+        "* **Mobil:** `X-Client: mobile` + `Authorization: Bearer <access>`.\n"
+        "* **Web panel:** httpOnly cookie + `X-CSRFToken`.\n\n"
+        "Har bir operatsiyada `x-access` (rol/ruxsat) va standart xato javoblari avtomatik hujjatlashtiriladi."
+    ),
+    "VERSION": "2.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
@@ -225,6 +243,25 @@ SPECTACULAR_SETTINGS = {
         ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.accounts.permissions.IsSuperAdmin"]
     ),
 }
+
+# -------------------------------------------------------------------- monitoring
+MONITORING = {
+    "ENABLED": env.bool("MONITORING_ENABLED", default=True),
+    # Write request metrics from a background thread (False = inline, used by tests).
+    "ASYNC": env.bool("MONITORING_ASYNC", default=True),
+    "BATCH_SIZE": 200,
+    "FLUSH_INTERVAL_SECONDS": 2.0,
+    "QUEUE_MAX": 10_000,
+    "RETENTION_DAYS": env.int("MONITORING_RETENTION_DAYS", default=14),
+    "MAX_ROWS": env.int("MONITORING_MAX_ROWS", default=2_000_000),
+    "PRUNE_INTERVAL_SECONDS": 3600,
+    "CATALOG_TTL_SECONDS": 300,
+    "INCLUDE_PREFIXES": ["/api/"],
+    # Probes, the monitoring UI itself and the docs would only add noise.
+    "EXCLUDE_PREFIXES": ["/api/v1/health/", "/api/v1/monitoring/", "/api/v1/schema/", "/api/v1/docs/"],
+}
+# Base URL shown in the API command examples of the monitoring catalog (documentation only).
+PUBLIC_API_BASE_URL = env.str("PUBLIC_API_BASE_URL", default="http://localhost:8000").rstrip("/")
 
 # ----------------------------------------------------------------------- logging
 LOGGING = {
