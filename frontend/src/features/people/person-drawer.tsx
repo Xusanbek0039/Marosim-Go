@@ -60,7 +60,7 @@ export function PersonDrawer({
   const { data: me } = useMe();
   const resource = kind === "admin" ? "admins" : "users";
   const detail = (kind === "admin" ? adminsResource : usersResource).useDetail(open ? initialPerson?.id ?? null : null);
-  const person = detail.data ?? initialPerson;
+  const person = (detail.data ?? initialPerson) as ManagedUser | Admin | null;
   const verifyPhone = useVerifyPhone(resource);
   const canVerify = kind === "admin" ? me?.role === "SUPER_ADMIN" : can("users.update");
   const reveal = useRevealPinfl(kind === "admin" ? "admins" : "users");
