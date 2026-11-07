@@ -21,3 +21,7 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
 }
 MEDIA_ROOT = BASE_DIR / ".test-media"  # noqa: F405
 MONITORING = {**MONITORING, "ASYNC": False}  # noqa: F405 - deterministic, inline writes
+GOOGLE_TOKEN_ENCRYPTION_KEYS = ["dGVzdF9nb29nbGVfdG9rZW5fa2V5X29ubHlfMDEyMzQ="]  # base64 of 32 test bytes
+GOOGLE_OAUTH_CLIENT_FILE = BASE_DIR / ".test-missing-google-client.json"  # noqa: F405 - tests inject config
+GOOGLE_OAUTH_CLIENT_ID = "test-client-id.apps.googleusercontent.com"
+GOOGLE_OAUTH_CLIENT_SECRET = "test-client-secret"

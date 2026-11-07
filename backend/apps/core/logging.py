@@ -6,7 +6,10 @@ import re
 _PATTERNS = [
     (re.compile(r"(?<!\d)\d{14}(?!\d)"), "[PINFL]"),
     (
-        re.compile(r"(?i)(\"?(?:password|pinfl|token|access|refresh|secret)\"?\s*[:=]\s*)\"?[^\s,&\"}]+"),
+        re.compile(
+            # \b keeps e.g. "status_code=200" readable while "?code=...&state=..." is redacted.
+            r"(?i)(\"?\b(?:password|pinfl|token|access|refresh|secret|client_secret|code|state)\"?\s*[:=]\s*)\"?[^\s,&\"}]+"
+        ),
         r"\1[REDACTED]",
     ),
     (re.compile(r"(?i)bearer\s+[a-z0-9\-_.]+"), "Bearer [REDACTED]"),

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "apps.studios",
     "apps.dashboard",
     "apps.monitoring",
+    "apps.storage",
 ]
 
 MIDDLEWARE = [
@@ -244,6 +245,32 @@ SPECTACULAR_SETTINGS = {
     ),
 }
 
+# ----------------------------------------------------------- Google Drive storage
+# OAuth "Web application" client. Read from the JSON downloaded from Google Cloud Console
+# (kept out of git in backend/credentials/); GOOGLE_OAUTH_CLIENT_ID / _SECRET / _REDIRECT_URI
+# environment variables override the file (useful for production secret managers).
+GOOGLE_OAUTH_CLIENT_FILE = Path(
+    env.str("GOOGLE_OAUTH_CLIENT_FILE", default=str(BASE_DIR / "credentials" / "google_oauth_client.json"))
+)
+GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default="")
+GOOGLE_OAUTH_CLIENT_SECRET = env.str("GOOGLE_OAUTH_CLIENT_SECRET", default="")
+GOOGLE_OAUTH_REDIRECT_URI = env.str(
+    "GOOGLE_OAUTH_REDIRECT_URI", default="http://localhost:8000/api/v1/admin/storage/google/callback/"
+)
+# Minimal scopes: drive.file = only files/folders this app creates or the owner picks (non-sensitive).
+GOOGLE_OAUTH_SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/drive.file",
+]
+GOOGLE_OAUTH_STATE_TTL_SECONDS = env.int("GOOGLE_OAUTH_STATE_TTL_SECONDS", default=600)
+# Refresh tokens are Fernet-encrypted with these keys (first encrypts, all decrypt — rotation).
+GOOGLE_TOKEN_ENCRYPTION_KEYS = env.list("GOOGLE_TOKEN_ENCRYPTION_KEY", default=[])
+# Optional default root folder (Phase B lets the Super Admin pick one instead).
+GOOGLE_DRIVE_ROOT_FOLDER_ID = env.str("GOOGLE_DRIVE_ROOT_FOLDER_ID", default="")
+# Where the OAuth callback sends the browser back to (the Super Admin panel).
+PANEL_URL = env.str("PANEL_URL", default="http://localhost:3000").rstrip("/")
+
 # -------------------------------------------------------------------- monitoring
 MONITORING = {
     "ENABLED": env.bool("MONITORING_ENABLED", default=True),
@@ -275,5 +302,7 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": env.str("LOG_LEVEL", default="INFO")},
     "loggers": {
         "django.request": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+        # runserver access log prints full URLs: redact OAuth ?code=&state= and tokens there too.
+        "django.server": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }
