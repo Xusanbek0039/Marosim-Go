@@ -1,5 +1,29 @@
 # Progress
 
+## 2026-11-07 — V4.1 Ceremony Ownership: Phase C (xavfsiz taklif tizimi) ✅
+
+Batafsil: [CEREMONY_OWNERSHIP.md](CEREMONY_OWNERSHIP.md#phase-c--xavfsiz-taklif-tizimi-endpointlar).
+
+* Oqimlar `apps/ceremonies/invitations.py` (yaratish, qabul/rad, egalar tasdig'i, revoke/resend, leave) — qoidalar faqat
+  `ownership.py` dan; har holat o'zgarishi compare-and-set (parallel qabul/ovoz — bitta g'olib).
+* 13 yangi endpoint: studiya `/ceremonies/{id}/owners/` (+`invite/`); ega `/me/ceremonies/{id}/members|invitations|owner-requests|viewers/…|leave/`;
+  `/me/invitations/{id}/`. `/me/ceremonies/`, `/me/invitations/` yangi modelga o'tdi (`access_role` qo'shildi, v1 maydonlari saqlandi).
+* v1 `/ceremonies/{id}/participants/` — deprecated alias (yangi modelga yozadi, raqam endi maskalangan).
+  Accept javobi: `{status, access_role, ceremony}`.
+* Xavfsizlik: OWNER — doim tasdiqlangan telefon; tasdiqlanmagan raqamga kelgan taklifda marosim tafsilotlari yashiriladi;
+  JSHSHIR birinchi egalikka yaramaydi; studiya ACCEPTED egani olib tashlay olmaydi; ega faqat o'zi berganini bekor qiladi;
+  muddati o'tgan — 410 (EXPIRED saqlanadi); limitlar `CEREMONY_MAX_PENDING_INVITATIONS`, `CEREMONY_MAX_INVITATION_SENDS`;
+  throttle `invitation_respond`. `manage.py expire_ceremony_invitations`.
+* Migratsiya: `ceremonies/0004_backfill_late_participants` (data). ENUM_NAME_OVERRIDES — ceremony enumlari.
+* Kontrakt revision 5 (breaking yo'q), `API_ENDPOINTS.md`, `openapi.yaml` qayta yaratildi (venues sessiyasi bilan kelishilgan holda bir marta).
+
+**Testlar**: 1073 passed (to'liq to'plam, venues bilan). Yangi `tests/test_ceremony_invitations.py` — 25;
+v1 testlari yangi qoidalarga moslandi (maskalangan raqam, OWNER uchun tasdiqlangan telefon, kuyov — kelin tasdig'i,
+studiya ACCEPTED egani o'chira olmaydi). Mutatsiya tekshiruvi: 7 ta ruxsat qoidasi ataylab buzilganda hammasi ushlandi.
+`ruff`, `makemigrations --check`, `api_contract`, `spectacular --validate --fail-on-warn` toza.
+
+**Keyingi**: Phase D (Google Drive media upload) — tasdiq kutilmoqda.
+
 ## 2026-11-07 — V5.0 Venue & Studio Availability: Phase A (audit) + Phase B (Venue/Hall, a'zoliklar) ✅
 
 Batafsil: [VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md).

@@ -19,8 +19,8 @@
 |---|---|---|
 | A | Mavjud loyiha auditi va DB munosabatlari dizayni | ✅ 2026-11-07 |
 | B | Ownership modellari (`CeremonyInvitation`, `CeremonyOwnership`, `CeremonyOwnershipApproval`, `CeremonyViewerAccess`), migratsiyalar + v1 backfill, ruxsat qatlami (`ownership.py`) | ✅ 2026-11-07 |
-| C | Xavfsiz taklif tizimi: telefon/JSHSHIR, qabul/rad, egalar tasdig'i, qayta yuborish, muddat, bekor qilish; v1 endpointlarini ko'chirish | ⏳ tasdiq kutilmoqda |
-| D | Google Drive media upload (studiya) | ⏳ |
+| C | Xavfsiz taklif tizimi: telefon/JSHSHIR, qabul/rad, egalar tasdig'i, qayta yuborish, muddat, bekor qilish; v1 endpointlarini ko'chirish | ✅ 2026-11-07 |
+| D | Google Drive media upload (studiya) | ⏳ tasdiq kutilmoqda |
 | E | Foydalanuvchi media API: galereya, thumbnail/preview/stream/download — har so'rovda object-level tekshiruv | ⏳ |
 | F | Super Admin: marosimlar monitoringi + API Developer Center (CEREMONY_OWNER / CEREMONY_VIEWER guruhlari) | ⏳ |
 | G | Xavfsizlik / integratsiya testlari, hujjatlar | ⏳ (B uchun ✅) |

@@ -1,6 +1,6 @@
 # Marosim egaligi, takliflar va shaxsiy media — arxitektura (V4.1)
 
-Holat: **Phase A (audit) + Phase B (modellar, migratsiyalar, ruxsatlar) ✅ 2026-11-07**. C–G — tasdiq kutilmoqda.
+Holat: **Phase A, B, C ✅ 2026-11-07**. D–G — tasdiq kutilmoqda.
 
 ## Phase A — mavjud loyiha auditi
 
@@ -87,9 +87,41 @@ Marosim yaratish — mavjud `CREATE` (target `ceremonies.Ceremony`).
   Mavjud ACTIVE ishtirokchilar egalikni saqlaydi (ular v1 qoidalari bilan qabul qilgan).
 * `audit/0005_ceremony_ownership_actions` — faqat choices.
 
-### Phase C uchun ochiq qarorlar
-1. v1 endpointlari (`/ceremonies/{id}/participants/`, `/me/invitations/`, `/me/ceremonies/`) yangi modelga o'tkaziladi;
-   v1 `participants` — deprecated alias. Phase B'dan keyin yaratilgan v1 qatorlari 0003'ni qayta ishga tushiruvchi migratsiya bilan ko'chiriladi.
-2. Studiya ACCEPTED egani olib tashlay oladimi? Hozirgi dizayn: **yo'q** (faqat Super Admin).
-3. Ega olib tashlansa, u bergan VIEWER huquqlari saqlanadimi? Hozirgi dizayn: saqlanadi (Super Admin / ko'ruvchi o'zi bekor qila oladi).
-4. MyID/OneID orqali shaxsni tasdiqlash — alohida bosqich.
+## Phase C — xavfsiz taklif tizimi (endpointlar)
+
+| Metod | Yo'l | Kim | Izoh |
+|---|---|---|---|
+| POST | `/api/v1/ceremonies/{id}/owners/invite/` | STUDIO (OWNER/MANAGER), SUPER_ADMIN | `{identifier_type, identifier, owner_type}` |
+| GET | `/api/v1/ceremonies/{id}/owners/` | studiya a'zosi, SUPER_ADMIN | egalik takliflari + natija; identifikator maskalangan |
+| GET | `/api/v1/me/invitations/` · `/{id}/` | USER (oluvchi) | telefon tasdiqlanmagan bo'lsa marosim tafsilotlari yashiriladi |
+| POST | `/api/v1/me/invitations/{id}/accept/` | USER (oluvchi) | `{status: ACCEPTED \| PENDING_APPROVAL, access_role, ceremony}` |
+| POST | `/api/v1/me/invitations/{id}/decline/` | USER (oluvchi) | 204 |
+| GET | `/api/v1/me/ceremonies/` · `/{id}/` | CEREMONY_OWNER / VIEWER | `access_role`, `my_role` (v1) |
+| GET | `/api/v1/me/ceremonies/{id}/members/` | CEREMONY_OWNER | egalar + ko'ruvchilar (`can_revoke`) |
+| GET/POST | `/api/v1/me/ceremonies/{id}/invitations/` | CEREMONY_OWNER | tarix / VIEWER yoki OWNER taklifi |
+| POST | `/api/v1/me/ceremonies/{id}/invitations/{invitation_id}/revoke/` · `/resend/` | yuborgan ega | resend muddatni yangilaydi (max `CEREMONY_MAX_INVITATION_SENDS`) |
+| POST | `/api/v1/me/ceremonies/{id}/viewers/{access_id}/revoke/` | huquqni bergan ega | boshqa ega — 403 |
+| POST | `/api/v1/me/ceremonies/{id}/leave/` | ega / ko'ruvchi | egalik ketganda uning PENDING takliflari ham bekor bo'ladi |
+| GET | `/api/v1/me/ceremonies/{id}/owner-requests/` | CEREMONY_OWNER | tasdiq kutayotgan egalar, ovozlar |
+| POST | `…/owner-requests/{request_id}/approve/` · `/reject/` | so'rov ochilganda ACCEPTED bo'lgan ega | bitta rad — REJECTED |
+| GET/POST/DELETE | `/api/v1/ceremonies/{id}/participants/…` | studiya | **deprecated** v1 alias (yangi modelga yozadi; raqam maskalangan) |
+
+**Xato kodlari**: `phone_not_verified` (403), `identity_unverified` (403, JSHSHIR + tasdiqlovchi ega yo'q),
+`invitation_expired` (410, holat EXPIRED saqlanadi), `conflict` (409, allaqachon a'zo / slot band),
+begona yoki javob berilgan taklif — 404 (mavjudligi tasdiqlanmaydi).
+
+**Qoidalar (amalda)**
+* Kuyovni studiya oldindan taklif qilgan bo'lsa ham, kelin qabul qilib bo'lgach kuyov egaligi kelinning tasdig'ini kutadi
+  (tasdiq — qabul qilish paytidagi egalar). Egalar qaysi akkaunt (ism) da'vo qilganini ko'rib tasdiqlaydi.
+* JSHSHIR orqali birinchi egalik taklifi rad etiladi (400) va qabul qilishda ham tekshiriladi.
+* Har bir holat o'zgarishi shartli `UPDATE … WHERE status=…` — parallel qabul/ovoz faqat bir marta o'tadi.
+* Throttle: `ceremony_invite` (taklif yaratish/qayta yuborish), `invitation_respond` (qabul/rad).
+* `manage.py expire_ceremony_invitations` — muddati o'tganlarni EXPIRED qiladi (cron); o'qishda ham hisobga olinadi.
+* SMS provayder yo'q: taklif oluvchining "Mening takliflarim" ro'yxatida paydo bo'ladi; resend — muddatni yangilash.
+
+### Qabul qilingan qarorlar (foydalanuvchi standartlarni tasdiqladi)
+1. Studiya ACCEPTED egani olib tashlay olmaydi (403); faqat Super Admin (`DELETE …/participants/{id}/`, audit).
+2. Ega ketsa/olib tashlansa, u bergan VIEWER huquqlari saqlanadi; uning javob kutilayotgan takliflari bekor bo'ladi.
+3. v1 endpointlari yangi modelga o'tdi; `/participants/` — deprecated alias. `CeremonyParticipant` endi yozilmaydi
+   (`0004_backfill_late_participants` oraliqdagi qatorlarni ko'chirdi).
+4. MyID/OneID — alohida bosqich (ochiq).
