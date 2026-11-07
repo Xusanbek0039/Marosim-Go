@@ -78,6 +78,8 @@ class StudioMeCeremoniesView(ListAPIView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):  # schema generation
+            return Ceremony.objects.none()
         qs = services.ceremonies_for(self.request.user)
         params = self.request.query_params
         if params.get("status"):
@@ -112,6 +114,8 @@ class CeremonyViewSet(
     viewsets.GenericViewSet,
 ):
     serializer_class = CeremonySerializer
+    queryset = Ceremony.objects.none()  # typing only; real rows come from get_queryset
+    lookup_value_regex = "[0-9a-fA-F-]{36}"
     permission_classes = [IsStudioMemberOrSuperAdmin]
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     search_fields = ["title", "description", "studio__name"]
@@ -126,6 +130,8 @@ class CeremonyViewSet(
     }
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Ceremony.objects.none()
         qs = services.ceremonies_for(self.request.user)
         if self.request.query_params.get("status"):
             qs = qs.filter(status=self.request.query_params["status"])
@@ -214,6 +220,8 @@ def _with_participants(qs):
 )
 class MyCeremonyViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MyCeremonySerializer
+    queryset = Ceremony.objects.none()
+    lookup_value_regex = "[0-9a-fA-F-]{36}"
     permission_classes = [IsClientUser]
     filter_backends = []
     access_notes = {
@@ -223,6 +231,8 @@ class MyCeremonyViewSet(viewsets.ReadOnlyModelViewSet):
     }
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Ceremony.objects.none()
         ids = services.participations_for(self.request.user).values_list("ceremony_id", flat=True)
         return _with_participants(Ceremony.objects.filter(pk__in=ids).select_related("studio"))
 
@@ -230,12 +240,16 @@ class MyCeremonyViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema_view(list=extend_schema(summary="Menga kelgan takliflar", tags=["me"]))
 class InvitationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = InvitationSerializer
+    queryset = CeremonyParticipant.objects.none()
+    lookup_value_regex = "[0-9a-fA-F-]{36}"
     permission_classes = [IsClientUser]
     filter_backends = []
     pagination_class = None
     access_notes = {"*": AccessNote(ownership="Faqat so'rovchining telefon raqamiga yuborilgan takliflar.")}
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return CeremonyParticipant.objects.none()
         return services.invitations_for(self.request.user)
 
     @extend_schema(summary="Taklifni qabul qilish", tags=["me"], request=None, responses=MyCeremonySerializer)

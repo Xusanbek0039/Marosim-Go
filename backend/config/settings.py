@@ -243,6 +243,9 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.Role",
         "ClientRoleEnum": ["USER", "STUDIO"],
         "AdminRoleEnum": ["ADMIN"],
+        "CeremonyStatusEnum": "apps.ceremonies.models.CeremonyStatus",
+        "ParticipantAccessStatusEnum": "apps.ceremonies.models.AccessStatus",
+        "StorageConnectionStatusEnum": "apps.storage.models.ConnectionStatus",
     },
     "SERVE_PERMISSIONS": (
         ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.accounts.permissions.IsSuperAdmin"]
