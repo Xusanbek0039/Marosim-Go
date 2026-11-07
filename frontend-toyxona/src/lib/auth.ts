@@ -17,6 +17,8 @@ export class WrongAppError extends Error {
 if (typeof window !== "undefined") {
   setSessionExpiredHandler(() => {
     if (!window.location.pathname.startsWith("/login")) {
+      // Hard navigation on purpose: drops every cached query of the dead session.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign(`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
     }
   });
