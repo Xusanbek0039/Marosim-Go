@@ -6,10 +6,11 @@ import json
 import pytest
 from django.core.management import call_command
 from django.test import override_settings
+from django.utils import timezone
 
 from apps.accounts.models import Role
 from apps.audit.models import AuditAction, AuditLog
-from apps.ceremonies.models import Ceremony, CeremonyStatus
+from apps.ceremonies.models import Ceremony, CeremonyOwnership, CeremonyStatus, OwnershipStatus, OwnerType
 from apps.media.models import CeremonyMedia, MediaStatus
 from apps.storage import services as storage_services
 from apps.storage import vault
@@ -162,7 +163,8 @@ def test_studio_member_starts_upload_into_folder_tree(studio, drive):
     assert media.original_name == "Dilnoza to'y.MOV"  # path stripped
 
     names = {f["name"] for f in drive.items.values()}
-    assert {"MarosimGo", f"Studio_{c.studio_id}", f"Ceremony_{c.pk}", "Videos"} <= names
+    # No client known yet: the folder carries only a short ceremony id.
+    assert {"MarosimGo", f"Studio_{c.studio.name}", f"Mijoz_{c.pk.hex[:6]}", "Videos"} <= names
     session = next(iter(drive.sessions.values()))
     assert session["name"] == f"{media.pk}.mov"  # no personal data in Drive names
     assert session["appProperties"] == {"mg_media": str(media.pk), "mg_ceremony": str(c.pk)}
@@ -170,6 +172,20 @@ def test_studio_member_starts_upload_into_folder_tree(studio, drive):
     assert c.drive_folder_id and StorageConnection.objects.get().root_folder_id
     # the session URI is stored encrypted only
     assert "upload_id" not in media.upload_session_encrypted and vault.unseal(media.upload_session_encrypted)
+
+
+@pytest.mark.django_db
+def test_client_folder_shows_only_last_four_jshshir_digits(studio, drive, make_user):
+    """User decision 2026-11-07: Studio_<name> / Mijoz_****<last4>_<id6>; the full JSHSHIR never reaches Drive."""
+    c = studio["ceremony"]
+    bride = make_user(Role.USER, pinfl="31203199512345")
+    CeremonyOwnership.objects.create(
+        ceremony=c, user=bride, owner_type=OwnerType.BRIDE, status=OwnershipStatus.ACCEPTED, accepted_at=timezone.now()
+    )
+    assert start(studio["uploader"], c).status_code == 201
+    names = {f["name"] for f in drive.items.values()}
+    assert f"Mijoz_****2345_{c.pk.hex[:6]}" in names and "Photos" in names
+    assert not any("3120319951" in n for n in names)
 
 
 @pytest.mark.django_db
