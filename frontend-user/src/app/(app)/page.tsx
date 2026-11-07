@@ -11,6 +11,7 @@ import { ApiError } from "@/lib/api";
 import { useMe } from "@/lib/auth";
 import { useInvitations, useMyCeremonies, useRespond } from "@/lib/ceremonies";
 import { formatEventDate, PARTICIPANT_LABELS, STATUS_LABELS, STATUS_TONE } from "@/lib/format";
+import { DURATION_LABEL } from "@/lib/sharing";
 import type { Invitation } from "@/lib/types";
 
 function InvitationCard({ invitation }: { invitation: Invitation }) {
@@ -37,6 +38,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
         <p className="truncate font-bold">{invitation.ceremony_title}</p>
         <p className="text-sm text-muted-foreground">
           {invitation.studio_name} · {formatEventDate(invitation.event_date)} · siz: <b>{invitation.participant_type ? PARTICIPANT_LABELS[invitation.participant_type] : "Ko'ruvchi"}</b>
+          {invitation.access_duration && <> · <b>{DURATION_LABEL[invitation.access_duration]}</b> ko&apos;rish</>}
         </p>
       </div>
       <div className="flex gap-2">

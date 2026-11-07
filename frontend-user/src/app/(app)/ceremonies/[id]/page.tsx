@@ -1,9 +1,11 @@
 "use client";
 
-import { ArrowLeftIcon, CalendarDaysIcon, FilmIcon, HeartIcon, MapPinIcon } from "lucide-react";
+import { ArrowLeftIcon, CalendarDaysIcon, HeartIcon, MapPinIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+import { Gallery } from "@/components/gallery";
+import { SharePanel } from "@/components/share-panel";
 import { Badge, Card, ErrorState, Skeleton } from "@/components/ui";
 import { useMyCeremony } from "@/lib/ceremonies";
 import { formatEventDate, PARTICIPANT_LABELS, STATUS_LABELS, STATUS_TONE } from "@/lib/format";
@@ -30,7 +32,11 @@ export default function CeremonyPage() {
             <div className="relative flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone={STATUS_TONE[data.status]}>{STATUS_LABELS[data.status]}</Badge>
-                {data.my_role && <Badge tone="brand">Siz: {PARTICIPANT_LABELS[data.my_role]}</Badge>}
+                {data.my_role ? (
+                  <Badge tone="brand">Siz: {PARTICIPANT_LABELS[data.my_role]}</Badge>
+                ) : (
+                  data.access_role === "VIEWER" && <Badge tone="warning">Ko&apos;ruvchi</Badge>
+                )}
               </div>
               <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{data.title}</h1>
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
@@ -46,8 +52,10 @@ export default function CeremonyPage() {
             </div>
           </Card>
 
-          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-            <Card className="flex flex-col gap-3">
+          <Gallery ceremonyId={data.id} isOwner={data.access_role === "OWNER"} />
+
+          <div className={data.access_role === "OWNER" ? "grid gap-5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]" : ""}>
+            <Card className="flex flex-col gap-3 self-start">
               <h2 className="flex items-center gap-2 text-base font-bold">
                 <HeartIcon className="size-4 text-pink-500" /> Ishtirokchilar
               </h2>
@@ -60,15 +68,7 @@ export default function CeremonyPage() {
                 ))}
               </ul>
             </Card>
-            <Card className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-              <span className="flex size-14 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-500/15 to-cyan-400/15 text-cyan-600 dark:text-cyan-300">
-                <FilmIcon className="size-6" aria-hidden />
-              </span>
-              <h2 className="text-base font-bold">Video va suratlar</h2>
-              <p className="max-w-sm text-sm text-muted-foreground">
-                Studiya materiallarni yuklagach, ular shu yerda ko&apos;rinadi. Media bo&apos;limi keyingi bosqichda qo&apos;shiladi.
-              </p>
-            </Card>
+            {data.access_role === "OWNER" && <SharePanel ceremonyId={data.id} />}
           </div>
         </>
       )}
