@@ -37,5 +37,6 @@ urlpatterns = [
     path("studios/me/", StudioMeView.as_view(), name="studio-me"),
     path("studios/me/ceremonies/", StudioMeCeremoniesView.as_view(), name="studio-me-ceremonies"),
     path("ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls")),
+    path("me/ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls_me")),
     path("", include(router.urls)),
 ]

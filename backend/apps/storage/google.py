@@ -309,8 +309,59 @@ class GoogleGateway:
         except HttpError as exc:
             raise _drive_error(exc) from exc
 
+    # ---------------------------------------------------------- reading media
+    def open_media(self, creds, file_id: str, byte_range: str | None = None) -> "MediaStream":
+        """Stream a file's bytes (``alt=media``), forwarding one validated HTTP Range.
+
+        Bytes flow Google → server → client chunk by chunk; nothing is buffered whole. The caller
+        must exhaust or ``close()`` the stream.
+        """
+        import requests
+        from google.auth.transport.requests import AuthorizedSession
+
+        headers = {"Range": byte_range} if byte_range else {}
+        try:
+            res = AuthorizedSession(creds).get(
+                f"{FILES_URL}/{file_id}?alt=media", headers=headers, stream=True, timeout=(TIMEOUT, 120)
+            )
+        except requests.RequestException as exc:
+            raise GoogleError("network_error") from exc
+        if res.status_code not in (200, 206, 416):
+            try:
+                raise _http_error(res)
+            finally:
+                res.close()
+        kept = {k: res.headers[k] for k in ("Content-Length", "Content-Range") if k in res.headers}
+        return MediaStream(status=res.status_code, headers=kept, chunks=res.iter_content(MEDIA_CHUNK), close=res.close)
+
+    def thumbnail(self, creds, file_id: str, size: int) -> tuple[bytes, str] | None:
+        """A Drive-generated preview image (photos and most videos), or ``None`` if Drive has none yet."""
+        import re
+
+        import requests
+        from google.auth.transport.requests import AuthorizedSession
+        from googleapiclient.errors import HttpError
+
+        try:
+            meta = self.drive(creds).files().get(fileId=file_id, fields="thumbnailLink").execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+        link = meta.get("thumbnailLink")
+        if not link:
+            return None
+        link = re.sub(r"=s\d+$", f"=s{size}", link)
+        try:
+            res = AuthorizedSession(creds).get(link, timeout=TIMEOUT)
+        except requests.RequestException as exc:
+            raise GoogleError("network_error") from exc
+        if res.status_code != 200 or not res.headers.get("Content-Type", "").startswith("image/"):
+            return None
+        return res.content, res.headers["Content-Type"]
+
 
 UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files"
+FILES_URL = "https://www.googleapis.com/drive/v3/files"
+MEDIA_CHUNK = 256 * 1024
 FILE_FIELDS = (
     "id,name,mimeType,size,md5Checksum,parents,appProperties,trashed,"
     "imageMediaMetadata(width,height),videoMediaMetadata(width,height,durationMillis)"
@@ -322,6 +373,14 @@ class UploadProgress:
     state: str  # in_progress | complete | expired
     received: int
     file: dict | None = None
+
+
+@dataclass
+class MediaStream:
+    status: int  # 200 | 206 | 416
+    headers: dict
+    chunks: object  # iterator of bytes
+    close: object  # callable
 
 
 def _http_error(res) -> GoogleError:
