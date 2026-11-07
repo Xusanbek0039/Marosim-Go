@@ -148,7 +148,9 @@ def test_uploader_can_view_but_not_manage(studio_world, client_for):
 @pytest.mark.django_db
 @pytest.mark.parametrize("role", [Role.ADMIN, Role.USER])
 def test_admin_and_user_cannot_use_studio_endpoints(role, make_user, client_for):
-    client = client_for(make_user(role, admin_permissions=["dashboard.view", "studios.view"]) if role == Role.ADMIN else make_user(role))
+    client = client_for(
+        make_user(role, admin_permissions=["dashboard.view", "studios.view"]) if role == Role.ADMIN else make_user(role)
+    )
     for url in (CEREMONIES, STUDIO_ME, STUDIO_ME_CEREMONIES):
         assert client.get(url).status_code == 403
 

@@ -15,6 +15,23 @@
       "operation_id": "admins_destroy",
       "schema_fingerprint": "687f94926a661e2f"
     },
+    "DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_participants_destroy",
+      "schema_fingerprint": "4dfd36b68f103d2d"
+    },
     "DELETE /api/v1/studios/{id}/": {
       "allowed_roles": [
         "ADMIN",
@@ -192,6 +209,53 @@
       "operation_id": "auth_me_retrieve",
       "schema_fingerprint": "53a4c996b4119b09"
     },
+    "GET /api/v1/ceremonies/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_list",
+      "schema_fingerprint": "e780961089a7552c"
+    },
+    "GET /api/v1/ceremonies/{id}/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_retrieve",
+      "schema_fingerprint": "11c3ae8334855989"
+    },
+    "GET /api/v1/ceremonies/{id}/participants/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_participants_list",
+      "schema_fingerprint": "ce787e9f5728e0d5"
+    },
     "GET /api/v1/dashboard/overview/": {
       "allowed_roles": [
         "ADMIN",
@@ -243,6 +307,48 @@
       "deprecated": false,
       "operation_id": "health_ready_retrieve",
       "schema_fingerprint": "94d147d530ac2a0c"
+    },
+    "GET /api/v1/me/ceremonies/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_list",
+      "schema_fingerprint": "21acfc2fe305e669"
+    },
+    "GET /api/v1/me/ceremonies/{id}/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_retrieve",
+      "schema_fingerprint": "7c721cff1ecf7464"
+    },
+    "GET /api/v1/me/invitations/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining telefon raqamiga yuborilgan takliflar.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_invitations_list",
+      "schema_fingerprint": "484973d2a5d2ae4e"
     },
     "GET /api/v1/monitoring/endpoints/": {
       "allowed_roles": [
@@ -306,6 +412,34 @@
       "deprecated": false,
       "operation_id": "studios_list",
       "schema_fingerprint": "ea2934b247bee1f0"
+    },
+    "GET /api/v1/studios/me/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining faol a'zoliklari va ularning studiyalari.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_list",
+      "schema_fingerprint": "335a7e5a7e5575bc"
+    },
+    "GET /api/v1/studios/me/ceremonies/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_ceremonies_list",
+      "schema_fingerprint": "164292ad0c83abf5"
     },
     "GET /api/v1/studios/{id}/": {
       "allowed_roles": [
@@ -426,6 +560,24 @@
       "deprecated": false,
       "operation_id": "auth_me_partial_update",
       "schema_fingerprint": "70adc3fd404f1cda"
+    },
+    "PATCH /api/v1/ceremonies/{id}/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).",
+        "Holat o'tishlari cheklangan."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_partial_update",
+      "schema_fingerprint": "d7c6e6d18b602d30"
     },
     "PATCH /api/v1/studios/{id}/": {
       "allowed_roles": [
@@ -578,6 +730,69 @@
       "deprecated": false,
       "operation_id": "auth_register_create",
       "schema_fingerprint": "ffa59874a58d9d1a"
+    },
+    "POST /api/v1/ceremonies/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).",
+        "SUPER_ADMIN studio_id ni ko'rsatishi shart."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_create",
+      "schema_fingerprint": "5664bdbacf873c05"
+    },
+    "POST /api/v1/ceremonies/{id}/participants/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_participants_create",
+      "schema_fingerprint": "677d6f30693f23ba"
+    },
+    "POST /api/v1/me/invitations/{id}/accept/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining telefon raqamiga yuborilgan takliflar.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_invitations_accept_create",
+      "schema_fingerprint": "0b3f583366092822"
+    },
+    "POST /api/v1/me/invitations/{id}/decline/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining telefon raqamiga yuborilgan takliflar.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_invitations_decline_create",
+      "schema_fingerprint": "478a59a6830ee2bf"
     },
     "POST /api/v1/studios/": {
       "allowed_roles": [

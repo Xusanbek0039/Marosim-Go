@@ -26,14 +26,28 @@
 | PATCH | `/api/v1/auth/me/` | Profilni tahrirlash | USER, STUDIO, ADMIN, SUPER_ADMIN | — | JWT | Faqat chaqiruvchining o'z hisobi (request.user). | OK |
 | POST | `/api/v1/auth/refresh/` | Tokenni yangilash (rotation) | PUBLIC | — | NONE | — | OK |
 | POST | `/api/v1/auth/register/` | Ro'yxatdan o'tish (telefon + parol) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/ceremonies/` | Marosimlar ro'yxati | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/` | Marosim yaratish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| GET | `/api/v1/ceremonies/{id}/` | Marosim ma'lumotlari | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| PATCH | `/api/v1/ceremonies/{id}/` | Marosimni tahrirlash | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| GET | `/api/v1/ceremonies/{id}/participants/` | Marosim ishtirokchilari | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/{id}/participants/` | Ishtirokchini telefon orqali taklif qilish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| DELETE | `/api/v1/ceremonies/{id}/participants/{participant_id}/` | Ishtirokchini olib tashlash (kirish bekor qilinadi) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/dashboard/overview/` | Dashboard statistikasi | ADMIN, SUPER_ADMIN | `dashboard.view` | JWT | — | OK |
 | GET | `/api/v1/health/live/` | Liveness — jarayon ishlayaptimi | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/health/ready/` | Readiness — bog'liqliklar (database, cache) tayyormi | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/me/ceremonies/` | Menga biriktirilgan marosimlar | USER | — | JWT | Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar. | OK |
+| GET | `/api/v1/me/ceremonies/{id}/` | Menga biriktirilgan marosim | USER | — | JWT | Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar. | OK |
+| GET | `/api/v1/me/invitations/` | Menga kelgan takliflar | USER | — | JWT | Faqat so'rovchining telefon raqamiga yuborilgan takliflar. | OK |
+| POST | `/api/v1/me/invitations/{id}/accept/` | Taklifni qabul qilish | USER | — | JWT | Faqat so'rovchining telefon raqamiga yuborilgan takliflar. | OK |
+| POST | `/api/v1/me/invitations/{id}/decline/` | Taklifni rad etish | USER | — | JWT | Faqat so'rovchining telefon raqamiga yuborilgan takliflar. | OK |
 | GET | `/api/v1/monitoring/endpoints/` | API endpointlar katalogi (OpenAPI'dan avtomatik) | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/logs/` | So'rovlar jurnali | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/studios/` | Studiyalar ro'yxati | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | POST | `/api/v1/studios/` | Studiya qo'shish | ADMIN, SUPER_ADMIN | `studios.create` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| GET | `/api/v1/studios/me/` | Mening studiyalarim | STUDIO | — | JWT | Faqat so'rovchining faol a'zoliklari va ularning studiyalari. | OK |
+| GET | `/api/v1/studios/me/ceremonies/` | Mening studiyamning marosimlari | STUDIO | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/studios/{id}/` | Studiya ma'lumotlari | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | PATCH | `/api/v1/studios/{id}/` | Studiyani tahrirlash | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | DELETE | `/api/v1/studios/{id}/` | Studiyani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `studios.delete` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
@@ -57,15 +71,29 @@
 * `GET /api/v1/health/live/` — Liveness — jarayon ishlayaptimi
 * `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
 
-### USER (2)
+### USER (7)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+* `GET /api/v1/me/ceremonies/` — Menga biriktirilgan marosimlar
+* `GET /api/v1/me/ceremonies/{id}/` — Menga biriktirilgan marosim
+* `GET /api/v1/me/invitations/` — Menga kelgan takliflar
+* `POST /api/v1/me/invitations/{id}/accept/` — Taklifni qabul qilish
+* `POST /api/v1/me/invitations/{id}/decline/` — Taklifni rad etish
 
-### STUDIO (2)
+### STUDIO (11)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+* `GET /api/v1/ceremonies/` — Marosimlar ro'yxati
+* `POST /api/v1/ceremonies/` — Marosim yaratish
+* `GET /api/v1/ceremonies/{id}/` — Marosim ma'lumotlari
+* `PATCH /api/v1/ceremonies/{id}/` — Marosimni tahrirlash
+* `GET /api/v1/ceremonies/{id}/participants/` — Marosim ishtirokchilari
+* `POST /api/v1/ceremonies/{id}/participants/` — Ishtirokchini telefon orqali taklif qilish
+* `DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/` — Ishtirokchini olib tashlash (kirish bekor qilinadi)
+* `GET /api/v1/studios/me/` — Mening studiyalarim
+* `GET /api/v1/studios/me/ceremonies/` — Mening studiyamning marosimlari
 
 ### ADMIN (14)
 
@@ -84,7 +112,7 @@
 * `DELETE /api/v1/users/{id}/` — Mijozni o'chirish (soft delete)
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 
-### SUPER_ADMIN (28)
+### SUPER_ADMIN (35)
 
 * `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
 * `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
@@ -99,6 +127,13 @@
 * `GET /api/v1/admins/{id}/pinfl/` — Adminning to'liq JSHSHIRi (audit qilinadi)
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+* `GET /api/v1/ceremonies/` — Marosimlar ro'yxati
+* `POST /api/v1/ceremonies/` — Marosim yaratish
+* `GET /api/v1/ceremonies/{id}/` — Marosim ma'lumotlari
+* `PATCH /api/v1/ceremonies/{id}/` — Marosimni tahrirlash
+* `GET /api/v1/ceremonies/{id}/participants/` — Marosim ishtirokchilari
+* `POST /api/v1/ceremonies/{id}/participants/` — Ishtirokchini telefon orqali taklif qilish
+* `DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/` — Ishtirokchini olib tashlash (kirish bekor qilinadi)
 * `GET /api/v1/dashboard/overview/` — Dashboard statistikasi
 * `GET /api/v1/monitoring/endpoints/` — API endpointlar katalogi (OpenAPI'dan avtomatik)
 * `GET /api/v1/monitoring/logs/` — So'rovlar jurnali
@@ -135,6 +170,18 @@
   * Yaratilgan hisob roli har doim USER
   * Tokenlar faqat `X-Client: mobile` uchun qaytariladi
   * Bot himoyasi yoqilgan bo'lsa bot-token sarlavhasi talab qilinadi
+* `POST /api/v1/ceremonies/`
+  * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+  * SUPER_ADMIN studio_id ni ko'rsatishi shart.
+* `PATCH /api/v1/ceremonies/{id}/`
+  * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+  * Holat o'tishlari cheklangan.
+* `GET /api/v1/ceremonies/{id}/participants/`
+  * POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+* `POST /api/v1/ceremonies/{id}/participants/`
+  * POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+* `DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/`
+  * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
 * `GET /api/v1/dashboard/overview/`
   * `recent_profiles` faqat `users.view` ruxsati bo'lsa to'ldiriladi, aks holda bo'sh
   * ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi

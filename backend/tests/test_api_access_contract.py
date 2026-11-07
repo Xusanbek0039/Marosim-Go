@@ -194,7 +194,34 @@ OWNERSHIP_TESTS = {
         "test_studios_scope_excludes_deleted",
     ),
     **dict.fromkeys(["auth_me_retrieve", "auth_me_partial_update"], "test_me_is_own_account_only"),
+    # ceremonies — tests live in tests/test_ceremonies.py (aliased below so they are not collected twice)
+    **dict.fromkeys(
+        [
+            "ceremonies_list",
+            "ceremonies_create",
+            "ceremonies_retrieve",
+            "ceremonies_partial_update",
+            "ceremonies_participants_list",
+            "ceremonies_participants_create",
+            "ceremonies_participants_destroy",
+            "studios_me_ceremonies_list",
+        ],
+        "ownership_ceremony_scope_is_own_studio",
+    ),
+    "studios_me_list": "ownership_studio_me_is_own_memberships",
+    **dict.fromkeys(["me_ceremonies_list", "me_ceremonies_retrieve"], "ownership_user_ceremony_scope"),
+    **dict.fromkeys(
+        ["me_invitations_list", "me_invitations_accept_create", "me_invitations_decline_create"],
+        "ownership_invitation_scope_is_own_phone",
+    ),
 }
+
+from . import test_ceremonies as _ceremony_tests  # noqa: E402
+
+ownership_ceremony_scope_is_own_studio = _ceremony_tests.test_ceremony_scope_is_own_studio
+ownership_studio_me_is_own_memberships = _ceremony_tests.test_studio_me_lists_own_memberships_only
+ownership_user_ceremony_scope = _ceremony_tests.test_user_ceremony_scope_is_own_participation
+ownership_invitation_scope_is_own_phone = _ceremony_tests.test_invitation_scope_is_own_phone
 
 
 @pytest.mark.parametrize(

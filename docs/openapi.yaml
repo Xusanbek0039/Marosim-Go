@@ -17,6 +17,9 @@ paths:
         Google shu manzilga brauzerni yo'naltiradi. JWT talab qilinmaydi — so'rov bir martalik `state` va bog'lovchi cookie orqali aynan ulashni boshlagan Super Admin'ga bog'lanadi. Javob har doim panelga 302 redirect: `?google=connected` yoki `?google=error&reason=<kod>`.
 
         **Ruxsat:** Ochiq (public)
+
+        **Shartlar:**
+        * JWT talab qilinmaydi (Google brauzer redirect'i), lekin faqat ulashni boshlagan faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga bog'lovchi httpOnly cookie
       summary: Google OAuth callback (brauzer redirect)
       parameters:
       - in: query
@@ -46,9 +49,40 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions:
+      - 'JWT talab qilinmaydi (Google brauzer redirect''i), lekin faqat ulashni boshlagan
+        faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga bog''lovchi
+        httpOnly cookie'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions:
+        - 'JWT talab qilinmaydi (Google brauzer redirect''i), lekin faqat ulashni
+          boshlagan faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga
+          bog''lovchi httpOnly cookie'
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admin/storage/google/connect/:
     get:
       operationId: admin_storage_google_connect_retrieve
@@ -92,6 +126,30 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admin/storage/google/disconnect/:
     post:
       operationId: admin_storage_google_disconnect_create
@@ -141,6 +199,30 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admin/storage/google/status/:
     get:
       operationId: admin_storage_google_status_retrieve
@@ -180,7 +262,31 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
       description: '**Ruxsat:** Faqat SUPER_ADMIN'
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admin/storage/google/test/:
     post:
       operationId: admin_storage_google_test_create
@@ -230,6 +336,30 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admins/:
     get:
       operationId: admins_list
@@ -237,6 +367,9 @@ paths:
         ADMIN accounts and their granular permissions — Super Admin only.
 
         **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      summary: Adminlar ro'yxati
       parameters:
       - in: query
         name: created_after
@@ -326,12 +459,39 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     post:
       operationId: admins_create
       description: |-
         ADMIN accounts and their granular permissions — Super Admin only.
 
         **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      summary: Admin qo'shish
       tags:
       - admins
       requestBody:
@@ -384,6 +544,30 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admins/{id}/:
     get:
       operationId: admins_retrieve
@@ -391,6 +575,9 @@ paths:
         ADMIN accounts and their granular permissions — Super Admin only.
 
         **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      summary: Admin ma'lumotlari
       parameters:
       - in: path
         name: id
@@ -440,12 +627,39 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     patch:
       operationId: admins_partial_update
       description: |-
         ADMIN accounts and their granular permissions — Super Admin only.
 
         **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      summary: Adminni tahrirlash (ruxsatlar bilan)
       parameters:
       - in: path
         name: id
@@ -512,12 +726,39 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     delete:
       operationId: admins_destroy
       description: |-
         ADMIN accounts and their granular permissions — Super Admin only.
 
         **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      summary: Adminni o'chirish (soft delete)
       parameters:
       - in: path
         name: id
@@ -563,6 +804,30 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admins/{id}/pinfl/:
     get:
       operationId: admins_pinfl_retrieve
@@ -570,6 +835,11 @@ paths:
         ADMIN accounts and their granular permissions — Super Admin only.
 
         **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+
+        **Shartlar:**
+        * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
       summary: Adminning to'liq JSHSHIRi (audit qilinadi)
       parameters:
       - in: path
@@ -620,6 +890,32 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions:
+      - Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions:
+        - Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admins/permissions/:
     get:
       operationId: admins_permissions_list
@@ -665,6 +961,30 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/auth/csrf/:
     get:
       operationId: auth_csrf_retrieve
@@ -688,9 +1008,34 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/auth/login/:
     post:
       operationId: auth_login_create
@@ -698,6 +1043,10 @@ paths:
         Noto'g'ri telefon, noto'g'ri parol va nofaol hisob uchun bir xil `401 invalid_credentials` qaytadi. Ketma-ket muvaffaqiyatsiz urinishlardan so'ng hisob vaqtincha bloklanadi (`429 account_locked`).
 
         **Ruxsat:** Ochiq (public)
+
+        **Shartlar:**
+        * Web (cookie) rejimida X-CSRFToken talab qilinadi
+        * Ketma-ket xatolardan so'ng hisob vaqtincha bloklanadi (429 account_locked)
       summary: Tizimga kirish (telefon + parol)
       parameters:
       - in: header
@@ -757,9 +1106,38 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions:
+      - Web (cookie) rejimida X-CSRFToken talab qilinadi
+      - Ketma-ket xatolardan so'ng hisob vaqtincha bloklanadi (429 account_locked)
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions:
+        - Web (cookie) rejimida X-CSRFToken talab qilinadi
+        - Ketma-ket xatolardan so'ng hisob vaqtincha bloklanadi (429 account_locked)
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/auth/logout/:
     post:
       operationId: auth_logout_create
@@ -767,6 +1145,9 @@ paths:
         Refresh token blacklistga qo'shiladi; web panelda cookie'lar tozalanadi.
 
         **Ruxsat:** Ochiq (public)
+
+        **Shartlar:**
+        * Refresh token bo'lsa blacklistga qo'shiladi; web rejimida CSRF talab qilinadi
       summary: Tizimdan chiqish
       parameters:
       - in: header
@@ -809,9 +1190,36 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions:
+      - Refresh token bo'lsa blacklistga qo'shiladi; web rejimida CSRF talab qilinadi
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions:
+        - Refresh token bo'lsa blacklistga qo'shiladi; web rejimida CSRF talab qilinadi
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/auth/me/:
     get:
       operationId: auth_me_retrieve
@@ -841,16 +1249,58 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: true
-        roles: []
+        roles:
+        - USER
+        - STUDIO
+        - ADMIN
+        - SUPER_ADMIN
         permission: null
         label: Har qanday tizimga kirgan foydalanuvchi
-      description: '**Ruxsat:** Har qanday tizimga kirgan foydalanuvchi'
+      x-allowed-roles:
+      - USER
+      - STUDIO
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat chaqiruvchining o'z hisobi (request.user).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        - STUDIO
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat chaqiruvchining o'z hisobi (request.user).
+        conditions: []
+        permission_classes:
+        - IsAuthenticated
+        status: DERIVED
+        review_reasons: []
+        label: Har qanday tizimga kirgan foydalanuvchi
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** Har qanday tizimga kirgan foydalanuvchi
+
+        **Ma'lumot doirasi:** Faqat chaqiruvchining o'z hisobi (request.user).
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     patch:
       operationId: auth_me_partial_update
       description: |-
         Faqat `first_name`, `last_name`, `profile_picture`, `address` o'zgaradi. Rol, holat, telefon va JSHSHIR bu yerda o'zgartirilmaydi (boshqa maydonlar e'tiborsiz qoldiriladi).
 
         **Ruxsat:** Har qanday tizimga kirgan foydalanuvchi
+
+        **Ma'lumot doirasi:** Faqat chaqiruvchining o'z hisobi (request.user).
+
+        **Shartlar:**
+        * Faqat first_name, last_name, profile_picture, address o'zgaradi
       summary: Profilni tahrirlash
       tags:
       - auth
@@ -907,9 +1357,45 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: true
-        roles: []
+        roles:
+        - USER
+        - STUDIO
+        - ADMIN
+        - SUPER_ADMIN
         permission: null
         label: Har qanday tizimga kirgan foydalanuvchi
+      x-allowed-roles:
+      - USER
+      - STUDIO
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat chaqiruvchining o'z hisobi (request.user).
+      x-access-conditions:
+      - Faqat first_name, last_name, profile_picture, address o'zgaradi
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        - STUDIO
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat chaqiruvchining o'z hisobi (request.user).
+        conditions:
+        - Faqat first_name, last_name, profile_picture, address o'zgaradi
+        permission_classes:
+        - IsAuthenticated
+        status: DERIVED
+        review_reasons: []
+        label: Har qanday tizimga kirgan foydalanuvchi
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/auth/refresh/:
     post:
       operationId: auth_refresh_create
@@ -917,6 +1403,10 @@ paths:
         Refresh token bir martalik. Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi.
 
         **Ruxsat:** Ochiq (public)
+
+        **Shartlar:**
+        * Access token kerak emas, lekin amaldagi refresh token talab qilinadi (mobil: body, web: cookie+CSRF)
+        * Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi
       summary: Tokenni yangilash (rotation)
       parameters:
       - in: header
@@ -963,9 +1453,40 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions:
+      - 'Access token kerak emas, lekin amaldagi refresh token talab qilinadi (mobil:
+        body, web: cookie+CSRF)'
+      - Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions:
+        - 'Access token kerak emas, lekin amaldagi refresh token talab qilinadi (mobil:
+          body, web: cookie+CSRF)'
+        - Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/auth/register/:
     post:
       operationId: auth_register_create
@@ -973,6 +1494,11 @@ paths:
         Rol har doim `USER`. Telefon raqam E.164 ga keltiriladi (`901234567` → `+998901234567`). Telefon egaligi hali tasdiqlanmagan (`is_phone_verified=false`). Bot himoyasi yoqilgan bo'lsa, `X-Bot-Token` sarlavhasi talab qilinadi.
 
         **Ruxsat:** Ochiq (public)
+
+        **Shartlar:**
+        * Yaratilgan hisob roli har doim USER
+        * Tokenlar faqat `X-Client: mobile` uchun qaytariladi
+        * Bot himoyasi yoqilgan bo'lsa bot-token sarlavhasi talab qilinadi
       summary: Ro'yxatdan o'tish (telefon + parol)
       parameters:
       - in: header
@@ -1027,12 +1553,759 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions:
+      - Yaratilgan hisob roli har doim USER
+      - 'Tokenlar faqat `X-Client: mobile` uchun qaytariladi'
+      - Bot himoyasi yoqilgan bo'lsa bot-token sarlavhasi talab qilinadi
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions:
+        - Yaratilgan hisob roli har doim USER
+        - 'Tokenlar faqat `X-Client: mobile` uchun qaytariladi'
+        - Bot himoyasi yoqilgan bo'lsa bot-token sarlavhasi talab qilinadi
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/:
+    get:
+      operationId: ceremonies_list
+      summary: Marosimlar ro'yxati
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ARCHIVED
+          - DRAFT
+          - PROCESSING
+          - READY
+          - UPLOADING
+      tags:
+      - ceremonies
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCeremonyList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions: []
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: ceremonies_create
+      summary: Marosim yaratish
+      tags:
+      - ceremonies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CeremonyRequest'
+            examples:
+              MarosimYaratish:
+                value:
+                  title: Dilnoza & Jasur to'yi
+                  event_date: '2026-09-12'
+                  description: Toshkent, Navro'z
+                summary: Marosim yaratish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CeremonyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CeremonyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ceremony'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      - SUPER_ADMIN studio_id ni ko'rsatishi shart.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions:
+        - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        - SUPER_ADMIN studio_id ni ko'rsatishi shart.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        * SUPER_ADMIN studio_id ni ko'rsatishi shart.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{id}/:
+    get:
+      operationId: ceremonies_retrieve
+      summary: Marosim ma'lumotlari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ceremony'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions: []
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    patch:
+      operationId: ceremonies_partial_update
+      summary: Marosimni tahrirlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCeremonyRequest'
+            examples:
+              MarosimYaratish:
+                value:
+                  title: Dilnoza & Jasur to'yi
+                  event_date: '2026-09-12'
+                  description: Toshkent, Navro'z
+                summary: Marosim yaratish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCeremonyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCeremonyRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ceremony'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      - Holat o'tishlari cheklangan.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions:
+        - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        - Holat o'tishlari cheklangan.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        * Holat o'tishlari cheklangan.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{id}/participants/:
+    get:
+      operationId: ceremonies_participants_list
+      summary: Marosim ishtirokchilari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Participant'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
+        ko''rish).'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions:
+        - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
+          ko''rish).'
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: ceremonies_participants_create
+      description: |-
+        Javob raqam ro'yxatdan o'tganmi-yo'qmi bildirmaydi. Ism faqat taklif qabul qilingandan keyin ko'rinadi.
+
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * POST: STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      summary: Ishtirokchini telefon orqali taklif qilish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantRequest'
+            examples:
+              KelinniTaklifQilish:
+                value:
+                  phone_number: '+998901234567'
+                  participant_type: BRIDE
+                summary: Kelinni taklif qilish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ParticipantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ParticipantRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Participant'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
+        ko''rish).'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions:
+        - 'POST: STUDIO a''zoligi OWNER yoki MANAGER bo''lishi shart (UPLOADER — faqat
+          ko''rish).'
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{id}/participants/{participant_id}/:
+    delete:
+      operationId: ceremonies_participants_destroy
+      summary: Ishtirokchini olib tashlash (kirish bekor qilinadi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: participant_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - ceremonies
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions:
+        - STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/dashboard/overview/:
     get:
       operationId: dashboard_overview_retrieve
+      summary: Dashboard statistikasi
       tags:
       - dashboard
       security:
@@ -1065,11 +2338,52 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: dashboard.view
         label: SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN
-      description: '**Ruxsat:** SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN'
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - dashboard.view
+      x-ownership-scope: null
+      x-access-conditions:
+      - '`recent_profiles` faqat `users.view` ruxsati bo''lsa to''ldiriladi, aks holda
+        bo''sh'
+      - ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - dashboard.view
+        role_requirements:
+          ADMIN:
+          - dashboard.view
+        ownership_scope: null
+        conditions:
+        - '`recent_profiles` faqat `users.view` ruxsati bo''lsa to''ldiriladi, aks
+          holda bo''sh'
+        - ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN
+
+        **Shartlar:**
+        * `recent_profiles` faqat `users.view` ruxsati bo'lsa to'ldiriladi, aks holda bo'sh
+        * ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/health/live/:
     get:
       operationId: health_live_retrieve
@@ -1093,10 +2407,35 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
       description: '**Ruxsat:** Ochiq (public)'
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/health/ready/:
     get:
       operationId: health_ready_retrieve
@@ -1130,9 +2469,435 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
       x-access:
         auth_required: false
-        roles: []
+        roles:
+        - PUBLIC
         permission: null
         label: Ochiq (public)
+      x-allowed-roles:
+      - PUBLIC
+      x-auth-type: NONE
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - PUBLIC
+        auth_type: NONE
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - AllowAny
+        status: DERIVED
+        review_reasons: []
+        label: Ochiq (public)
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/:
+    get:
+      operationId: me_ceremonies_list
+      summary: Menga biriktirilgan marosimlar
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMyCeremonyList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
+        marosimlar.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
+          marosimlar.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/ceremonies/{id}/:
+    get:
+      operationId: me_ceremonies_retrieve
+      summary: Menga biriktirilgan marosim
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyCeremony'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
+        marosimlar.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan
+          marosimlar.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/invitations/:
+    get:
+      operationId: me_invitations_list
+      summary: Menga kelgan takliflar
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/invitations/{id}/accept/:
+    post:
+      operationId: me_invitations_accept_create
+      summary: Taklifni qabul qilish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyCeremony'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/me/invitations/{id}/decline/:
+    post:
+      operationId: me_invitations_decline_create
+      summary: Taklifni rad etish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - USER
+        permission: null
+        label: USER
+      x-allowed-roles:
+      - USER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - USER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+        conditions: []
+        permission_classes:
+        - IsClientUser
+        status: DERIVED
+        review_reasons: []
+        label: USER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** USER
+
+        **Ma'lumot doirasi:** Faqat so'rovchining telefon raqamiga yuborilgan takliflar.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/monitoring/endpoints/:
     get:
       operationId: monitoring_endpoints_retrieve
@@ -1172,7 +2937,31 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
       description: '**Ruxsat:** Faqat SUPER_ADMIN'
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/monitoring/logs/:
     get:
       operationId: monitoring_logs_list
@@ -1330,7 +3119,31 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
       description: '**Ruxsat:** Faqat SUPER_ADMIN'
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/monitoring/overview/:
     get:
       operationId: monitoring_overview_retrieve
@@ -1381,10 +3194,41 @@ paths:
         - SUPER_ADMIN
         permission: null
         label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
       description: '**Ruxsat:** Faqat SUPER_ADMIN'
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/studios/:
     get:
       operationId: studios_list
+      description: |-
+        Panel management of studios. Not the STUDIO role's own API (that comes with StudioMembership).
+
+        **Ruxsat:** SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi.
+      summary: Studiyalar ro'yxati
       parameters:
       - in: query
         name: created_after
@@ -1461,13 +3305,51 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: studios.view
         label: SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
-      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN'
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - studios.view
+      x-ownership-scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+        kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - studios.view
+        role_requirements:
+          ADMIN:
+          - studios.view
+        ownership_scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+          kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     post:
       operationId: studios_create
+      description: |-
+        Panel management of studios. Not the STUDIO role's own API (that comes with StudioMembership).
+
+        **Ruxsat:** SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi.
+      summary: Studiya qo'shish
       tags:
       - studios
       requestBody:
@@ -1518,14 +3400,52 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: studios.create
         label: SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN
-      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN'
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - studios.create
+      x-ownership-scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+        kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - studios.create
+        role_requirements:
+          ADMIN:
+          - studios.create
+        ownership_scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+          kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/studios/{id}/:
     get:
       operationId: studios_retrieve
+      description: |-
+        Panel management of studios. Not the STUDIO role's own API (that comes with StudioMembership).
+
+        **Ruxsat:** SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi.
+      summary: Studiya ma'lumotlari
       parameters:
       - in: path
         name: id
@@ -1572,13 +3492,51 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: studios.view
         label: SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
-      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN'
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - studios.view
+      x-ownership-scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+        kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - studios.view
+        role_requirements:
+          ADMIN:
+          - studios.view
+        ownership_scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+          kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     patch:
       operationId: studios_partial_update
+      description: |-
+        Panel management of studios. Not the STUDIO role's own API (that comes with StudioMembership).
+
+        **Ruxsat:** SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi.
+      summary: Studiyani tahrirlash
       parameters:
       - in: path
         name: id
@@ -1642,13 +3600,51 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: studios.update
         label: SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN
-      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN'
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - studios.update
+      x-ownership-scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+        kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - studios.update
+        role_requirements:
+          ADMIN:
+          - studios.update
+        ownership_scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+          kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     delete:
       operationId: studios_destroy
+      description: |-
+        Panel management of studios. Not the STUDIO role's own API (that comes with StudioMembership).
+
+        **Ruxsat:** SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi.
+      summary: Studiyani o'chirish (soft delete)
       parameters:
       - in: path
         name: id
@@ -1691,11 +3687,219 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: studios.delete
         label: SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN
-      description: '**Ruxsat:** SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN'
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - studios.delete
+      x-ownership-scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+        kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - studios.delete
+        role_requirements:
+          ADMIN:
+          - studios.delete
+        ownership_scope: Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli
+          kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/studios/me/:
+    get:
+      operationId: studios_me_list
+      summary: Mening studiyalarim
+      tags:
+      - studio
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudioMembershipMe'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        permission: null
+        label: STUDIO
+      x-allowed-roles:
+      - STUDIO
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchining faol a'zoliklari va ularning studiyalari.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchining faol a'zoliklari va ularning studiyalari.
+        conditions: []
+        permission_classes:
+        - IsStudioMember
+        status: DERIVED
+        review_reasons: []
+        label: STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** STUDIO
+
+        **Ma'lumot doirasi:** Faqat so'rovchining faol a'zoliklari va ularning studiyalari.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/studios/me/ceremonies/:
+    get:
+      operationId: studios_me_ceremonies_list
+      summary: Mening studiyamning marosimlari
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - ARCHIVED
+          - DRAFT
+          - PROCESSING
+          - READY
+          - UPLOADING
+      - in: query
+        name: studio
+        schema:
+          type: string
+      tags:
+      - studio
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCeremonyList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        permission: null
+        label: STUDIO
+      x-allowed-roles:
+      - STUDIO
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+        SUPER_ADMIN: barchasi.'
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyalarning marosimlari;
+          SUPER_ADMIN: barchasi.'
+        conditions: []
+        permission_classes:
+        - IsStudioMember
+        status: DERIVED
+        review_reasons: []
+        label: STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/users/:
     get:
       operationId: users_list
@@ -1703,6 +3907,9 @@ paths:
         Clients of the platform: USER and STUDIO accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      summary: Mijozlar ro'yxati (USER, STUDIO)
       parameters:
       - in: query
         name: created_after
@@ -1789,16 +3996,51 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: users.view
         label: SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.view
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.view
+        role_requirements:
+          ADMIN:
+          - users.view
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     post:
       operationId: users_create
       description: |-
         Clients of the platform: USER and STUDIO accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.create` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      summary: Mijoz qo'shish
       tags:
       - users
       requestBody:
@@ -1848,10 +4090,42 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: users.create
         label: SUPER_ADMIN yoki `users.create` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.create
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.create
+        role_requirements:
+          ADMIN:
+          - users.create
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.create` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/users/{id}/:
     get:
       operationId: users_retrieve
@@ -1859,6 +4133,9 @@ paths:
         Clients of the platform: USER and STUDIO accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      summary: Mijoz ma'lumotlari
       parameters:
       - in: path
         name: id
@@ -1905,16 +4182,51 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: users.view
         label: SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.view
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.view
+        role_requirements:
+          ADMIN:
+          - users.view
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.view` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     patch:
       operationId: users_partial_update
       description: |-
         Clients of the platform: USER and STUDIO accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      summary: Mijozni tahrirlash
       parameters:
       - in: path
         name: id
@@ -1978,16 +4290,54 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: users.update
         label: SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.update
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.update
+        role_requirements:
+          ADMIN:
+          - users.update
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
     delete:
       operationId: users_destroy
       description: |-
         Clients of the platform: USER and STUDIO accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+
+        **Shartlar:**
+        * Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
+      summary: Mijozni o'chirish (soft delete)
       parameters:
       - in: path
         name: id
@@ -2030,10 +4380,44 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: users.delete
         label: SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.delete
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions:
+      - Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.delete
+        role_requirements:
+          ADMIN:
+          - users.delete
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions:
+        - Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/users/{id}/pinfl/:
     get:
       operationId: users_pinfl_retrieve
@@ -2041,6 +4425,12 @@ paths:
         Clients of the platform: USER and STUDIO accounts.
 
         **Ruxsat:** SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+
+        **Shartlar:**
+        * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+        * Throttle: pinfl_reveal
       summary: To'liq JSHSHIR (audit qilinadi)
       parameters:
       - in: path
@@ -2088,10 +4478,46 @@ paths:
       x-access:
         auth_required: true
         roles:
-        - SUPER_ADMIN
         - ADMIN
+        - SUPER_ADMIN
         permission: users.view_pinfl
         label: SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.view_pinfl
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions:
+      - Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+      - 'Throttle: pinfl_reveal'
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.view_pinfl
+        role_requirements:
+          ADMIN:
+          - users.view_pinfl
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions:
+        - Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+        - 'Throttle: pinfl_reveal'
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
 components:
   schemas:
     Admin:
@@ -2230,6 +4656,109 @@ components:
     BlankEnum:
       enum:
       - ''
+    Ceremony:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        studio:
+          allOf:
+          - $ref: '#/components/schemas/StudioBrief'
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        event_date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/CeremonyStatusEnum'
+        participants_summary:
+          type: object
+          additionalProperties:
+            type: integer
+          readOnly: true
+        can_manage:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - can_manage
+      - created_at
+      - event_date
+      - id
+      - participants_summary
+      - studio
+      - title
+      - updated_at
+    CeremonyRequest:
+      type: object
+      properties:
+        studio_id:
+          type: string
+          format: uuid
+          writeOnly: true
+          description: Super Admin uchun majburiy; studiya a'zosi bitta studiyada
+            bo'lsa ixtiyoriy.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        event_date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/CeremonyStatusEnum'
+      required:
+      - event_date
+      - title
+    CeremonyStatusEnum:
+      enum:
+      - DRAFT
+      - UPLOADING
+      - PROCESSING
+      - READY
+      - ARCHIVED
+      type: string
+      description: |-
+        * `DRAFT` - Qoralama
+        * `UPLOADING` - Yuklanmoqda
+        * `PROCESSING` - Qayta ishlanmoqda
+        * `READY` - Tayyor
+        * `ARCHIVED` - Arxivlangan
+    CoupleMember:
+      type: object
+      properties:
+        participant_type:
+          allOf:
+          - $ref: '#/components/schemas/ParticipantTypeEnum'
+          readOnly: true
+        full_name:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - full_name
+      - participant_type
     DashboardOverview:
       type: object
       properties:
@@ -2304,6 +4833,11 @@ components:
               example:
                 phone_number:
                 - 'Telefon raqam noto''g''ri. Masalan: +998901234567'
+    EventTypeEnum:
+      enum:
+      - WEDDING
+      type: string
+      description: '* `WEDDING` - To''y'
     GoogleDriveConnect:
       type: object
       properties:
@@ -2391,6 +4925,44 @@ components:
         * `ok` - ok
         * `degraded` - degraded
         * `unavailable` - unavailable
+    Invitation:
+      type: object
+      description: Just enough for the invitee to recognise the event before accepting.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        participant_type:
+          allOf:
+          - $ref: '#/components/schemas/ParticipantTypeEnum'
+          readOnly: true
+        ceremony_id:
+          type: string
+          format: uuid
+          readOnly: true
+        ceremony_title:
+          type: string
+          readOnly: true
+        event_date:
+          type: string
+          format: date
+          readOnly: true
+        studio_name:
+          type: string
+          readOnly: true
+        invited_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - ceremony_id
+      - ceremony_title
+      - event_date
+      - id
+      - invited_at
+      - participant_type
+      - studio_name
     LoginRequest:
       type: object
       properties:
@@ -2685,6 +5257,93 @@ components:
       - top_endpoints
       - totals
       - window
+    MyCeremony:
+      type: object
+      description: 'A ceremony as its bride/groom/guest sees it: no phone numbers,
+        no internal fields.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        event_type:
+          allOf:
+          - $ref: '#/components/schemas/EventTypeEnum'
+          readOnly: true
+        event_date:
+          type: string
+          format: date
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/CeremonyStatusEnum'
+          readOnly: true
+        studio:
+          allOf:
+          - $ref: '#/components/schemas/StudioBrief'
+          readOnly: true
+        my_role:
+          type: string
+          nullable: true
+          readOnly: true
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoupleMember'
+          readOnly: true
+      required:
+      - description
+      - event_date
+      - event_type
+      - id
+      - my_role
+      - participants
+      - status
+      - studio
+      - title
+    MyStudio:
+      type: object
+      description: A studio as seen by one of its members (no responsible user PII).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - created_at
+      - description
+      - id
+      - is_active
+      - name
+      - profile_picture
     PaginatedAdminList:
       type: object
       required:
@@ -2714,6 +5373,35 @@ components:
           type: integer
         total_pages:
           type: integer
+    PaginatedCeremonyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ceremony'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
     PaginatedManagedUserList:
       type: object
       required:
@@ -2737,6 +5425,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ManagedUser'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PaginatedMyCeremonyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyCeremony'
         page:
           type: integer
         page_size:
@@ -2801,6 +5518,81 @@ components:
           type: integer
         total_pages:
           type: integer
+    Participant:
+      type: object
+      description: Studio view of an invitation. The person's name appears only after
+        they accept.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 32
+        participant_type:
+          $ref: '#/components/schemas/ParticipantTypeEnum'
+        access_status:
+          allOf:
+          - $ref: '#/components/schemas/ParticipantAccessStatusEnum'
+          readOnly: true
+        display_name:
+          type: string
+          nullable: true
+          readOnly: true
+        invited_at:
+          type: string
+          format: date-time
+          readOnly: true
+        responded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - access_status
+      - display_name
+      - id
+      - invited_at
+      - participant_type
+      - phone_number
+      - responded_at
+    ParticipantAccessStatusEnum:
+      enum:
+      - INVITED
+      - ACTIVE
+      - DECLINED
+      - REVOKED
+      type: string
+      description: |-
+        * `INVITED` - Taklif yuborilgan
+        * `ACTIVE` - Faol
+        * `DECLINED` - Rad etilgan
+        * `REVOKED` - Bekor qilingan
+    ParticipantRequest:
+      type: object
+      description: Studio view of an invitation. The person's name appears only after
+        they accept.
+      properties:
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 32
+        participant_type:
+          $ref: '#/components/schemas/ParticipantTypeEnum'
+      required:
+      - participant_type
+      - phone_number
+    ParticipantTypeEnum:
+      enum:
+      - BRIDE
+      - GROOM
+      - OTHER
+      type: string
+      description: |-
+        * `BRIDE` - Kelin
+        * `GROOM` - Kuyov
+        * `OTHER` - Boshqa
     PatchedAdminRequest:
       type: object
       description: |-
@@ -2850,6 +5642,29 @@ components:
           items:
             $ref: '#/components/schemas/PermissionsEnum'
           maxItems: 10
+    PatchedCeremonyRequest:
+      type: object
+      properties:
+        studio_id:
+          type: string
+          format: uuid
+          writeOnly: true
+          description: Super Admin uchun majburiy; studiya a'zosi bitta studiyada
+            bo'lsa ixtiyoriy.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        event_date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/CeremonyStatusEnum'
     PatchedManagedUserRequest:
       type: object
       description: |-
@@ -2921,6 +5736,9 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+        description:
+          type: string
+          maxLength: 2000
         profile_picture:
           type: string
           format: binary
@@ -3158,6 +5976,9 @@ components:
         name:
           type: string
           maxLength: 150
+        description:
+          type: string
+          maxLength: 2000
         profile_picture:
           type: string
           format: uri
@@ -3186,6 +6007,45 @@ components:
       - name
       - responsible_user
       - updated_at
+    StudioBrief:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        profile_picture:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+      required:
+      - address
+      - id
+      - name
+      - profile_picture
+    StudioMembershipMe:
+      type: object
+      properties:
+        role:
+          type: string
+        can_manage:
+          type: boolean
+        studio:
+          $ref: '#/components/schemas/MyStudio'
+        ceremonies_count:
+          type: integer
+      required:
+      - can_manage
+      - ceremonies_count
+      - role
+      - studio
     StudioRequest:
       type: object
       properties:
@@ -3193,6 +6053,9 @@ components:
           type: string
           minLength: 1
           maxLength: 150
+        description:
+          type: string
+          maxLength: 2000
         profile_picture:
           type: string
           format: binary
