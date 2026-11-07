@@ -36,7 +36,7 @@ MEMBER_SCOPE = (
 #: One satisfiable single range ("bytes=0-", "bytes=100-199", "bytes=-500"); anything else is ignored.
 RANGE_RE = re.compile(r"^bytes=(\d*)-(\d*)$")
 THUMB_SIZES = (240, 480, 960)
-THUMB_TTL = 10 * 60
+THUMB_TTL = 10 * 60  # server-side cache; browsers get "no-store" like every /api/ response
 BINARY_ACTIONS = {"thumbnail", "stream", "download"}
 
 
@@ -141,7 +141,6 @@ class MyMediaViewSet(viewsets.GenericViewSet):
             response[key] = value
         response["Accept-Ranges"] = "bytes"
         response["Content-Disposition"] = f'{disposition}; filename="{_download_name(media)}"'
-        response["Cache-Control"] = "private, no-store"
         response["X-Content-Type-Options"] = "nosniff"
         return response
 
@@ -176,7 +175,6 @@ class MyMediaViewSet(viewsets.GenericViewSet):
         if not content:
             raise NotFound("Preview hali tayyor emas.")
         response = HttpResponse(content, content_type=content_type)
-        response["Cache-Control"] = "private, max-age=600"
         response["X-Content-Type-Options"] = "nosniff"
         return response
 

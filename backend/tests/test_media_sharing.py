@@ -99,7 +99,10 @@ def media_url(c, media=None, action=""):
 
 
 def share_with_guest(w, duration="1W"):
-    assert owner_invite(w["c"]["bride"], w["ceremony"], w["users"]["guest"].phone_number, duration=duration).status_code == 201
+    assert (
+        owner_invite(w["c"]["bride"], w["ceremony"], w["users"]["guest"].phone_number, duration=duration).status_code
+        == 201
+    )
     assert answer(w["c"]["guest"]).status_code == 200
     return CeremonyViewerAccess.objects.get(user=w["users"]["guest"], status=ViewerStatus.ACCEPTED)
 
@@ -223,7 +226,7 @@ def test_stream_supports_ranges_inline(gallery, drive):
     assert b"".join(res.streaming_content) == PHOTO[:100]
     assert res["Content-Range"] == f"bytes 0-99/{len(PHOTO)}" and res["Accept-Ranges"] == "bytes"
     assert res["Content-Disposition"].startswith("inline;") and "to'y" not in res["Content-Disposition"]
-    assert res["Cache-Control"] == "private, no-store"
+    assert res["Cache-Control"] == "no-store"  # every /api/ response (core middleware)
 
     full = w["c"]["guest"].get(media_url(c, w["photo"], "stream"), HTTP_ACCEPT="image/avif,image/webp,*/*")
     assert full.status_code == 200 and b"".join(full.streaming_content) == PHOTO
