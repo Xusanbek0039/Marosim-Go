@@ -95,6 +95,7 @@ export interface Invitation {
   id: string;
   requested_role: "OWNER" | "VIEWER";
   owner_type: string | null;
+  access_duration: AccessDuration | "";
   participant_type: ParticipantType | null;
   ceremony_id: string;
   ceremony_title: string | null;
@@ -105,4 +106,46 @@ export interface Invitation {
   expires_at: string;
   phone_verification_required: boolean;
   requires_owner_approval: boolean;
+}
+
+// ---------------------------------------------------------- media + sharing
+export type AccessDuration = "24H" | "3D" | "1W" | "1M";
+
+export interface MyMedia {
+  id: string;
+  kind: "PHOTO" | "VIDEO";
+  mime_type: string;
+  size_bytes: number;
+  width: number | null;
+  height: number | null;
+  duration_ms: number | null;
+  completed_at: string;
+  can_download: boolean;
+}
+
+export interface CeremonyMembers {
+  owners: { id: string; owner_type: string; full_name: string; is_me: boolean; accepted_at: string }[];
+  viewers: {
+    id: string;
+    full_name: string;
+    granted_by_name: string | null;
+    granted_by_me: boolean;
+    can_revoke: boolean;
+    accepted_at: string;
+    expires_at: string | null;
+  }[];
+  pending_owner_requests: number;
+}
+
+export interface SentInvitation {
+  id: string;
+  identifier_type: "PHONE" | "PINFL";
+  recipient_hint: string;
+  requested_role: "OWNER" | "VIEWER";
+  access_duration: AccessDuration | "";
+  status: "PENDING" | "ACCEPTED" | "DECLINED" | "REVOKED" | "EXPIRED";
+  is_mine: boolean;
+  can_revoke: boolean;
+  invited_at: string;
+  expires_at: string;
 }
