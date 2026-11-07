@@ -21,7 +21,14 @@ from .models import Role
 
 PUBLIC = "PUBLIC"
 #: Display / sort order of the classification (most open first).
-ROLE_ORDER = (PUBLIC, Role.USER.value, Role.STUDIO.value, Role.ADMIN.value, Role.SUPER_ADMIN.value)
+ROLE_ORDER = (
+    PUBLIC,
+    Role.USER.value,
+    Role.STUDIO.value,
+    Role.VENUE_OWNER.value,
+    Role.ADMIN.value,
+    Role.SUPER_ADMIN.value,
+)
 AUTHENTICATED_ROLES = frozenset(ROLE_ORDER[1:])
 
 AUTH_NONE = "NONE"

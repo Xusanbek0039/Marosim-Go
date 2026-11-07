@@ -117,14 +117,14 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary="Mijozlar ro'yxati (USER, STUDIO)"),
+    list=extend_schema(summary="Mijozlar ro'yxati (USER, STUDIO, VENUE_OWNER)"),
     create=extend_schema(summary="Mijoz qo'shish"),
     retrieve=extend_schema(summary="Mijoz ma'lumotlari"),
     partial_update=extend_schema(summary="Mijozni tahrirlash"),
     destroy=extend_schema(summary="Mijozni o'chirish (soft delete)"),
 )
 class UserViewSet(ManagedUserViewSetBase):
-    """Clients of the platform: USER and STUDIO accounts."""
+    """Clients of the platform: USER, STUDIO and VENUE_OWNER accounts."""
 
     managed_roles = tuple(r.value for r in CLIENT_ROLES)
     serializer_class = ManagedUserSerializer
@@ -134,7 +134,7 @@ class UserViewSet(ManagedUserViewSetBase):
     action_permissions = {"pinfl": "users.view_pinfl", "verify_phone": "users.update"}
     access_notes = {
         "*": AccessNote(
-            ownership="Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). "
+            ownership="Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). "
             "ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404)."
         ),
         "pinfl": AccessNote(conditions=("Har bir ko'rish audit qilinadi (PINFL_REVEAL)", "Throttle: pinfl_reveal")),

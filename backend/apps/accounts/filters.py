@@ -1,11 +1,11 @@
 import django_filters
 
 from . import pinfl as pinfl_utils
-from .models import Role, User
+from .models import CLIENT_ROLES, User
 
 
 class ManagedUserFilter(django_filters.FilterSet):
-    role = django_filters.ChoiceFilter(choices=[(Role.USER, Role.USER.label), (Role.STUDIO, Role.STUDIO.label)])
+    role = django_filters.ChoiceFilter(choices=[(r.value, r.label) for r in CLIENT_ROLES])
     is_active = django_filters.BooleanFilter()
     created_after = django_filters.IsoDateTimeFilter(field_name="created_at", lookup_expr="gte")
     created_before = django_filters.IsoDateTimeFilter(field_name="created_at", lookup_expr="lte")

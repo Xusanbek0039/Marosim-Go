@@ -1,5 +1,36 @@
 # Progress
 
+## 2026-11-07 — V4.1 Ceremony Ownership: Phase A (audit) + Phase B (modellar, ruxsatlar) ✅
+
+Batafsil: [CEREMONY_OWNERSHIP.md](CEREMONY_OWNERSHIP.md).
+
+**Phase A — audit**
+* Mavjud: `Ceremony` + v1 `CeremonyParticipant` (studiya telefon orqali BRIDE/GROOM/OTHER taklif qiladi, ACTIVE = to'liq kirish).
+  Yo'q edi: OWNER/VIEWER, ko'p egalar tasdig'i, JSHSHIR orqali taklif, muddat, ko'ruvchilarga ulashish.
+* Xavf: JSHSHIR ro'yxatdan o'tishda tekshirilmaydi → faqat identifikator; OTP yo'q → OWNER uchun tasdiqlangan telefon har doim shart;
+  v1'da studiya egalar roziligisiz yangi "ega" qo'sha olardi.
+
+**Phase B — DB va ruxsatlar**
+* Modellar: `CeremonyInvitation` (Fernet + HMAC identifikator, maskalangan hint, muddat, inviter_kind),
+  `CeremonyOwnership` (BRIDE/GROOM/FAMILY_OWNER/OTHER_OWNER; PENDING→ACCEPTED/REJECTED/REVOKED),
+  `CeremonyOwnershipApproval` (yangi egani mavjud egalar tasdiqlaydi), `CeremonyViewerAccess`.
+  `Ceremony.cover_image`, marosim turlari kengaytirildi.
+* DB cheklovlari: takroriy PENDING taklif, takroriy faol egalik/ko'ruvchi, ikkinchi kelin/kuyov, studiyadan VIEWER taklifi,
+  owner_type ⇔ rol, ACCEPTED ⇒ user / accepted_at.
+* Ruxsat qatlami `apps/ceremonies/ownership.py` + DRF `IsCeremonyMember` / `IsCeremonyOwner` (object-level).
+* Migratsiyalar: `ceremonies/0002_ownership_model`, `ceremonies/0003_backfill_ownership_from_participants`
+  (v1 → yangi model, idempotent, qaytariladigan; dev DB: 1 ACTIVE kuyov → ACCEPTED ega), `audit/0005_ceremony_ownership_actions`.
+* Sozlamalar: `CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE=true`, `CEREMONY_INVITATION_TTL_DAYS=14` (`.env.example`).
+* `apps/devcenter/planned.py` — rejalashtirilgan endpointlar (C–F) haqiqiylaridan alohida; `API_ENDPOINTS.md` da alohida bo'lim.
+* Mavjud endpointlar o'zgarmadi (v1 oqimi ishlashda davom etadi). Kontrakt: faqat `event_type` enum kengaygani
+  (schema_fingerprint, breaking emas) — `api_contract --write`. `openapi.yaml` qayta yaratildi.
+
+**Testlar**: 756 passed (oldin 728; `tests/test_ceremony_ownership.py` — 27, `test_devcenter.py` — planned≠live).
+`ruff`, `makemigrations --check`, `api_contract`, `spectacular --validate --fail-on-warn` toza.
+Migratsiyalar dev DB nusxasida oldinga/orqaga/oldinga tekshirildi.
+
+**Keyingi**: Phase C (xavfsiz taklif tizimi) — tasdiq kutilmoqda.
+
 ## 2026-11-07 — Studios & Ceremonies API + studiya va foydalanuvchi web ilovalari ✅
 
 **Backend (`apps/ceremonies`, `apps/studios`)**

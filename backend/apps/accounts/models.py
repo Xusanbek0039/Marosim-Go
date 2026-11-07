@@ -14,11 +14,14 @@ class Role(models.TextChoices):
     SUPER_ADMIN = "SUPER_ADMIN", "Super Admin"
     ADMIN = "ADMIN", "Admin"
     STUDIO = "STUDIO", "Studiya"
+    VENUE_OWNER = "VENUE_OWNER", "To'yxona"
     USER = "USER", "Foydalanuvchi"
 
 
 #: Roles managed through /api/v1/users/ (admins have their own endpoint; super admins none).
-CLIENT_ROLES = (Role.USER, Role.STUDIO)
+#: STUDIO / VENUE_OWNER are *account types* (role gates); what such an account may do in a given
+#: business comes from its StudioMembership / VenueMembership rows, never from ``role`` alone.
+CLIENT_ROLES = (Role.USER, Role.STUDIO, Role.VENUE_OWNER)
 
 
 def avatar_upload_to(instance, filename):

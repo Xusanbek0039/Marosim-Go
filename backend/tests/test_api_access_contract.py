@@ -32,7 +32,7 @@ from apps.storage import services as storage_services
 from .conftest import bearer_client
 
 ENDPOINTS = catalog.build()
-CALLERS = ("ANONYMOUS", "USER", "STUDIO", "ADMIN_NO_PERMS", "ADMIN_WITH_PERMS", "SUPER_ADMIN")
+CALLERS = ("ANONYMOUS", "USER", "STUDIO", "VENUE_OWNER", "ADMIN_NO_PERMS", "ADMIN_WITH_PERMS", "SUPER_ADMIN")
 
 
 def expected_allowed(endpoint: dict, caller: str) -> bool:
@@ -156,11 +156,11 @@ def test_schema_exposes_role_extensions():
     assert op["x-allowed-roles"] == ["ADMIN", "SUPER_ADMIN"]
     assert op["x-required-permissions"] == ["users.view_pinfl"]
     assert op["x-auth-type"] == "JWT"
-    assert op["x-ownership-scope"].startswith("Faqat USER va STUDIO")
+    assert op["x-ownership-scope"].startswith("Faqat USER, STUDIO va VENUE_OWNER")
     assert op["x-access-status"] == "DERIVED"
     assert any("PINFL_REVEAL" in c for c in op["x-access-conditions"])
     me = catalog.get_schema()["paths"]["/api/v1/auth/me/"]["get"]
-    assert me["x-allowed-roles"] == ["USER", "STUDIO", "ADMIN", "SUPER_ADMIN"]
+    assert me["x-allowed-roles"] == ["USER", "STUDIO", "VENUE_OWNER", "ADMIN", "SUPER_ADMIN"]
     assert "403" not in me["responses"]  # any signed-in role passes
 
 
@@ -417,7 +417,7 @@ def test_new_endpoint_is_catalogued_with_its_role():
 
     undocumented = by_path["/api/v1/probe/undocumented/"]
     assert undocumented["documentation_status"] == "MISSING"
-    assert undocumented["allowed_roles"] == ["USER", "STUDIO", "ADMIN", "SUPER_ADMIN"]  # DRF default
+    assert undocumented["allowed_roles"] == ["USER", "STUDIO", "VENUE_OWNER", "ADMIN", "SUPER_ADMIN"]  # DRF default
 
     unknown = by_path["/api/v1/probe/unknown/"]
     assert unknown["access_status"] == REVIEW_REQUIRED and unknown["allowed_roles"] == []
@@ -434,7 +434,7 @@ def test_catalog_api_reports_contract_status(super_admin, client_for):
     data = client_for(super_admin).get("/api/v1/monitoring/endpoints/").data
     assert {e["contract_status"] for e in data["results"]} == {contract.MATCHES}
     me = next(e for e in data["results"] if e["path"] == "/api/v1/auth/me/" and e["method"] == "GET")
-    assert me["allowed_roles"] == ["USER", "STUDIO", "ADMIN", "SUPER_ADMIN"]
+    assert me["allowed_roles"] == ["USER", "STUDIO", "VENUE_OWNER", "ADMIN", "SUPER_ADMIN"]
     assert me["ownership_scope"] and me["documentation_status"] == "DOCUMENTED"
     # "documented" and "matches contract" are not "healthy": traffic status is reported separately.
     assert me["status"] in {"idle", "healthy", "degraded", "failing"}
