@@ -1,6 +1,6 @@
 "use client";
 
-import { ClockIcon, HourglassIcon, PhoneIcon, SendIcon, ShieldCheckIcon, UserXIcon } from "lucide-react";
+import { ClockIcon, HourglassIcon, SendIcon, ShieldCheckIcon, UserXIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ import {
 } from "@/lib/sharing";
 import type { AccessDuration } from "@/lib/types";
 
+import { PhoneInput } from "./phone-input";
 import { Badge, Button, Card, cn, Field, Input, Skeleton } from "./ui";
 
 const errorText = (err: unknown, fallback: string) => {
@@ -57,7 +58,7 @@ function ShareForm({ ceremonyId, slotsLeft }: { ceremonyId: string; slotsLeft: n
         setError(null);
         const identifier = type === "PINFL" ? value.replace(/\D/g, "") : value.trim();
         if (type === "PINFL" && identifier.length !== 14) return setError("JSHSHIR 14 ta raqamdan iborat.");
-        if (type === "PHONE" && identifier.replace(/\D/g, "").length < 9) return setError("Telefon raqamni to'liq kiriting.");
+        if (type === "PHONE" && !/^\+998\d{9}$/.test(identifier)) return setError("Raqam +998 dan keyin 9 ta raqam bo'lishi kerak.");
         share.mutate(
           { identifier_type: type, identifier, access_duration: duration },
           {
@@ -96,25 +97,25 @@ function ShareForm({ ceremonyId, slotsLeft }: { ceremonyId: string; slotsLeft: n
       </div>
 
       <Field label={type === "PHONE" ? "Telefon raqam" : "JSHSHIR (14 raqam)"} htmlFor="share_identifier">
-        <div className="relative">
-          {type === "PHONE" ? (
-            <PhoneIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          ) : (
+        {type === "PHONE" ? (
+          <PhoneInput id="share_identifier" autoComplete="off" value={value} onChange={setValue} disabled={full} />
+        ) : (
+          <div className="relative">
             <ShieldCheckIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-          )}
-          <Input
-            id="share_identifier"
-            type={type === "PHONE" ? "tel" : "text"}
-            inputMode={type === "PHONE" ? "tel" : "numeric"}
-            autoComplete="off"
-            maxLength={type === "PHONE" ? 20 : 14}
-            placeholder={type === "PHONE" ? "+998 90 123 45 67" : "12345678901234"}
-            className="pl-10 tabular-nums"
-            value={value}
-            disabled={full}
-            onChange={(e) => setValue(type === "PINFL" ? e.target.value.replace(/\D/g, "") : e.target.value)}
-          />
-        </div>
+            <Input
+              id="share_identifier"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={14}
+              placeholder="12345678901234"
+              className="pl-10 tabular-nums"
+              value={value}
+              disabled={full}
+              onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
+            />
+          </div>
+        )}
       </Field>
 
       <fieldset className="flex flex-col gap-1.5">
