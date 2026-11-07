@@ -220,11 +220,9 @@ __marimo__/
 .streamlit/secrets.toml
 
 # --- MarosimGo ---
-backend/media/
 node_modules/
 .next/
 next-env.d.ts
 *.tsbuildinfo
 .env.local
 # The Python template above ignores every "lib/" — keep the frontend source library tracked.
-!frontend/src/lib/
