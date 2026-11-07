@@ -3,11 +3,25 @@
 from django.db import migrations
 
 
+def forwards(apps, schema_editor):
+    from apps.ceremonies.backfill import backfill
+
+    backfill(apps)
+
+
+def backwards(apps, schema_editor):
+    # v1 participants are untouched by the forward step; dropping the copies restores the old state.
+    apps.get_model("ceremonies", "CeremonyOwnership").objects.filter(invitation__legacy_participant__isnull=False).delete()
+    apps.get_model("ceremonies", "CeremonyInvitation").objects.filter(legacy_participant__isnull=False).delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ceremonies', '0002_ownership_model'),
+        ("ceremonies", "0002_ownership_model"),
+        ("accounts", "0002_phone_login"),
     ]
 
     operations = [
+        migrations.RunPython(forwards, backwards),
     ]
