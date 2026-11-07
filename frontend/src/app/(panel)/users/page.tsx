@@ -124,6 +124,7 @@ function UsersContent() {
               options: [
                 { value: "USER", label: "Foydalanuvchi" },
                 { value: "STUDIO", label: "Studiya" },
+                { value: "VENUE_OWNER", label: "To'yxona" },
               ],
             },
           ]}

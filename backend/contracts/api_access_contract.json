@@ -597,7 +597,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_list",
-      "schema_fingerprint": "e9625545ae4cf869"
+      "schema_fingerprint": "1050d0044c00f9c2"
     },
     "GET /api/v1/venue-owner/venues/{id}/": {
       "allowed_roles": [
@@ -611,7 +611,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_retrieve",
-      "schema_fingerprint": "cc590f5416e43482"
+      "schema_fingerprint": "f005c987fb1d176e"
     },
     "GET /api/v1/venue-owner/venues/{id}/halls/": {
       "allowed_roles": [
@@ -739,7 +739,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_partial_update",
-      "schema_fingerprint": "e2742c9c570f361e"
+      "schema_fingerprint": "771c3ef232c91075"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/": {
       "allowed_roles": [
@@ -1023,7 +1023,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_create",
-      "schema_fingerprint": "8478db7c49c96d4f"
+      "schema_fingerprint": "5355664fabdf5596"
     },
     "POST /api/v1/venue-owner/venues/{id}/halls/": {
       "allowed_roles": [

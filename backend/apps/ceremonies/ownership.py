@@ -137,9 +137,12 @@ def is_owner(user, ceremony: Ceremony) -> bool:
 
 
 def _is_owner_id(user_id, ceremony: Ceremony) -> bool:
-    return bool(user_id) and CeremonyOwnership.objects.filter(
-        ceremony=ceremony, user_id=user_id, status=OwnershipStatus.ACCEPTED
-    ).exists()
+    return (
+        bool(user_id)
+        and CeremonyOwnership.objects.filter(
+            ceremony=ceremony, user_id=user_id, status=OwnershipStatus.ACCEPTED
+        ).exists()
+    )
 
 
 def can_view(user, ceremony: Ceremony) -> bool:
@@ -235,7 +238,9 @@ def response_refusal(user, invitation: CeremonyInvitation, *, accepting: bool) -
     if invitation.ceremony.studio.deleted_at is not None:
         return Refusal.NOT_FOUND
     # Viewer access is the sharing owner's to give; it lapses with their ownership.
-    if invitation.requested_role == AccessRole.VIEWER and not _is_owner_id(invitation.invited_by_id, invitation.ceremony):
+    if invitation.requested_role == AccessRole.VIEWER and not _is_owner_id(
+        invitation.invited_by_id, invitation.ceremony
+    ):
         return Refusal.NOT_FOUND
     if invitation.expires_at <= timezone.now():
         return Refusal.EXPIRED

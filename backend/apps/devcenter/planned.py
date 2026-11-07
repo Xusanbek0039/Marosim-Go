@@ -25,80 +25,9 @@ class PlannedEndpoint:
 
 
 _ID = "{id}"
-OWNER_ONLY = "USER roli + marosimda ACCEPTED ownership"
 MEMBER = "USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi)"
-STUDIO_MANAGE = "Studiya a'zoligi OWNER/MANAGER (UPLOADER — faqat yuklash)"
 
 PLANNED_ENDPOINTS: tuple[PlannedEndpoint, ...] = (
-    # ------------------------------------------------------------ Phase C
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/ceremonies/{_ID}/owners/invite/",
-        "Marosim egasini telefon / JSHSHIR orqali taklif qilish",
-        ("STUDIO", "SUPER_ADMIN"),
-        "C",
-        STUDIO_MANAGE + "; egalar bor bo'lsa — ularning tasdig'i kerak",
-    ),
-    PlannedEndpoint(
-        "GET", f"/api/v1/ceremonies/{_ID}/owners/", "Egalar va egalik takliflari holati", ("STUDIO", "SUPER_ADMIN"), "C"
-    ),
-    PlannedEndpoint("GET", f"/api/v1/me/invitations/{_ID}/", "Taklif tafsilotlari", ("USER",), "C"),
-    PlannedEndpoint("GET", f"/api/v1/me/ceremonies/{_ID}/members/", "Egalar va ko'ruvchilar", (CEREMONY_OWNER,), "C"),
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/me/ceremonies/{_ID}/invitations/",
-        "VIEWER yoki OWNER taklifi yuborish",
-        (CEREMONY_OWNER,),
-        "C",
-        OWNER_ONLY + "; OWNER taklifi boshqa egalar tasdig'idan o'tadi",
-    ),
-    PlannedEndpoint("GET", f"/api/v1/me/ceremonies/{_ID}/invitations/", "Takliflar tarixi", (CEREMONY_OWNER,), "C"),
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/me/ceremonies/{_ID}/invitations/{{invitation_id}}/revoke/",
-        "O'zi yuborgan taklifni bekor qilish",
-        (CEREMONY_OWNER,),
-        "C",
-        "Faqat taklifni yuborgan ega",
-    ),
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/me/ceremonies/{_ID}/invitations/{{invitation_id}}/resend/",
-        "Taklifni qayta yuborish (muddat yangilanadi)",
-        (CEREMONY_OWNER,),
-        "C",
-        "Faqat taklifni yuborgan ega",
-    ),
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/me/ceremonies/{_ID}/viewers/{{access_id}}/revoke/",
-        "O'zi bergan ko'rish huquqini bekor qilish",
-        (CEREMONY_OWNER,),
-        "C",
-        "Faqat huquqni bergan ega; boshqa egalar emas",
-    ),
-    PlannedEndpoint(
-        "POST", f"/api/v1/me/ceremonies/{_ID}/leave/", "Marosimdan chiqish", (CEREMONY_OWNER, CEREMONY_VIEWER), "C"
-    ),
-    PlannedEndpoint(
-        "GET", f"/api/v1/me/ceremonies/{_ID}/owner-requests/", "Tasdiq kutayotgan yangi egalar", (CEREMONY_OWNER,), "C"
-    ),
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/me/ceremonies/{_ID}/owner-requests/{{request_id}}/approve/",
-        "Yangi egani tasdiqlash",
-        (CEREMONY_OWNER,),
-        "C",
-        "Faqat so'rov ochilganda ACCEPTED bo'lgan va hali ega bo'lgan egalar",
-    ),
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/me/ceremonies/{_ID}/owner-requests/{{request_id}}/reject/",
-        "Yangi egani rad etish",
-        (CEREMONY_OWNER,),
-        "C",
-        "Faqat so'rov ochilganda ACCEPTED bo'lgan va hali ega bo'lgan egalar",
-    ),
     # ------------------------------------------------------------ Phase D
     PlannedEndpoint(
         "POST",

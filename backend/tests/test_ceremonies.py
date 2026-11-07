@@ -5,7 +5,7 @@ from django.test import override_settings
 
 from apps.accounts.models import Role
 from apps.audit.models import AuditAction, AuditLog
-from apps.ceremonies.models import AccessStatus, Ceremony, CeremonyParticipant, CeremonyStatus
+from apps.ceremonies.models import Ceremony, CeremonyInvitation, CeremonyStatus, InvitationStatus
 from apps.studios.models import StudioMembership
 from apps.studios.services import sync_owner_membership
 
@@ -190,7 +190,7 @@ def test_invite_response_does_not_reveal_account_existence(studio_world, client_
     strip = lambda d: {k: v for k, v in d.items() if k not in ("id", "phone_number", "participant_type", "invited_at")}  # noqa: E731
     assert strip(known.data) == strip(unknown.data)
     assert known.data["display_name"] is None and known.data["access_status"] == "INVITED"
-    assert known.data["phone_number"] == "+998901112233"
+    assert known.data["phone_number"] == "+99890***2233"  # studios get the masked number back
     assert "Dilnoza" not in json.dumps(client.get(participants_url(c)).data)
 
 
@@ -217,8 +217,9 @@ def test_invalid_phone_rejected(studio_world, client_for):
 # -------------------------------------------------------------- couple side
 @pytest.fixture
 def couple(studio_world, make_user, client_for):
-    bride = make_user(Role.USER, phone_number="+998901112233", first_name="Dilnoza")
-    groom = make_user(Role.USER, phone_number="+998907776655", first_name="Jasur")
+    # OWNER access always needs a verified phone (CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE).
+    bride = make_user(Role.USER, phone_number="+998901112233", first_name="Dilnoza", is_phone_verified=True)
+    groom = make_user(Role.USER, phone_number="+998907776655", first_name="Jasur", is_phone_verified=True)
     c = make_ceremony(studio_world["studio_a"], title="Dilnoza & Jasur", status=CeremonyStatus.READY)
     studio = client_for(studio_world["owner_a"])
     invite(studio, c, bride.phone_number, "BRIDE")
@@ -236,12 +237,18 @@ def test_invitation_flow_bride_and_groom(couple, client_for):
 
     res = bride.post(f"{INVITATIONS}{invitations[0]['id']}/accept/")
     assert res.status_code == 200, res.data
-    assert res.data["my_role"] == "BRIDE"
+    assert res.data["status"] == "ACCEPTED" and res.data["ceremony"]["my_role"] == "BRIDE"
     mine = bride.get(MY_CEREMONIES).data
     assert mine["count"] == 1 and mine["results"][0]["id"] == str(couple["ceremony"].pk)
 
+    # The bride is now an owner, so the groom's ownership waits for her approval.
     groom = client_for(couple["groom"])
-    groom.post(f"{INVITATIONS}{groom.get(INVITATIONS).data[0]['id']}/accept/")
+    res = groom.post(f"{INVITATIONS}{groom.get(INVITATIONS).data[0]['id']}/accept/")
+    assert res.data["status"] == "PENDING_APPROVAL" and res.data["ceremony"] is None
+    assert groom.get(f"{MY_CEREMONIES}{couple['ceremony'].pk}/").status_code == 404
+    requests_url = f"{MY_CEREMONIES}{couple['ceremony'].pk}/owner-requests/"
+    request_id = bride.get(requests_url).data[0]["id"]
+    assert bride.post(f"{requests_url}{request_id}/approve/").status_code == 200
     detail_res = groom.get(f"{MY_CEREMONIES}{couple['ceremony'].pk}/")
     assert {p["participant_type"] for p in detail_res.data["participants"]} == {"BRIDE", "GROOM"}
     body = json.dumps(detail_res.data, default=str)
@@ -251,7 +258,7 @@ def test_invitation_flow_bride_and_groom(couple, client_for):
     assert {"Dilnoza Familiya1", "Jasur Familiya2"} <= names or {"Dilnoza", "Jasur"} <= {
         (n or "").split()[0] for n in names
     }
-    assert AuditLog.objects.filter(action=AuditAction.PARTICIPANT_ACCEPT).count() == 2
+    assert AuditLog.objects.filter(action=AuditAction.OWNER_ACCEPT).count() == 2
 
 
 @pytest.mark.django_db
@@ -274,7 +281,7 @@ def test_invitation_scope_is_own_phone(couple, client_for, make_user):
     thief = client_for(make_user(Role.USER))
     assert thief.post(f"{INVITATIONS}{invitation_id}/accept/").status_code == 404
     assert thief.post(f"{INVITATIONS}{invitation_id}/decline/").status_code == 404
-    assert CeremonyParticipant.objects.get(pk=invitation_id).access_status == AccessStatus.INVITED
+    assert CeremonyInvitation.objects.get(pk=invitation_id).status == InvitationStatus.PENDING
 
 
 @pytest.mark.django_db
@@ -286,7 +293,7 @@ def test_draft_ceremony_hidden_from_couple(couple, client_for):
 
 
 @pytest.mark.django_db
-def test_decline_and_revoke(couple, client_for):
+def test_decline_and_revoke(couple, client_for, super_admin):
     groom = client_for(couple["groom"])
     groom_inv = groom.get(INVITATIONS).data[0]["id"]
     assert groom.post(f"{INVITATIONS}{groom_inv}/decline/").status_code == 204
@@ -294,9 +301,12 @@ def test_decline_and_revoke(couple, client_for):
 
     bride = client_for(couple["bride"])
     bride.post(f"{INVITATIONS}{bride.get(INVITATIONS).data[0]['id']}/accept/")
-    bride_row = CeremonyParticipant.objects.get(participant_type="BRIDE")
-    res = couple["studio"].delete(f"{participants_url(couple['ceremony'])}{bride_row.pk}/")
-    assert res.status_code == 204
+    bride_row = CeremonyInvitation.objects.get(owner_type="BRIDE")
+    url = f"{participants_url(couple['ceremony'])}{bride_row.pk}/"
+    # A studio cannot remove an accepted owner; a Super Admin can (audited).
+    assert couple["studio"].delete(url).status_code == 403
+    assert bride.get(MY_CEREMONIES).data["count"] == 1
+    assert client_for(super_admin).delete(url).status_code == 204
     assert bride.get(MY_CEREMONIES).data["count"] == 0  # access gone immediately
     # a revoked bride slot can be re-invited
     assert invite(couple["studio"], couple["ceremony"], "+998935554433", "BRIDE").status_code == 201
@@ -312,18 +322,20 @@ def test_studio_account_cannot_accept_invitations(studio_world, client_for):
 
 @pytest.mark.django_db
 def test_verified_phone_required_when_configured(couple, client_for):
-    bride = client_for(couple["bride"])
+    bride_user = couple["bride"]
+    type(bride_user).objects.filter(pk=bride_user.pk).update(is_phone_verified=False)
+    bride = client_for(bride_user)
     inv = bride.get(INVITATIONS).data[0]["id"]
-    with override_settings(CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE=True):
+    with override_settings(CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE=True):
         res = bride.post(f"{INVITATIONS}{inv}/accept/")
-        assert res.status_code == 403
-        type(couple["bride"]).objects.filter(pk=couple["bride"].pk).update(is_phone_verified=True)
+        assert res.status_code == 403 and res.data["error"]["code"] == "phone_not_verified"
+        type(bride_user).objects.filter(pk=bride_user.pk).update(is_phone_verified=True)
         assert bride.post(f"{INVITATIONS}{inv}/accept/").status_code == 200
 
 
 @pytest.mark.django_db
 def test_one_user_many_ceremonies(studio_world, make_user, client_for):
-    guest = make_user(Role.USER, phone_number="+998935554433")
+    guest = make_user(Role.USER, phone_number="+998935554433", is_phone_verified=True)
     studios = [client_for(studio_world["owner_a"]), client_for(studio_world["owner_b"])]
     for studio, s in zip(studios, (studio_world["studio_a"], studio_world["studio_b"]), strict=True):
         invite(studio, make_ceremony(s, status=CeremonyStatus.READY), guest.phone_number, "OTHER")

@@ -5,6 +5,7 @@ export const ROLE_SLUGS: Record<string, ApiRole> = {
   public: "PUBLIC",
   user: "USER",
   studio: "STUDIO",
+  "venue-owner": "VENUE_OWNER",
   admin: "ADMIN",
   "super-admin": "SUPER_ADMIN",
 };

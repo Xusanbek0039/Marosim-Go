@@ -27,6 +27,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   SUPER_ADMIN: "Super Admin",
   ADMIN: "Admin",
   STUDIO: "Studiya",
+  VENUE_OWNER: "To'yxona",
   USER: "Foydalanuvchi",
 };
 

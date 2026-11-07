@@ -84,7 +84,9 @@ class VenueOwnerVenueViewSet(
             record(self.request, AuditAction.UPDATE, venue, changes=changes)
 
     # ------------------------------------------------------------- halls
-    @extend_schema(methods=["GET"], summary="To'yxona zallari", tags=["venue-owner"], responses=VenueHallSerializer(many=True))
+    @extend_schema(
+        methods=["GET"], summary="To'yxona zallari", tags=["venue-owner"], responses=VenueHallSerializer(many=True)
+    )
     @extend_schema(
         methods=["POST"],
         summary="Zal qo'shish",
@@ -106,7 +108,9 @@ class VenueOwnerVenueViewSet(
             record(request, AuditAction.CREATE, hall, changes=snapshot(hall, services.HALL_AUDITED_FIELDS))
         return Response(VenueHallSerializer(hall, context={"venue": venue}).data, status=status.HTTP_201_CREATED)
 
-    @extend_schema(summary="Zalni tahrirlash", tags=["venue-owner"], request=VenueHallSerializer, responses=VenueHallSerializer)
+    @extend_schema(
+        summary="Zalni tahrirlash", tags=["venue-owner"], request=VenueHallSerializer, responses=VenueHallSerializer
+    )
     @action(
         detail=True,
         methods=["patch"],

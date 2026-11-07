@@ -89,6 +89,7 @@ const ROLE_STYLES: Record<Role, string> = {
   SUPER_ADMIN: "bg-violet-500/14 text-violet-700 dark:text-violet-300",
   ADMIN: "bg-blue-500/14 text-blue-700 dark:text-blue-300",
   STUDIO: "bg-cyan-500/14 text-cyan-800 dark:text-cyan-300",
+  VENUE_OWNER: "bg-amber-500/14 text-amber-800 dark:text-amber-300",
   USER: "bg-slate-500/12 text-slate-700 dark:text-slate-300",
 };
 

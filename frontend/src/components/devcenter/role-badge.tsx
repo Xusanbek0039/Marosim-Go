@@ -2,22 +2,24 @@ import type { ApiRole, EndpointDoc } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 /** Display order of the role classification (most open first) — mirrors the backend ROLE_ORDER. */
-export const API_ROLES: ApiRole[] = ["PUBLIC", "USER", "STUDIO", "ADMIN", "SUPER_ADMIN"];
+export const API_ROLES: ApiRole[] = ["PUBLIC", "USER", "STUDIO", "VENUE_OWNER", "ADMIN", "SUPER_ADMIN"];
 
 export const ROLE_LABELS: Record<ApiRole, string> = {
   PUBLIC: "Public",
   USER: "User",
   STUDIO: "Studio",
+  VENUE_OWNER: "Venue Owner",
   ADMIN: "Admin",
   SUPER_ADMIN: "Super Admin",
 };
 
-const ROLE_SHORT: Record<ApiRole, string> = { PUBLIC: "PUB", USER: "USER", STUDIO: "STUDIO", ADMIN: "ADMIN", SUPER_ADMIN: "SA" };
+const ROLE_SHORT: Record<ApiRole, string> = { PUBLIC: "PUB", USER: "USER", STUDIO: "STUDIO", VENUE_OWNER: "VENUE", ADMIN: "ADMIN", SUPER_ADMIN: "SA" };
 
 const ROLE_STYLES: Record<ApiRole, string> = {
   PUBLIC: "border-emerald-400/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   USER: "border-sky-400/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
   STUDIO: "border-cyan-400/40 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
+  VENUE_OWNER: "border-amber-400/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
   ADMIN: "border-blue-400/40 bg-blue-500/10 text-blue-700 dark:text-blue-300",
   SUPER_ADMIN: "border-violet-400/40 bg-violet-500/10 text-violet-700 dark:text-violet-300",
 };

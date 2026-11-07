@@ -39,7 +39,7 @@ function buildSchema(mode: "create" | "edit") {
       pinfl,
       password: z.string().max(128),
       address: z.string().trim().max(255),
-      role: z.enum(["USER", "STUDIO", "ADMIN"]),
+      role: z.enum(["USER", "STUDIO", "VENUE_OWNER", "ADMIN"]),
       is_active: z.boolean(),
       permissions: z.array(z.string()),
       profile_picture: z.custom<File | null | undefined>(),
@@ -87,7 +87,7 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
             pinfl: "",
             password: "",
             address: person.address ?? "",
-            role: person.role === "STUDIO" ? "STUDIO" : person.role === "ADMIN" ? "ADMIN" : "USER",
+            role: person.role === "SUPER_ADMIN" ? "ADMIN" : person.role,
             is_active: person.is_active,
             permissions: "permissions" in person ? person.permissions : [],
             profile_picture: undefined,
@@ -245,6 +245,7 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
                     <SelectContent>
                       <SelectItem value="USER">Foydalanuvchi</SelectItem>
                       <SelectItem value="STUDIO">Studiya mas&apos;uli</SelectItem>
+                      <SelectItem value="VENUE_OWNER">To&apos;yxona egasi / xodimi</SelectItem>
                     </SelectContent>
                   </Select>
                 )}

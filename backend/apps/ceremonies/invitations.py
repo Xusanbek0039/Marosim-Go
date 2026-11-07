@@ -122,9 +122,7 @@ def create_invitation(
         ceremony.ownerships.filter(owner_type=owner_type, status__in=OPEN_OWNERSHIP).exists()
         or live.filter(owner_type=owner_type).exists()
     ):
-        raise ValidationError(
-            {"owner_type": [f"Bu marosimda {_label(OwnerType, owner_type)} allaqachon belgilangan."]}
-        )
+        raise ValidationError({"owner_type": [f"Bu marosimda {_label(OwnerType, owner_type)} allaqachon belgilangan."]})
     if live.count() >= settings.CEREMONY_MAX_PENDING_INVITATIONS:
         raise ValidationError({"non_field_errors": [TOO_MANY]})
 

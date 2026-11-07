@@ -24,10 +24,11 @@ from .models import (
     InviterKind,
     OwnershipStatus,
     OwnerType,
+    ParticipantType,
 )
 
 MAX_FUTURE = timedelta(days=5 * 365)
-LEGACY_TYPES = ["BRIDE", "GROOM", "OTHER"]
+LEGACY_TYPES = ParticipantType.choices  # v1 vocabulary (BRIDE / GROOM / OTHER)
 
 
 class StudioBriefSerializer(serializers.ModelSerializer):

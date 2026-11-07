@@ -37,6 +37,7 @@ const ROLE_INTRO: Record<ApiRole, string> = {
   PUBLIC: "Autentifikatsiya talab qilmaydigan endpointlar: ro'yxatdan o'tish, login, token, health.",
   USER: "USER rolidagi hisob (kelin, kuyov, mehmon) chaqira oladigan endpointlar — mobil ilova uchun.",
   STUDIO: "STUDIO rolidagi hisob chaqira oladigan endpointlar — studiya mobil ilovasi uchun.",
+  VENUE_OWNER: "VENUE_OWNER (to'yxona) hisobi chaqira oladigan endpointlar; qaysi to'yxona va qaysi amal — a'zolik roli hal qiladi.",
   ADMIN: "ADMIN — har bir endpoint uchun Super Admin bergan granular ruxsat kodi ham kerak.",
   SUPER_ADMIN: "SUPER_ADMIN chaqira oladigan barcha endpointlar (granular kodlarning hammasi unda bor).",
 };

@@ -63,8 +63,8 @@ def test_venue_owner_creates_private_venue_with_owner_membership_and_default_hal
     # client cannot self-approve, unblock or change currency
     assert venue.publication_status == PublicationStatus.PRIVATE and venue.is_active and venue.currency == "UZS"
     assert venue.phone_number == "+998901234567"
-    assert res.data["my_role"] == "OWNER"
-    assert set(res.data["my_capabilities"]) == set(Capability.values)
+    assert res.data["membership_role"] == "OWNER"
+    assert set(res.data["membership_capabilities"]) == set(Capability.values)
     membership = VenueMembership.objects.get(venue=venue)
     assert membership.user == venue_owner and membership.role == MembershipRole.OWNER
     [hall] = res.data["halls"]
@@ -170,7 +170,7 @@ def test_one_account_member_of_several_venues_with_different_roles(make_user, ma
     services.add_member(None, venue_b, staff, MembershipRole.VIEWER)
     client = client_for(staff)
     rows = {row["name"]: row for row in client.get(BASE).data["results"]}
-    assert rows["A"]["my_role"] == "MANAGER" and rows["B"]["my_role"] == "VIEWER"
+    assert rows["A"]["membership_role"] == "MANAGER" and rows["B"]["membership_role"] == "VIEWER"
     assert client.patch(f"{BASE}{venue_a.pk}/", {"district": "Yunusobod"}, format="json").status_code == 200
     assert client.patch(f"{BASE}{venue_b.pk}/", {"district": "Yunusobod"}, format="json").status_code == 403
 
@@ -199,7 +199,7 @@ def test_membership_capabilities(make_user, make_venue, client_for, role, can_ed
     assert created.status_code == (201 if can_halls else 403)
     edited = client.patch(f"{url}halls/{hall.pk}/", {"base_price": "30000000"}, format="json")
     assert edited.status_code == (200 if can_halls else 403)
-    assert set(client.get(url).data["my_capabilities"]) == set(CAPABILITIES[role])
+    assert set(client.get(url).data["membership_capabilities"]) == set(CAPABILITIES[role])
 
 
 @pytest.mark.django_db
@@ -209,7 +209,7 @@ def test_blocked_venue_is_read_only_for_members(venue_owner, make_venue, client_
     client = client_for(venue_owner)
     url = f"{BASE}{venue.pk}/"
     res = client.get(url)
-    assert res.status_code == 200 and res.data["is_active"] is False and res.data["my_capabilities"] == ["VIEW"]
+    assert res.status_code == 200 and res.data["is_active"] is False and res.data["membership_capabilities"] == ["VIEW"]
     assert client.patch(url, {"name": "X"}, format="json").status_code == 403
     assert client.post(f"{url}halls/", {"name": "X", "capacity": 5}, format="json").status_code == 403
 

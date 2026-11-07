@@ -1,4 +1,4 @@
-export type Role = "SUPER_ADMIN" | "ADMIN" | "STUDIO" | "USER";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "STUDIO" | "VENUE_OWNER" | "USER";
 
 export type PermissionCode =
   | "dashboard.view"

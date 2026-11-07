@@ -13,7 +13,16 @@ class VenueHallSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VenueHall
-        fields = ["id", "name", "capacity", "base_price", "effective_base_price", "is_active", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "name",
+            "capacity",
+            "base_price",
+            "effective_base_price",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
         extra_kwargs = {
             "capacity": {"min_value": 1},
@@ -57,8 +66,8 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(required=False, allow_blank=True)
     cover_image = serializers.ImageField(required=False, allow_null=True)
     halls = serializers.SerializerMethodField()
-    my_role = serializers.SerializerMethodField()
-    my_capabilities = serializers.SerializerMethodField()
+    membership_role = serializers.SerializerMethodField()
+    membership_capabilities = serializers.SerializerMethodField()
 
     class Meta:
         model = Venue
@@ -81,8 +90,8 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
             "is_active",
             "publication_status",
             "halls",
-            "my_role",
-            "my_capabilities",
+            "membership_role",
+            "membership_capabilities",
             "created_at",
             "updated_at",
         ]
@@ -105,12 +114,12 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
         return VenueHallSerializer(halls, many=True, context={**self.context, "venue": venue}).data
 
     @extend_schema_field(serializers.ChoiceField(choices=MembershipRole.choices, allow_null=True))
-    def get_my_role(self, venue):
+    def get_membership_role(self, venue):
         membership = self._membership(venue)
         return membership.role if membership else None
 
     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_my_capabilities(self, venue):
+    def get_membership_capabilities(self, venue):
         return sorted(services.capabilities_for(self.context["request"].user, venue))
 
     # ----------------------------------------------------------- write side
@@ -139,7 +148,9 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
         cap_min = attrs.get("capacity_min", getattr(self.instance, "capacity_min", 0))
         cap_max = attrs.get("capacity_max", getattr(self.instance, "capacity_max", None))
         if cap_max is not None and cap_min > cap_max:
-            raise serializers.ValidationError({"capacity_min": ["capacity_min capacity_max dan katta bo'lmasligi kerak."]})
+            raise serializers.ValidationError(
+                {"capacity_min": ["capacity_min capacity_max dan katta bo'lmasligi kerak."]}
+            )
         lat = attrs.get("latitude", getattr(self.instance, "latitude", None))
         lon = attrs.get("longitude", getattr(self.instance, "longitude", None))
         if (lat is None) != (lon is None):
