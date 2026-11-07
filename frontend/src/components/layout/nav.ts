@@ -2,6 +2,7 @@ import {
   ActivityIcon,
   BookOpenIcon,
   Building2Icon,
+  CastleIcon,
   CrownIcon,
   GaugeIcon,
   GlobeIcon,
@@ -36,6 +37,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/users", label: "Foydalanuvchilar", icon: UsersIcon, requires: "users.view" },
   { href: "/admins", label: "Adminlar", icon: ShieldCheckIcon, requires: "super" },
   { href: "/studios", label: "Studiyalar", icon: VideoIcon, requires: "studios.view" },
+  { href: "/venues", label: "To'yxonalar", icon: CastleIcon, requires: "venues.view" },
   { href: "/storage", label: "Google Drive", icon: HardDriveIcon, requires: "super" },
   { href: "/settings", label: "Sozlamalar", icon: Settings2Icon },
 ];
