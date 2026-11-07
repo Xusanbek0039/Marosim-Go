@@ -59,7 +59,8 @@ export const REASON_MESSAGES: Record<string, string> = {
   state_expired: "Ulanish muddati tugadi (10 daqiqa). Qaytadan urinib ko'ring.",
   state_reused: "Bu ulanish havolasi allaqachon ishlatilgan.",
   state_missing: "Ulanish so'rovi noto'g'ri.",
-  binding_mismatch: "Ulanish boshqa brauzerdan yakunlandi. Xuddi shu brauzerda qaytadan boshlang.",
+  binding_mismatch:
+    "Ulanish boshqa brauzer yoki manzildan yakunlandi. Panelni http://localhost:3000 orqali (127.0.0.1 emas) ochib, qaytadan boshlang.",
   forbidden: "Ulanishni faqat faol Super Admin yakunlay oladi.",
   exchange_failed: "Google kodini tokenga almashtirib bo'lmadi. Client ID/Secret va redirect URI'ni tekshiring.",
   id_token_invalid: "Google akkaunt ma'lumoti tasdiqlanmadi.",
