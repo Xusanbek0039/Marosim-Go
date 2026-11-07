@@ -34,6 +34,10 @@
 | POST | `/api/v1/ceremonies/{id}/participants/` | Ishtirokchini telefon orqali taklif qilish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | DELETE | `/api/v1/ceremonies/{id}/participants/{participant_id}/` | Ishtirokchini olib tashlash (kirish bekor qilinadi) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/dashboard/overview/` | Dashboard statistikasi | ADMIN, SUPER_ADMIN | `dashboard.view` | JWT | — | OK |
+| GET | `/api/v1/devcenter/changelog/` | Developer Center: API changelog | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/devcenter/endpoints/` | Developer Center: endpointlar (rol bo'yicha filtr) | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/devcenter/mobile/` | Developer Center: User / Studio mobil API | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/devcenter/overview/` | Developer Center: umumiy ko'rinish | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/health/live/` | Liveness — jarayon ishlayaptimi | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/health/ready/` | Readiness — bog'liqliklar (database, cache) tayyormi | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/me/ceremonies/` | Menga biriktirilgan marosimlar | USER | — | JWT | Faqat so'rovchi ACTIVE ishtirokchi bo'lgan, DRAFT bo'lmagan marosimlar. | OK |
@@ -112,7 +116,7 @@
 * `DELETE /api/v1/users/{id}/` — Mijozni o'chirish (soft delete)
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 
-### SUPER_ADMIN (35)
+### SUPER_ADMIN (39)
 
 * `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
 * `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
@@ -135,6 +139,10 @@
 * `POST /api/v1/ceremonies/{id}/participants/` — Ishtirokchini telefon orqali taklif qilish
 * `DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/` — Ishtirokchini olib tashlash (kirish bekor qilinadi)
 * `GET /api/v1/dashboard/overview/` — Dashboard statistikasi
+* `GET /api/v1/devcenter/changelog/` — Developer Center: API changelog
+* `GET /api/v1/devcenter/endpoints/` — Developer Center: endpointlar (rol bo'yicha filtr)
+* `GET /api/v1/devcenter/mobile/` — Developer Center: User / Studio mobil API
+* `GET /api/v1/devcenter/overview/` — Developer Center: umumiy ko'rinish
 * `GET /api/v1/monitoring/endpoints/` — API endpointlar katalogi (OpenAPI'dan avtomatik)
 * `GET /api/v1/monitoring/logs/` — So'rovlar jurnali
 * `GET /api/v1/monitoring/overview/` — API statistikasi (real so'rovlar asosida)

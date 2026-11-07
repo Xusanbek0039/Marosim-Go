@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/cookies";
 
 /** Optimistic guard only — Django authorizes every API call. */
-const PUBLIC = ["/login", "/register"];
+const PUBLIC = ["/login"];
 
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;

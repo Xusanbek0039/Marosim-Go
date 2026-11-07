@@ -2384,6 +2384,296 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/devcenter/changelog/:
+    get:
+      operationId: devcenter_changelog_retrieve
+      description: |-
+        Har bir qabul qilingan kontrakt o'zgarishi (`manage.py api_contract --write`). Yangisi birinchi.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+      summary: 'Developer Center: API changelog'
+      tags:
+      - devcenter
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevcenterChangelog'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/devcenter/endpoints/:
+    get:
+      operationId: devcenter_endpoints_retrieve
+      description: |-
+        `role` berilsa, faqat o'sha rol chaqira oladigan endpointlar (bitta endpoint bir nechta rolda).
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+      summary: 'Developer Center: endpointlar (rol bo''yicha filtr)'
+      parameters:
+      - in: query
+        name: method
+        schema:
+          type: string
+          enum:
+          - DELETE
+          - GET
+          - PATCH
+          - POST
+          - PUT
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - ADMIN
+          - PUBLIC
+          - STUDIO
+          - SUPER_ADMIN
+          - USER
+      - in: query
+        name: version
+        schema:
+          type: string
+      tags:
+      - devcenter
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevcenterEndpoints'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/devcenter/mobile/:
+    get:
+      operationId: devcenter_mobile_retrieve
+      description: |-
+        Mobil ilova funksiyalari real operatsiyalarga bog'langan. `PLANNED` — hali API yo'q.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+      summary: 'Developer Center: User / Studio mobil API'
+      tags:
+      - devcenter
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevcenterMobileGuide'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/devcenter/overview/:
+    get:
+      operationId: devcenter_overview_retrieve
+      summary: 'Developer Center: umumiy ko''rinish'
+      tags:
+      - devcenter
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DevcenterOverview'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: null
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: null
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      description: '**Ruxsat:** Faqat SUPER_ADMIN'
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/health/live/:
     get:
       operationId: health_live_retrieve
@@ -4783,6 +5073,114 @@ components:
       - recent_profiles
       - role_distribution
       - totals
+    DevcenterChangelog:
+      type: object
+      properties:
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - count
+      - results
+    DevcenterEndpoints:
+      type: object
+      properties:
+        api_base_url:
+          type: string
+        schema_url:
+          type: string
+        docs_url:
+          type: string
+        openapi_version:
+          type: string
+        api_version:
+          type: string
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - api_base_url
+      - api_version
+      - count
+      - docs_url
+      - openapi_version
+      - results
+      - schema_url
+    DevcenterMobileGuide:
+      type: object
+      properties:
+        apps:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - apps
+    DevcenterOverview:
+      type: object
+      properties:
+        api_version:
+          type: string
+        openapi_version:
+          type: string
+        schema_url:
+          type: string
+        docs_url:
+          type: string
+        versions:
+          type: array
+          items:
+            type: string
+        totals:
+          type: object
+          additionalProperties:
+            type: integer
+        roles:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        methods:
+          type: object
+          additionalProperties:
+            type: integer
+        contract:
+          type: object
+          additionalProperties:
+            type: integer
+        health:
+          type: object
+          additionalProperties:
+            type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        last_change:
+          type: object
+          additionalProperties: {}
+          nullable: true
+      required:
+      - api_version
+      - contract
+      - docs_url
+      - health
+      - last_change
+      - methods
+      - openapi_version
+      - roles
+      - schema_url
+      - tags
+      - totals
+      - versions
     ErrorCategoryEnum:
       enum:
       - validation
