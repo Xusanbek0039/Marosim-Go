@@ -17,7 +17,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { EmptyState, ErrorState, GlassCard, PageHeader } from "@/components/common";
-import { API_ROLES, ROLE_LABELS, RoleBadge } from "@/components/devcenter/role-badge";
+import { ROLE_LABELS, RoleBadge } from "@/components/devcenter/role-badge";
 import { RequirePermission } from "@/components/layout/require-permission";
 import { AnimatedNumber } from "@/components/motion/animated-number";
 import { PageTransition } from "@/components/motion/page-transition";
@@ -29,18 +29,9 @@ import { cn } from "@/lib/utils";
 import { listContainer } from "@/motion/tokens";
 
 import { useChangelog, useDevcenterEndpoints, useDevcenterOverview, useMobileGuide } from "./api";
+import { slugOf } from "./roles";
 
 const CRUMB = "Super Admin / Developer Center";
-
-/** URL slug of each role section page. */
-export const ROLE_SLUGS: Record<string, ApiRole> = {
-  public: "PUBLIC",
-  user: "USER",
-  studio: "STUDIO",
-  admin: "ADMIN",
-  "super-admin": "SUPER_ADMIN",
-};
-const slugOf = (role: ApiRole) => Object.entries(ROLE_SLUGS).find(([, r]) => r === role)?.[0] ?? "";
 
 const ROLE_INTRO: Record<ApiRole, string> = {
   PUBLIC: "Autentifikatsiya talab qilmaydigan endpointlar: ro'yxatdan o'tish, login, token, health.",
@@ -353,4 +344,3 @@ export function ChangelogView() {
   );
 }
 
-export { API_ROLES };

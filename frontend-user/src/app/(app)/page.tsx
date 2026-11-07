@@ -15,14 +15,13 @@ import type { Invitation } from "@/lib/types";
 
 function InvitationCard({ invitation }: { invitation: Invitation }) {
   const respond = useRespond();
+  // mutateAsync, not mutate(cb): this card unmounts as soon as the list refreshes, and per-call
+  // callbacks of an unmounted observer are skipped — the promise still resolves.
   const answer = (kind: "accept" | "decline") =>
-    respond.mutate(
-      { id: invitation.id, answer: kind },
-      {
-        onSuccess: () => toast.success(kind === "accept" ? "Taklif qabul qilindi" : "Taklif rad etildi"),
-        onError: (e) => toast.error(e instanceof ApiError ? e.message : "Javob yuborilmadi"),
-      },
-    );
+    respond
+      .mutateAsync({ id: invitation.id, answer: kind })
+      .then(() => toast.success(kind === "accept" ? "Taklif qabul qilindi" : "Taklif rad etildi"))
+      .catch((e) => toast.error(e instanceof ApiError ? e.message : "Javob yuborilmadi"));
   return (
     <motion.li
       layout

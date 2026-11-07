@@ -143,7 +143,7 @@ function ParticipantsCard({ ceremony }: { ceremony: Ceremony }) {
   return (
     <Card className="flex flex-col gap-4">
       <h2 className="text-lg font-bold">Ishtirokchilar</h2>
-      {ceremony.can_manage && <InviteForm key={open.length} ceremonyId={ceremony.id} takenCouple={takenCouple} />}
+      {ceremony.can_manage && <InviteForm ceremonyId={ceremony.id} takenCouple={takenCouple} />}
       {isPending ? (
         <Skeleton className="h-24" />
       ) : error ? (
