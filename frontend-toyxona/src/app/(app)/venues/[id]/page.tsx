@@ -4,6 +4,7 @@ import {
   ArrowLeftIcon,
   Building2Icon,
   CalendarDaysIcon,
+  ImagesIcon,
   ImageUpIcon,
   LayersIcon,
   MapPinIcon,
@@ -22,6 +23,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { CalendarPreview } from "@/components/calendar-preview";
+import { GalleryTab } from "@/components/gallery-tab";
 import { Avatar, Badge, Button, Card, cn, EmptyState, ErrorState, Field, Input, Modal, Select, Skeleton } from "@/components/ui";
 import { VenueForm, venueToForm } from "@/components/venue-form";
 import { ApiError } from "@/lib/api";
@@ -42,7 +44,7 @@ import {
   VENUE_TYPE_LABELS,
 } from "@/lib/venues";
 
-type Tab = "schedule" | "profile" | "halls" | "team";
+type Tab = "schedule" | "profile" | "gallery" | "halls" | "team";
 
 const errorText = (err: unknown, fallback: string) => (err instanceof ApiError ? err.message : fallback);
 const digits = (s: string) => s.replace(/\D/g, "");
@@ -449,6 +451,7 @@ export default function VenuePage() {
   const tabs: { key: Tab; label: string; icon: typeof LayersIcon }[] = [
     { key: "schedule", label: "Jadval", icon: CalendarDaysIcon },
     { key: "profile", label: "Profil", icon: SettingsIcon },
+    { key: "gallery", label: "Rasmlar", icon: ImagesIcon },
     { key: "halls", label: "Zallar", icon: LayersIcon },
     ...(can(venue, "MANAGE_MEMBERS") ? [{ key: "team" as const, label: "Jamoa", icon: UsersIcon }] : []),
   ];
@@ -479,6 +482,7 @@ export default function VenuePage() {
                 </Card>
               )}
               {tab === "profile" && <ProfileTab venue={venue} />}
+              {tab === "gallery" && <GalleryTab venue={venue} />}
               {tab === "halls" && <HallsTab venue={venue} />}
               {tab === "team" && <TeamTab venue={venue} />}
             </motion.div>
