@@ -17,6 +17,7 @@ from apps.core.exceptions import Conflict
 
 from . import ownership
 from .models import (
+    OPEN_OWNERSHIP,
     SINGLE_OWNER_TYPES,
     AccessRole,
     ApprovalDecision,
@@ -118,7 +119,7 @@ def create_invitation(
     now = _now()
     live = ceremony.invitations.filter(status=InvitationStatus.PENDING, expires_at__gt=now)
     if owner_type in SINGLE_OWNER_TYPES and (
-        ceremony.ownerships.filter(owner_type=owner_type, status__in=ownership.OPEN_OWNERSHIP).exists()
+        ceremony.ownerships.filter(owner_type=owner_type, status__in=OPEN_OWNERSHIP).exists()
         or live.filter(owner_type=owner_type).exists()
     ):
         raise ValidationError(
@@ -202,15 +203,20 @@ def _claim(invitation: CeremonyInvitation, user, new_status: str) -> None:
     invitation.status, invitation.invited_user, invitation.responded_at = new_status, user, now
 
 
-@transaction.atomic
 def accept(request, invitation: CeremonyInvitation) -> dict:
-    """Accept. VIEWER → access now. OWNER → ACCEPTED, or PENDING until current owners approve."""
-    user = request.user
-    refusal = ownership.response_refusal(user, invitation, accepting=True)
+    """Accept. VIEWER → access now. OWNER → ACCEPTED, or PENDING until current owners approve.
+
+    Refusals are checked outside the transaction so an EXPIRED mark survives the error response.
+    """
+    refusal = ownership.response_refusal(request.user, invitation, accepting=True)
     if refusal:
-        if refusal == ownership.Refusal.EXPIRED:
-            transaction.on_commit(lambda: None)  # keep the EXPIRED mark below committed
         _refuse(refusal, invitation)
+    return _accept(request, invitation)
+
+
+@transaction.atomic
+def _accept(request, invitation: CeremonyInvitation) -> dict:
+    user = request.user
     _claim(invitation, user, InvitationStatus.ACCEPTED)
     ceremony = invitation.ceremony
 
@@ -270,7 +276,6 @@ def accept(request, invitation: CeremonyInvitation) -> dict:
     return {"status": result, "access_role": AccessRole.OWNER, "ownership": row}
 
 
-@transaction.atomic
 def decline(request, invitation: CeremonyInvitation) -> None:
     refusal = ownership.response_refusal(request.user, invitation, accepting=False)
     if refusal:
@@ -367,7 +372,7 @@ def revoke_ownership(request, row: CeremonyOwnership) -> None:
     if not ownership.can_revoke_ownership(user, row):
         raise PermissionDenied("Boshqa egani faqat Super Admin olib tashlay oladi.")
     now = _now()
-    won = CeremonyOwnership.objects.filter(pk=row.pk, status__in=ownership.OPEN_OWNERSHIP).update(
+    won = CeremonyOwnership.objects.filter(pk=row.pk, status__in=OPEN_OWNERSHIP).update(
         status=OwnershipStatus.REVOKED, revoked_at=now, revoked_by=user, updated_at=now
     )
     if not won:
