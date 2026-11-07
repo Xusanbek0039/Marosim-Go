@@ -41,7 +41,7 @@ class OAuthClientConfig:
 
     @property
     def masked_client_id(self) -> str:
-        return f"{self.client_id[:8]}…{self.client_id[-27:]}" if len(self.client_id) > 40 else "***"
+        return f"{self.client_id[:18]}...{self.client_id[-27:]}" if len(self.client_id) > 40 else "***"
 
     @property
     def project_number(self) -> str:
