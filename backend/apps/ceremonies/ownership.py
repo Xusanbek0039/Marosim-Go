@@ -121,13 +121,24 @@ def _shareable(ceremony: Ceremony) -> bool:
     return ceremony.status in VISIBLE_TO_PARTICIPANTS and ceremony.studio.deleted_at is None
 
 
+def live_viewers():
+    """VIEWER rows that grant access right now: ACCEPTED and not past ``expires_at`` (null = unlimited).
+
+    Every access check goes through this, so an expired share stops working at the exact second,
+    whether or not the lazy EXPIRED mark has been written yet.
+    """
+    return CeremonyViewerAccess.objects.filter(status=ViewerStatus.ACCEPTED).filter(
+        Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())
+    )
+
+
 def role_in(user, ceremony: Ceremony) -> str | None:
     """``OWNER`` / ``VIEWER`` / ``None`` — re-evaluated from the database on every call."""
     if not is_client(user) or not _shareable(ceremony):
         return None
     if CeremonyOwnership.objects.filter(ceremony=ceremony, user=user, status=OwnershipStatus.ACCEPTED).exists():
         return AccessRole.OWNER
-    if CeremonyViewerAccess.objects.filter(ceremony=ceremony, user=user, status=ViewerStatus.ACCEPTED).exists():
+    if live_viewers().filter(ceremony=ceremony, user=user).exists():
         return AccessRole.VIEWER
     return None
 
@@ -166,7 +177,7 @@ def accessible_ceremonies(user):
     if not is_client(user):
         return Ceremony.objects.none()
     owned = CeremonyOwnership.objects.filter(user=user, status=OwnershipStatus.ACCEPTED).values("ceremony_id")
-    viewed = CeremonyViewerAccess.objects.filter(user=user, status=ViewerStatus.ACCEPTED).values("ceremony_id")
+    viewed = live_viewers().filter(user=user).values("ceremony_id")
     return _shareable_ceremonies().filter(Q(pk__in=owned) | Q(pk__in=viewed))
 
 
@@ -256,10 +267,7 @@ def response_refusal(user, invitation: CeremonyInvitation, *, accepting: bool) -
     ).exists()
     if open_ownership:
         return Refusal.ALREADY_HAS_ACCESS
-    if (
-        invitation.requested_role == AccessRole.VIEWER
-        and CeremonyViewerAccess.objects.filter(ceremony=ceremony, user=user, status=ViewerStatus.ACCEPTED).exists()
-    ):
+    if invitation.requested_role == AccessRole.VIEWER and live_viewers().filter(ceremony=ceremony, user=user).exists():
         return Refusal.ALREADY_HAS_ACCESS
     return None
 

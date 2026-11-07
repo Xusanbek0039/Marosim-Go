@@ -17,8 +17,10 @@ from apps.core.exceptions import Conflict
 
 from . import ownership
 from .models import (
+    ACCESS_DURATIONS,
     OPEN_OWNERSHIP,
     SINGLE_OWNER_TYPES,
+    AccessDuration,
     AccessRole,
     ApprovalDecision,
     Ceremony,
@@ -79,6 +81,9 @@ def _now():
     return timezone.now()
 
 
+CHOOSE_DURATION = "Ko'rish muddatini tanlang: 24 soat, 3 kun, 1 hafta yoki 1 oy."
+
+
 # ------------------------------------------------------------------ create
 @transaction.atomic
 def create_invitation(
@@ -89,6 +94,7 @@ def create_invitation(
     identifier: str,
     requested_role: str,
     owner_type: str = "",
+    access_duration: str = "",
     allowed_kinds: tuple[str, ...] = (InviterKind.OWNER, InviterKind.STUDIO, InviterKind.SUPER_ADMIN),
 ) -> CeremonyInvitation:
     """Create an invitation. The response never depends on whether the identifier has an account."""
@@ -96,11 +102,18 @@ def create_invitation(
     kind = ownership.inviter_kind(user, ceremony, requested_role)
     if kind is None or kind not in allowed_kinds:
         raise PermissionDenied(NO_INVITE_RIGHT)
+    # Serialize invitations of one ceremony: the single-owner-type and viewer-quota checks below
+    # count rows, so two parallel requests must not both pass them (SELECT … FOR UPDATE on PostgreSQL).
+    Ceremony.objects.select_for_update().filter(pk=ceremony.pk).first()
 
     if requested_role == AccessRole.VIEWER:
         owner_type = ""
-    elif not owner_type:
-        raise ValidationError({"owner_type": ["Egalik turini tanlang."]})
+        if access_duration not in AccessDuration.values:
+            raise ValidationError({"access_duration": [CHOOSE_DURATION]})
+    else:
+        access_duration = ""
+        if not owner_type:
+            raise ValidationError({"owner_type": ["Egalik turini tanlang."]})
 
     try:
         sealed = ownership.seal_identifier(identifier_type, identifier)
@@ -125,6 +138,8 @@ def create_invitation(
         raise ValidationError({"owner_type": [f"Bu marosimda {_label(OwnerType, owner_type)} allaqachon belgilangan."]})
     if live.count() >= settings.CEREMONY_MAX_PENDING_INVITATIONS:
         raise ValidationError({"non_field_errors": [TOO_MANY]})
+    if requested_role == AccessRole.VIEWER and kind == InviterKind.OWNER:
+        _check_viewer_quota(ceremony, user, live)
 
     # A stale PENDING row to the same recipient would trip the unique constraint: expire it first.
     _expire(
@@ -141,6 +156,7 @@ def create_invitation(
                 ceremony=ceremony,
                 requested_role=requested_role,
                 owner_type=owner_type,
+                access_duration=access_duration,
                 invited_by=user,
                 inviter_kind=kind,
                 expires_at=ownership.default_expiry(),
@@ -159,6 +175,7 @@ def create_invitation(
             "ceremony": str(ceremony.pk),
             "requested_role": requested_role,
             "owner_type": owner_type or None,
+            "access_duration": access_duration or None,
             "identifier_type": identifier_type,
             "recipient": invitation.recipient_hint,
             "inviter_kind": kind,
@@ -166,6 +183,28 @@ def create_invitation(
         target_label=f"{ceremony.title} → {invitation.recipient_hint}",
     )
     return invitation
+
+
+def _check_viewer_quota(ceremony: Ceremony, owner, live_invitations) -> None:
+    """Each owner shares with at most ``CEREMONY_MAX_VIEWERS_PER_OWNER`` people at a time:
+    live viewer access they granted + their viewer invitations still awaiting an answer.
+
+    Called inside the creating transaction after the ceremony row is locked, so two parallel
+    requests cannot both take the last slot.
+    """
+    limit = settings.CEREMONY_MAX_VIEWERS_PER_OWNER
+    used = (
+        ownership.live_viewers().filter(ceremony=ceremony, granted_by=owner).count()
+        + live_invitations.filter(requested_role=AccessRole.VIEWER, invited_by=owner).count()
+    )
+    if used >= limit:
+        raise ValidationError(
+            {
+                "non_field_errors": [
+                    f"Siz ko'pi bilan {limit} kishiga ruxsat bera olasiz. Avvalgi ruxsat yoki taklifni bekor qiling."
+                ]
+            }
+        )
 
 
 # ---------------------------------------------------------------- respond
@@ -219,6 +258,11 @@ def _accept(request, invitation: CeremonyInvitation) -> dict:
     ceremony = invitation.ceremony
 
     if invitation.requested_role == AccessRole.VIEWER:
+        # A share that ran out still holds the ACCEPTED slot of the unique constraint: release it.
+        CeremonyViewerAccess.objects.filter(
+            ceremony=ceremony, user=user, status=ViewerStatus.ACCEPTED, expires_at__lte=invitation.responded_at
+        ).update(status=ViewerStatus.EXPIRED, updated_at=invitation.responded_at)
+        lifetime = ACCESS_DURATIONS.get(invitation.access_duration)
         try:
             with transaction.atomic():
                 CeremonyViewerAccess.objects.create(
@@ -227,6 +271,7 @@ def _accept(request, invitation: CeremonyInvitation) -> dict:
                     granted_by_id=invitation.invited_by_id,
                     invitation=invitation,
                     accepted_at=invitation.responded_at,
+                    expires_at=invitation.responded_at + lifetime if lifetime else None,
                 )
         except IntegrityError:
             raise Conflict("Sizda bu marosimga kirish huquqi allaqachon bor.") from None
@@ -412,7 +457,7 @@ def leave(request, ceremony: Ceremony) -> None:
     row = CeremonyOwnership.objects.filter(ceremony=ceremony, user=user, status=OwnershipStatus.ACCEPTED).first()
     if row is not None:
         return revoke_ownership(request, row)
-    access = CeremonyViewerAccess.objects.filter(ceremony=ceremony, user=user, status=ViewerStatus.ACCEPTED).first()
+    access = ownership.live_viewers().filter(ceremony=ceremony, user=user).first()
     if access is None:
         raise NotFound()
     return revoke_viewer(request, access)

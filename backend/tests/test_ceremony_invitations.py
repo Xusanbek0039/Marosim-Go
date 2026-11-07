@@ -37,10 +37,12 @@ def studio_invite(client, ceremony, identifier, owner_type="BRIDE", identifier_t
     )
 
 
-def owner_invite(client, ceremony, identifier, role="VIEWER", owner_type="", identifier_type="PHONE"):
+def owner_invite(client, ceremony, identifier, role="VIEWER", owner_type="", identifier_type="PHONE", duration="1W"):
     body = {"identifier_type": identifier_type, "identifier": identifier, "requested_role": role}
     if owner_type:
         body["owner_type"] = owner_type
+    if role == "VIEWER" and duration:
+        body["access_duration"] = duration
     return client.post(f"{MY}{ceremony.pk}/invitations/", body, format="json")
 
 

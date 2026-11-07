@@ -283,6 +283,8 @@ CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE = env.bool("CEREMONY_OWNER_REQUIRE_VERIFIE
 CEREMONY_INVITATION_TTL_DAYS = env.int("CEREMONY_INVITATION_TTL_DAYS", default=14)
 # Abuse limits: open invitations per ceremony, renewals per invitation.
 CEREMONY_MAX_PENDING_INVITATIONS = env.int("CEREMONY_MAX_PENDING_INVITATIONS", default=50)
+#: How many people one ceremony owner may share the gallery with at a time (live access + pending invitations).
+CEREMONY_MAX_VIEWERS_PER_OWNER = env.int("CEREMONY_MAX_VIEWERS_PER_OWNER", default=5)
 CEREMONY_MAX_INVITATION_SENDS = env.int("CEREMONY_MAX_INVITATION_SENDS", default=5)
 
 # Ceremony media (Phase D): client → Google Drive resumable sessions; nothing is public.

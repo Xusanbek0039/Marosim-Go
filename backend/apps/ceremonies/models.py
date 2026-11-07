@@ -15,6 +15,8 @@ An invitation is not linked to an account until its recipient accepts it, so an 
 learns whether a number / JSHSHIR has an account.
 """
 
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -204,6 +206,26 @@ OPEN_OWNERSHIP = (OwnershipStatus.PENDING, OwnershipStatus.ACCEPTED)
 class ViewerStatus(models.TextChoices):
     ACCEPTED = "ACCEPTED", "Faol"
     REVOKED = "REVOKED", "Bekor qilingan"
+    #: ``expires_at`` passed. Checks never rely on this mark (they compare ``expires_at``); it is set
+    #: lazily so the same person can be invited again (unique constraint covers ACCEPTED only).
+    EXPIRED = "EXPIRED", "Muddati tugagan"
+
+
+class AccessDuration(models.TextChoices):
+    """How long a VIEWER may watch, chosen by the owner who shares (counted from acceptance)."""
+
+    HOURS_24 = "24H", "24 soat"
+    DAYS_3 = "3D", "3 kun"
+    WEEK_1 = "1W", "1 hafta"
+    MONTH_1 = "1M", "1 oy"
+
+
+ACCESS_DURATIONS = {
+    AccessDuration.HOURS_24: timedelta(hours=24),
+    AccessDuration.DAYS_3: timedelta(days=3),
+    AccessDuration.WEEK_1: timedelta(weeks=1),
+    AccessDuration.MONTH_1: timedelta(days=30),
+}
 
 
 class ApprovalDecision(models.TextChoices):
@@ -237,6 +259,8 @@ class CeremonyInvitation(BaseModel):
     requested_role = models.CharField(max_length=10, choices=AccessRole.choices)
     #: Only for OWNER invitations.
     owner_type = models.CharField(max_length=20, choices=OwnerType.choices, blank=True)
+    #: VIEWER only: access lifetime after acceptance. Blank for OWNER (and for legacy VIEWER rows = unlimited).
+    access_duration = models.CharField(max_length=3, choices=AccessDuration.choices, blank=True)
     invited_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -368,6 +392,8 @@ class CeremonyViewerAccess(BaseModel):
     )
     status = models.CharField(max_length=10, choices=ViewerStatus.choices, default=ViewerStatus.ACCEPTED)
     accepted_at = models.DateTimeField()
+    #: null = unlimited (rows created before access durations existed).
+    expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
     revoked_at = models.DateTimeField(null=True, blank=True)
     revoked_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"

@@ -13,6 +13,7 @@ from . import ownership, services
 from .invitations import LEGACY_FROM_OWNER_TYPE
 from .models import (
     STUDIO_TRANSITIONS,
+    AccessDuration,
     AccessRole,
     Ceremony,
     CeremonyInvitation,
@@ -386,6 +387,7 @@ class InvitationSerializer(serializers.ModelSerializer):
             "id",
             "requested_role",
             "owner_type",
+            "access_duration",
             "participant_type",
             "ceremony_id",
             "ceremony_title",
@@ -460,7 +462,7 @@ class MemberViewerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CeremonyViewerAccess
-        fields = ["id", "full_name", "granted_by_name", "granted_by_me", "can_revoke", "accepted_at"]
+        fields = ["id", "full_name", "granted_by_name", "granted_by_me", "can_revoke", "accepted_at", "expires_at"]
         read_only_fields = fields
 
     def get_full_name(self, obj) -> str | None:
@@ -510,6 +512,12 @@ class OwnerInvitationCreateSerializer(serializers.Serializer):
     owner_type = serializers.ChoiceField(
         choices=OwnerType.choices, required=False, allow_blank=True, help_text="Faqat OWNER uchun majburiy."
     )
+    access_duration = serializers.ChoiceField(
+        choices=AccessDuration.choices,
+        required=False,
+        allow_blank=True,
+        help_text="Faqat VIEWER uchun majburiy: qabul qilingandan keyin ko'rish muddati (24H / 3D / 1W / 1M).",
+    )
 
 
 class OwnerInvitationSerializer(serializers.ModelSerializer):
@@ -530,6 +538,7 @@ class OwnerInvitationSerializer(serializers.ModelSerializer):
             "recipient_hint",
             "requested_role",
             "owner_type",
+            "access_duration",
             "status",
             "inviter_kind",
             "invited_by_display",

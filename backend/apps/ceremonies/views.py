@@ -33,7 +33,6 @@ from .models import (
     InvitationStatus,
     InviterKind,
     OwnershipStatus,
-    ViewerStatus,
 )
 from .permissions import IsCeremonyMember, IsCeremonyOwner, IsClientUser, IsStudioMember, IsStudioMemberOrSuperAdmin
 from .serializers import (
@@ -399,7 +398,8 @@ class MyCeremonyViewSet(viewsets.ReadOnlyModelViewSet):
             "owners": ceremony.ownerships.filter(status=OwnershipStatus.ACCEPTED)
             .select_related("user")
             .order_by("accepted_at"),
-            "viewers": ceremony.viewer_accesses.filter(status=ViewerStatus.ACCEPTED)
+            "viewers": ownership.live_viewers()
+            .filter(ceremony=ceremony)
             .select_related("user", "granted_by", "ceremony__studio")
             .order_by("accepted_at"),
             "pending_owner_requests": ceremony.ownerships.filter(status=OwnershipStatus.PENDING).count(),
