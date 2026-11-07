@@ -88,7 +88,13 @@ def error_response(exc: services.StorageError, http_status=status.HTTP_409_CONFL
         "redirect_uri_mismatch": "Redirect URI Google Cloud sozlamasiga mos emas.",
     }
     return Response(
-        {"error": {"code": exc.code, "message": messages.get(exc.code, "Google Drive bilan ishlashda xatolik."), "details": None}},
+        {
+            "error": {
+                "code": exc.code,
+                "message": messages.get(exc.code, "Google Drive bilan ishlashda xatolik."),
+                "details": None,
+            }
+        },
         status=http_status,
     )
 
@@ -183,7 +189,9 @@ class CallbackView(APIView):
             logger.warning("google oauth callback rejected: %s", exc.code)
             query = {"google": "error", "reason": exc.code}
         response = HttpResponseRedirect(f"{settings.PANEL_URL}/storage?{urlencode(query)}")
-        response.delete_cookie(services.BINDING_COOKIE, path=services.BINDING_COOKIE_PATH, domain=settings.AUTH_COOKIES["DOMAIN"])
+        response.delete_cookie(
+            services.BINDING_COOKIE, path=services.BINDING_COOKIE_PATH, domain=settings.AUTH_COOKIES["DOMAIN"]
+        )
         response["Referrer-Policy"] = "no-referrer"  # the URL held ?code=
         return response
 

@@ -1,6 +1,6 @@
 """Verify the Google OAuth setup without ever printing a secret.
 
-    python manage.py google_oauth_check
+python manage.py google_oauth_check
 """
 
 import subprocess  # noqa: S404 - fixed git argv, no shell

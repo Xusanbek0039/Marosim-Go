@@ -14,7 +14,9 @@ from apps.storage.google import DRIVE_FILE_SCOPE, AccountInfo, GoogleAuthRevoked
 from apps.storage.models import ConnectionStatus, OAuthState, StorageConnection, StorageCredential, digest
 
 BASE = "/api/v1/admin/storage/google"
-CONNECT, CALLBACK, STATUS, TEST, DISCONNECT = (f"{BASE}/{p}/" for p in ("connect", "callback", "status", "test", "disconnect"))
+CONNECT, CALLBACK, STATUS, TEST, DISCONNECT = (
+    f"{BASE}/{p}/" for p in ("connect", "callback", "status", "test", "disconnect")
+)
 REFRESH_TOKEN = "1//fake-refresh-token-SECRET-value"
 ACCESS_TOKEN = "ya29.fake-access-token-SECRET"
 
@@ -216,7 +218,10 @@ def test_callback_success_stores_encrypted_token_only(super_admin, client_for, g
     assert conn.status == ConnectionStatus.CONNECTED and conn.account_email == "owner@gmail.com"
     assert DRIVE_FILE_SCOPE in conn.scopes and conn.connected_by == super_admin
     cred = StorageCredential.objects.get()
-    assert REFRESH_TOKEN not in cred.refresh_token_encrypted and vault.unseal(cred.refresh_token_encrypted) == REFRESH_TOKEN
+    assert (
+        REFRESH_TOKEN not in cred.refresh_token_encrypted
+        and vault.unseal(cred.refresh_token_encrypted) == REFRESH_TOKEN
+    )
     assert REFRESH_TOKEN not in repr(cred)
     assert google.exchanged[0][0] == "auth-code-123"
     assert AuditLog.objects.filter(action=AuditAction.STORAGE_CONNECT).exists()
@@ -366,7 +371,9 @@ def test_revoked_or_expired_refresh_token_requires_reconnect(super_admin, client
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("code", ["insufficient_permissions", "storage_quota_exceeded", "rate_limited", "drive_api_disabled"])
+@pytest.mark.parametrize(
+    "code", ["insufficient_permissions", "storage_quota_exceeded", "rate_limited", "drive_api_disabled"]
+)
 def test_google_api_errors_are_mapped(super_admin, client_for, google, code):
     client = client_for(super_admin)
     connect_fully(client, google)
@@ -415,3 +422,42 @@ def test_storage_endpoints_are_documented(super_admin, client_for):
         assert url in paths
     assert paths[CALLBACK]["get"]["x-access"]["auth_required"] is False
     assert paths[CONNECT]["get"]["x-access"]["roles"] == ["SUPER_ADMIN"]
+
+
+# ------------------------------------------------- real gateway, offline parts
+def test_real_gateway_builds_offline_pkce_consent_url():
+    from apps.storage.google import GoogleGateway
+
+    config = client_config.load()
+    url = GoogleGateway().authorization_url(config, "the-state", "v" * 64)
+    q = parse_qs(urlparse(url).query)
+    assert url.startswith("https://accounts.google.com/o/oauth2/auth?")
+    assert q["access_type"] == ["offline"] and q["prompt"] == ["consent"]
+    assert q["state"] == ["the-state"] and q["response_type"] == ["code"]
+    assert q["code_challenge_method"] == ["S256"] and q["code_challenge"][0] != "v" * 64
+    assert q["redirect_uri"] == ["http://localhost:8000/api/v1/admin/storage/google/callback/"]
+    assert DRIVE_FILE_SCOPE in q["scope"][0].split()
+    assert "https://www.googleapis.com/auth/drive " not in q["scope"][0] + " "  # never the broad scope
+    assert "test-client-secret" not in url
+
+
+@pytest.mark.parametrize(
+    "status,reason,code",
+    [
+        (403, "storageQuotaExceeded", "storage_quota_exceeded"),
+        (403, "insufficientFilePermissions", "insufficient_permissions"),
+        (403, "accessNotConfigured", "drive_api_disabled"),
+        (429, "", "rate_limited"),
+        (404, "notFound", "not_found"),
+        (503, "", "google_unavailable"),
+    ],
+)
+def test_drive_http_errors_are_normalized(status, reason, code):
+    import httplib2
+    from googleapiclient.errors import HttpError
+
+    from apps.storage.google import _drive_error
+
+    body = json.dumps({"error": {"code": status, "errors": [{"reason": reason}] if reason else []}}).encode()
+    err = _drive_error(HttpError(httplib2.Response({"status": status}), body))
+    assert err.code == code and err.status == status

@@ -71,7 +71,9 @@ def _from_file(path: Path) -> dict:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        raise ClientConfigError("client_file_invalid", "OAuth client JSON o'qib bo'lmadi (JSON formati noto'g'ri).") from None
+        raise ClientConfigError(
+            "client_file_invalid", "OAuth client JSON o'qib bo'lmadi (JSON formati noto'g'ri)."
+        ) from None
     if "web" not in data:
         kind = next(iter(data), "unknown") if isinstance(data, dict) else "unknown"
         raise ClientConfigError(

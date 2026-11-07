@@ -4,6 +4,7 @@ so unit tests substitute a fake (``services.set_gateway``) and never hit the net
 Errors are normalized to ``GoogleError(code)`` with stable, non-secret codes.
 """
 
+import json
 import os
 from dataclasses import dataclass, field
 
@@ -65,11 +66,13 @@ _DRIVE_REASONS = {
 
 def _drive_error(exc) -> GoogleError:
     status = getattr(getattr(exc, "resp", None), "status", None)
+    # Parse the body ourselves: HttpError.error_details is only filled lazily by __repr__.
     reason = ""
     try:
-        details = exc.error_details or []
-        reason = details[0].get("reason", "") if details else ""
-    except (AttributeError, IndexError, TypeError):
+        payload = json.loads(exc.content.decode() if isinstance(exc.content, bytes) else exc.content)
+        errors = (payload.get("error") or {}).get("errors") or []
+        reason = errors[0].get("reason", "") if errors else ""
+    except (AttributeError, IndexError, TypeError, ValueError):
         reason = ""
     code = _DRIVE_REASONS.get(reason)
     if code is None:
