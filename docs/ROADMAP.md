@@ -21,7 +21,7 @@
 | B | Ownership modellari (`CeremonyInvitation`, `CeremonyOwnership`, `CeremonyOwnershipApproval`, `CeremonyViewerAccess`), migratsiyalar + v1 backfill, ruxsat qatlami (`ownership.py`) | ✅ 2026-11-07 |
 | C | Xavfsiz taklif tizimi: telefon/JSHSHIR, qabul/rad, egalar tasdig'i, qayta yuborish, muddat, bekor qilish; v1 endpointlarini ko'chirish | ✅ 2026-11-07 |
 | D | Google Drive media upload (studiya): resumable sessiya, papka daraxti, yakunda Drive'dan tekshiruv | ✅ 2026-11-07 |
-| E | Foydalanuvchi media API: galereya, thumbnail/preview/stream/download — har so'rovda object-level tekshiruv | ⏳ tasdiq kutilmoqda |
+| E | Foydalanuvchi media API (galereya, thumbnail, stream/Range, download — faqat ega), muddatli ulashish (24 soat / 3 kun / 1 hafta / 1 oy, har ega 5 kishigacha), studiya yuklash UI, foydalanuvchi galereyasi | ✅ 2026-11-07 |
 | F | Super Admin: marosimlar monitoringi + API Developer Center (CEREMONY_OWNER / CEREMONY_VIEWER guruhlari) | ⏳ |
 | G | Xavfsizlik / integratsiya testlari, hujjatlar | ⏳ (B uchun ✅) |
 
@@ -31,6 +31,7 @@ Qarorlar:
 * V4.1: studiya/foydalanuvchi uchun yangi web frontend yaratilmaydi — faqat mobil REST API (2026-11-07).
 * V4.1: spec'dagi `ceremony_type`/`ceremony_date` mavjud `event_type`/`event_date` maydonlari bilan beriladi (API buzilmaydi);
   studiya yo'llari mavjud `/api/v1/ceremonies/…` standartida qoladi (`/studio/ceremonies/` emas).
+* V4.1-E: Drive papkasi `Studio_<nom>/Mijoz_****<JSHSHIR oxirgi 4>_<id6>/{Videos,Photos}` (to'liq JSHSHIR hech qachon); har ega 5 tagacha ko'ruvchi; ko'ruvchi faqat ko'radi (2026-11-07, foydalanuvchi qarori).
 * V4.1: OWNER huquqi faqat tasdiqlangan telefon bilan (`CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE`, DEBUG'da ham); JSHSHIR — faqat identifikator.
 
 ## V5.0 — To'yxona va studiya bandlik tizimi ([VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md))

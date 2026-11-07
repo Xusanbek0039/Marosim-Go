@@ -49,6 +49,10 @@
 | GET | `/api/v1/health/live/` | Liveness — jarayon ishlayaptimi | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/health/ready/` | Readiness — bog'liqliklar (database, cache) tayyormi | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/me/ceremonies/` | Menga biriktirilgan marosimlar | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
+| GET | `/api/v1/me/ceremonies/{ceremony_id}/media/` | Marosim rasm va videolari | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
+| GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/` | Faylni yuklab olish (faqat ega) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
+| GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/` | Faylni ko'rish (oqim, Range) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
+| GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/` | Kichik rasm (preview) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{id}/` | Menga biriktirilgan marosim | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{id}/invitations/` | Marosim takliflari tarixi | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
 | POST | `/api/v1/me/ceremonies/{id}/invitations/` | VIEWER yoki OWNER taklifi yuborish (telefon / JSHSHIR) | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
@@ -105,11 +109,15 @@
 * `GET /api/v1/health/live/` — Liveness — jarayon ishlayaptimi
 * `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
 
-### USER (18)
+### USER (22)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
 * `GET /api/v1/me/ceremonies/` — Menga biriktirilgan marosimlar
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/` — Marosim rasm va videolari
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/` — Faylni yuklab olish (faqat ega)
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/` — Faylni ko'rish (oqim, Range)
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/` — Kichik rasm (preview)
 * `GET /api/v1/me/ceremonies/{id}/` — Menga biriktirilgan marosim
 * `GET /api/v1/me/ceremonies/{id}/invitations/` — Marosim takliflari tarixi
 * `POST /api/v1/me/ceremonies/{id}/invitations/` — VIEWER yoki OWNER taklifi yuborish (telefon / JSHSHIR)
@@ -286,6 +294,12 @@
 * `GET /api/v1/dashboard/overview/`
   * `recent_profiles` faqat `users.view` ruxsati bo'lsa to'ldiriladi, aks holda bo'sh
   * ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/`
+  * Faqat marosim EGASI; ko'ruvchi — 403
+  * Har bir yuklab olish audit qilinadi
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/`
+  * HTTP Range qo'llab-quvvatlanadi (video uchun)
+  * Content-Disposition: inline
 * `GET /api/v1/me/ceremonies/{id}/invitations/`
   * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
   * POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.
@@ -363,10 +377,5 @@
 
 | Bosqich | Metod | Yo'l | Tavsif | Kim | Shart |
 |---|---|---|---|---|---|
-| E | GET | `/api/v1/me/ceremonies/{id}/media/` | Media galereya | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi) |
-| E | GET | `/api/v1/me/ceremonies/{id}/media/{media_id}/thumbnail/` | Kichik rasm | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi); Drive fayli hech qachon public qilinmaydi |
-| E | GET | `/api/v1/me/ceremonies/{id}/media/{media_id}/preview/` | Ko'rib chiqish | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi); Drive fayli hech qachon public qilinmaydi |
-| E | GET | `/api/v1/me/ceremonies/{id}/media/{media_id}/stream/` | Video oqimi (Range) | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi); Drive fayli hech qachon public qilinmaydi |
-| E | GET | `/api/v1/me/ceremonies/{id}/media/{media_id}/download/` | Asl faylni yuklab olish | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi); Drive fayli hech qachon public qilinmaydi |
 | F | GET | `/api/v1/admin/ceremonies/` | Barcha marosimlar monitoringi | SUPER_ADMIN | — |
 | F | GET | `/api/v1/admin/ceremonies/{id}/` | Marosim: egalar, takliflar, ko'ruvchilar, media, tarix | SUPER_ADMIN | Maxfiy maydonlar faqat audit qilinadigan alohida amal orqali |

@@ -1,5 +1,15 @@
 # Progress
 
+## 2026-11-07 (kech) — V4.1 Phase E: studiya yuklash UI, foydalanuvchi galereyasi, muddatli ulashish ✅
+
+* **Studiya** (`frontend-studio`, marosim sahifasi): drag & drop, bir vaqtda 2 fayl, bo'laklab to'g'ridan-to'g'ri Google Drive'ga, progress, bekor qilish, uzilsa davom etish.
+* **Drive papkasi:** `Studio_<nom>/Mijoz_****<oxirgi 4>_<id6>/{Videos,Photos}`, to'liq JSHSHIR yozilmaydi.
+* **Foydalanuvchi** (`frontend-user`, marosim sahifasi): video/rasm galereyasi, ko'rish oynasi; ega uchun yuklab olish; "Kimlar ko'ra oladi" paneli (telefon/JSHSHIR, 24 soat · 3 kun · 1 hafta · 1 oy, N/5, qolgan vaqt, bekor qilish).
+* **Backend:** `/me/ceremonies/{id}/media/` (list, thumbnail, stream, download), `access_duration`, `expires_at`, 5 kishilik chegara, `MEDIA_DOWNLOAD` audit; migratsiyalar `ceremonies/0005`, `audit/0007`.
+* **Jonli topilgan bug:** Google yakuniy javobga CORS faqat sessiya brauzer Origin bilan ochilganda qo'yadi → server allowlist'dagi Origin'ni uzatadi.
+* **Testlar:** 1251 passed (SQLite va PostgreSQL); ruff, spectacular, tsc, eslint, next build toza; haqiqiy Drive bilan e2e o'tdi.
+* **Tekshirilmagan:** UI haqiqiy brauzerda bosib ko'rilmadi (API va Google CORS jonli tekshirildi).
+
 ## 2026-11-07 (kech) — V5.0: PostgreSQL + `frontend-toyxona` + frontend kutubxonalari tiklandi ✅
 
 * **PostgreSQL 17** o'rnatildi, `marosimgo` rol/baza, `btree_gist`; dev ma'lumotlari ko'chirildi; `.env` → PG.

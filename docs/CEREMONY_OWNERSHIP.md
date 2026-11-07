@@ -125,3 +125,30 @@ begona yoki javob berilgan taklif — 404 (mavjudligi tasdiqlanmaydi).
 3. v1 endpointlari yangi modelga o'tdi; `/participants/` — deprecated alias. `CeremonyParticipant` endi yozilmaydi
    (`0004_backfill_late_participants` oraliqdagi qatorlarni ko'chirdi).
 4. MyID/OneID — alohida bosqich (ochiq).
+
+## Phase E — media ko'rish va muddatli ulashish (2026-11-07) ✅
+
+**Oqim:** studiya montaj qilingan video/rasmni `frontend-studio` → marosim sahifasidan yuklaydi (baytlar brauzerdan to'g'ridan-to'g'ri Google Drive'ga, 8 MB bo'laklar, uzilsa davom etadi) → server Drive'dan tekshiradi (READY) → marosim egasi `frontend-user` da ko'radi → ega 5 kishigacha telefon yoki JSHSHIR orqali taklif yuboradi → odam qabul qilgach, tanlangan muddat davomida faqat ko'radi.
+
+**Drive papkasi:** `MarosimGo / Studio_<studiya nomi> / Mijoz_****<JSHSHIR oxirgi 4 raqami>_<marosim id 6 belgi> / {Videos, Photos} / <media id>.<ext>`. Ega hali ma'lum bo'lmasa — `Mijoz_<id6>`. Kalitlar ID asosida (nom keyin o'zgarsa daraxt bo'linmaydi); mavjud papkalar qayta nomlanmaydi.
+
+**Endpointlar** (`/api/v1/me/ceremonies/{ceremony_id}/media/`)
+
+| Endpoint | OWNER | VIEWER |
+|---|:-:|:-:|
+| `GET …/media/` — READY fayllar (Drive id, asl nom, yuklovchi yo'q) | ✓ | ✓ |
+| `GET …/{media_id}/thumbnail/?size=240\|480\|960` — Drive preview, server keshi 10 daqiqa | ✓ | ✓ |
+| `GET …/{media_id}/stream/` — inline, bitta HTTP Range (video seek) | ✓ | ✓ |
+| `GET …/{media_id}/download/` — attachment, audit `MEDIA_DOWNLOAD` | ✓ | 403 |
+
+Huquq har so'rovda DB'dan qayta o'qiladi: muddati tugagan yoki bekor qilingan ruxsat darhol 404.
+
+**Muddatli ulashish:** VIEWER taklifida `access_duration` majburiy (`24H`, `3D`, `1W`, `1M`=30 kun); muddat qabul qilingan paytdan. `CeremonyViewerAccess.expires_at`; barcha tekshiruvlar `ownership.live_viewers()` orqali (`expires_at` bilan solishtiriladi). Muddati o'tgan qator qayta taklif qabul qilinganda `EXPIRED` bo'ladi. Eski (muddatsiz) qatorlar — `expires_at = null`.
+
+**Chegara:** har bir ega bir vaqtda ko'pi bilan `CEREMONY_MAX_VIEWERS_PER_OWNER = 5` (faol ruxsatlar + javob kutilayotgan takliflar; kelin va kuyov alohida). Hisoblash marosim qatori `SELECT … FOR UPDATE` bilan qulflangan holda.
+
+**"Faqat ko'rish" chegarasi:** ko'ruvchiga yuklab olish endpointi va tugmasi yo'q, `controlsList="nodownload"`, kontekst menyu o'chirilgan. Ekran yozib olishni texnik jihatdan to'liq to'sib bo'lmaydi.
+
+**Google CORS (jonli topilgan):** brauzer PUT'ining yakuniy (200) javobida CORS sarlavhasi faqat sessiya o'sha `Origin` bilan ochilgan bo'lsa qaytadi. Server `Origin` ni faqat `MEDIA_UPLOAD_BROWSER_ORIGINS` ro'yxatidan (dev: `http://localhost:3001`) Google'ga uzatadi. **Production'da studiya domenini shu o'zgaruvchiga qo'shish shart.**
+
+**Tekshiruv:** 1251 test (SQLite + PostgreSQL). Haqiqiy Google Drive bilan jonli sinov: yuklash → READY → `Studio_…/Mijoz_****2345_…/Photos` → ega Range oqimi va yuklab olish → begona 404 → 24 soatlik ulashish → mehmon ko'radi, yuklab ololmaydi → thumbnail. Sinov ma'lumotlari va Drive papkasi o'chirildi.
