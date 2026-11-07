@@ -63,7 +63,7 @@ class FakeDrive:
         return dict(self.items[file_id])
 
     # --- resumable sessions
-    def start_resumable_upload(self, creds, *, name, parent_id, mime_type, size, app_properties):
+    def start_resumable_upload(self, creds, *, name, parent_id, mime_type, size, app_properties, origin=None):
         if self.fail_start:
             error, self.fail_start = self.fail_start, None
             raise error
@@ -72,7 +72,7 @@ class FakeDrive:
         uri = f"https://www.googleapis.com/upload/drive/v3/files?upload_id=SESSION-{next(self.ids)}"
         self.sessions[uri] = {
             "name": name, "parents": [parent_id], "mimeType": mime_type, "size": size,
-            "appProperties": app_properties, "received": 0, "file": None, "expired": False,
+            "appProperties": app_properties, "received": 0, "file": None, "expired": False, "origin": origin,
         }  # fmt: skip
         return uri
 
@@ -172,6 +172,20 @@ def test_studio_member_starts_upload_into_folder_tree(studio, drive):
     assert c.drive_folder_id and StorageConnection.objects.get().root_folder_id
     # the session URI is stored encrypted only
     assert "upload_id" not in media.upload_session_encrypted and vault.unseal(media.upload_session_encrypted)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("origin", "forwarded"),
+    [("http://localhost:3001", "http://localhost:3001"), ("https://evil.example", None), (None, None)],
+)
+def test_session_is_opened_for_the_allowlisted_browser_origin_only(studio, drive, origin, forwarded):
+    """Google sends CORS headers on the final PUT response only if the session was opened with that Origin."""
+    headers = {"HTTP_ORIGIN": origin} if origin else {}
+    c = studio["ceremony"]
+    body = {"filename": "a.jpg", "mime_type": "image/jpeg", "size_bytes": MB}
+    assert studio["uploader"].post(f"{base(c)}uploads/", body, format="json", **headers).status_code == 201
+    assert next(iter(drive.sessions.values()))["origin"] == forwarded
 
 
 @pytest.mark.django_db

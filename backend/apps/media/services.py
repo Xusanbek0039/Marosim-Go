@@ -168,7 +168,7 @@ def start_upload(
         uploaded_by=user,
     )
     try:
-        session_uri, folder_id = _open_session(ceremony, media)
+        session_uri, folder_id = _open_session(ceremony, media, browser_origin(request))
     except (StorageError, GoogleError) as exc:
         CeremonyMedia.objects.filter(pk=media.pk).update(status=MediaStatus.FAILED, error_code=exc.code)
         raise _storage_error(exc) from None
@@ -180,7 +180,13 @@ def start_upload(
     return media, session_uri
 
 
-def _open_session(ceremony: Ceremony, media: CeremonyMedia) -> tuple[str, str]:
+def browser_origin(request) -> str | None:
+    """The uploading web app's Origin, only if allowlisted (mobile apps send none and need none)."""
+    origin = request.headers.get("Origin", "")
+    return origin if origin in _limits().get("BROWSER_ORIGINS", ()) else None
+
+
+def _open_session(ceremony: Ceremony, media: CeremonyMedia, origin: str | None = None) -> tuple[str, str]:
     for attempt in (1, 2):
         folder_id, creds = _folder_for(ceremony, media.kind)
         try:
@@ -191,6 +197,7 @@ def _open_session(ceremony: Ceremony, media: CeremonyMedia) -> tuple[str, str]:
                 mime_type=media.mime_type,
                 size=media.size_bytes,
                 app_properties={"mg_media": str(media.pk), "mg_ceremony": str(ceremony.pk)},
+                origin=origin,
             )
             return uri, folder_id
         except GoogleError as exc:

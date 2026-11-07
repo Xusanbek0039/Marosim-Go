@@ -249,22 +249,37 @@ class GoogleGateway:
         return files[0]["id"] if files else None
 
     def start_resumable_upload(
-        self, creds, *, name: str, parent_id: str, mime_type: str, size: int, app_properties: dict
+        self,
+        creds,
+        *,
+        name: str,
+        parent_id: str,
+        mime_type: str,
+        size: int,
+        app_properties: dict,
+        origin: str | None = None,
     ) -> str:
         """Open a resumable upload session for one file; returns the session URI.
 
         The URI authorizes uploading the bytes of *this one file* only (no OAuth token is shared),
         and expires after about a week. Google enforces the declared length.
+
+        ``origin``: the browser origin that will PUT the bytes. Google only adds CORS headers to the
+        *final* (200/201) response when the session was opened with that Origin (verified live
+        2026-11-07); without it a browser upload succeeds in Drive but the page sees a network error.
         """
         import requests
         from google.auth.transport.requests import AuthorizedSession
 
         body = {"name": name, "parents": [parent_id], "mimeType": mime_type, "appProperties": app_properties}
+        headers = {"X-Upload-Content-Type": mime_type, "X-Upload-Content-Length": str(size)}
+        if origin:
+            headers["Origin"] = origin
         try:
             res = AuthorizedSession(creds).post(
                 f"{UPLOAD_URL}?uploadType=resumable&fields={FILE_FIELDS}",
                 json=body,
-                headers={"X-Upload-Content-Type": mime_type, "X-Upload-Content-Length": str(size)},
+                headers=headers,
                 timeout=TIMEOUT,
             )
         except requests.RequestException as exc:

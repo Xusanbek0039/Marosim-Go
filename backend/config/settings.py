@@ -294,6 +294,11 @@ MEDIA_UPLOAD = {
     "MAX_ACTIVE_PER_CEREMONY": env.int("MEDIA_MAX_ACTIVE_UPLOADS", default=50),
     # Google keeps a resumable session for about a week; close ours a little earlier.
     "SESSION_TTL_HOURS": env.int("MEDIA_SESSION_TTL_HOURS", default=144),
+    # Web apps that PUT bytes to Google directly (studio cabinet). The session is opened with this
+    # Origin so Google returns CORS headers on the final response; anything else is not forwarded.
+    "BROWSER_ORIGINS": env.list(
+        "MEDIA_UPLOAD_BROWSER_ORIGINS", default=["http://localhost:3001", "http://127.0.0.1:3001"]
+    ),
 }
 
 # ----------------------------------------------------------- Google Drive storage
