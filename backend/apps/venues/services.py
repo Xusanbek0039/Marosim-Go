@@ -10,7 +10,7 @@ from django.db import transaction
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.accounts.models import Role
-from apps.audit.services import AuditAction, record, snapshot
+from apps.audit.services import AuditAction, diff, record, snapshot
 
 from .models import Capability, MembershipRole, Venue, VenueHall, VenueMembership
 
@@ -143,8 +143,7 @@ def update_member(request, membership: VenueMembership, *, role: str | None = No
         raise ValidationError({"role": ["To'yxonada kamida bitta faol OWNER qolishi kerak."]})
     membership.role, membership.is_active = new_role, new_active
     membership.save(update_fields=["role", "is_active", "updated_at"])
-    after = snapshot(membership, MEMBERSHIP_AUDITED_FIELDS)
-    changes = {k: {"from": before[k], "to": after[k]} for k in after if before[k] != after[k]}
+    changes = diff(before, snapshot(membership, MEMBERSHIP_AUDITED_FIELDS))
     if changes:
         record(request, AuditAction.UPDATE, membership, changes=changes)
     return membership

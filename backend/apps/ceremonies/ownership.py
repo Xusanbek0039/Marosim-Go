@@ -136,6 +136,12 @@ def is_owner(user, ceremony: Ceremony) -> bool:
     return role_in(user, ceremony) == AccessRole.OWNER
 
 
+def _is_owner_id(user_id, ceremony: Ceremony) -> bool:
+    return bool(user_id) and CeremonyOwnership.objects.filter(
+        ceremony=ceremony, user_id=user_id, status=OwnershipStatus.ACCEPTED
+    ).exists()
+
+
 def can_view(user, ceremony: Ceremony) -> bool:
     """Ceremony details and every media endpoint (list, thumbnail, preview, stream, download)."""
     return role_in(user, ceremony) is not None
@@ -214,6 +220,12 @@ class Refusal:
     EXPIRED = "expired"
     PHONE_NOT_VERIFIED = "phone_not_verified"
     ALREADY_HAS_ACCESS = "already_has_access"
+    #: A self-declared JSHSHIR cannot found ownership: with no owner left to approve, refuse.
+    IDENTITY_UNVERIFIED = "identity_unverified"
+
+
+def pinfl_owner_needs_approvers(invitation: CeremonyInvitation) -> bool:
+    return invitation.identifier_type == IdentifierType.PINFL and invitation.requested_role == AccessRole.OWNER
 
 
 def response_refusal(user, invitation: CeremonyInvitation, *, accepting: bool) -> str | None:
@@ -222,12 +234,17 @@ def response_refusal(user, invitation: CeremonyInvitation, *, accepting: bool) -
         return Refusal.NOT_FOUND
     if invitation.ceremony.studio.deleted_at is not None:
         return Refusal.NOT_FOUND
+    # Viewer access is the sharing owner's to give; it lapses with their ownership.
+    if invitation.requested_role == AccessRole.VIEWER and not _is_owner_id(invitation.invited_by_id, invitation.ceremony):
+        return Refusal.NOT_FOUND
     if invitation.expires_at <= timezone.now():
         return Refusal.EXPIRED
     if not accepting:
         return None
     if requires_verified_phone(invitation) and not user.is_phone_verified:
         return Refusal.PHONE_NOT_VERIFIED
+    if pinfl_owner_needs_approvers(invitation) and not approvers_for(invitation.ceremony):
+        return Refusal.IDENTITY_UNVERIFIED
     ceremony = invitation.ceremony
     open_ownership = CeremonyOwnership.objects.filter(
         ceremony=ceremony, user=user, status__in=(OwnershipStatus.PENDING, OwnershipStatus.ACCEPTED)
@@ -242,11 +259,9 @@ def response_refusal(user, invitation: CeremonyInvitation, *, accepting: bool) -
     return None
 
 
-def can_revoke_invitation(user, invitation: CeremonyInvitation) -> bool:
+def _controls_invitation(user, invitation: CeremonyInvitation) -> bool:
     """The sender while they still hold the capacity they sent it in; studio managers for studio
     invitations; Super Admin. Never another owner."""
-    if invitation.status != InvitationStatus.PENDING:
-        return False
     if is_super_admin(user):
         return True
     ceremony = invitation.ceremony
@@ -255,6 +270,17 @@ def can_revoke_invitation(user, invitation: CeremonyInvitation) -> bool:
     if invitation.inviter_kind == InviterKind.OWNER:
         return invitation.invited_by_id == user.pk and is_owner(user, ceremony)
     return False
+
+
+def can_revoke_invitation(user, invitation: CeremonyInvitation) -> bool:
+    return invitation.status == InvitationStatus.PENDING and _controls_invitation(user, invitation)
+
+
+def can_resend_invitation(user, invitation: CeremonyInvitation) -> bool:
+    """Pending (expired or not) and EXPIRED invitations can be renewed by whoever controls them."""
+    return invitation.status in (InvitationStatus.PENDING, InvitationStatus.EXPIRED) and _controls_invitation(
+        user, invitation
+    )
 
 
 # ------------------------------------------------------------ owner requests

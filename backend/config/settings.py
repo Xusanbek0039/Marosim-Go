@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.monitoring",
     "apps.storage",
     "apps.ceremonies",
+    "apps.venues",
     "apps.devcenter",
 ]
 
@@ -121,6 +122,7 @@ REST_FRAMEWORK = {
         "login": env.str("THROTTLE_LOGIN", default="5/min"),
         "register": env.str("THROTTLE_REGISTER", default="10/hour"),
         "ceremony_invite": env.str("THROTTLE_CEREMONY_INVITE", default="60/hour"),
+        "invitation_respond": env.str("THROTTLE_INVITATION_RESPOND", default="30/hour"),
         "storage_connect": env.str("THROTTLE_STORAGE_CONNECT", default="20/hour"),
         "storage_callback": env.str("THROTTLE_STORAGE_CALLBACK", default="30/hour"),
         "token_refresh": env.str("THROTTLE_REFRESH", default="30/min"),
@@ -247,6 +249,11 @@ SPECTACULAR_SETTINGS = {
         "CeremonyStatusEnum": "apps.ceremonies.models.CeremonyStatus",
         "ParticipantAccessStatusEnum": "apps.ceremonies.models.AccessStatus",
         "StorageConnectionStatusEnum": "apps.storage.models.ConnectionStatus",
+        "VenueRegionEnum": "apps.venues.models.Region",
+        "VenueTypeEnum": "apps.venues.models.VenueType",
+        "VenuePublicationStatusEnum": "apps.venues.models.PublicationStatus",
+        "VenueMembershipRoleEnum": "apps.venues.models.MembershipRole",
+        "CurrencyEnum": "apps.venues.models.Currency",
     },
     "SERVE_PERMISSIONS": (
         ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.accounts.permissions.IsSuperAdmin"]
@@ -261,6 +268,9 @@ CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE = env.bool("CEREMONY_INVITE_REQUIRE_VERIF
 # (or having registered it first) must not be enough to claim a ceremony.
 CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE = env.bool("CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE", default=True)
 CEREMONY_INVITATION_TTL_DAYS = env.int("CEREMONY_INVITATION_TTL_DAYS", default=14)
+# Abuse limits: open invitations per ceremony, renewals per invitation.
+CEREMONY_MAX_PENDING_INVITATIONS = env.int("CEREMONY_MAX_PENDING_INVITATIONS", default=50)
+CEREMONY_MAX_INVITATION_SENDS = env.int("CEREMONY_MAX_INVITATION_SENDS", default=5)
 
 # ----------------------------------------------------------- Google Drive storage
 # OAuth "Web application" client. Read from the JSON downloaded from Google Cloud Console
