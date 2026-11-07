@@ -28,3 +28,4 @@ GOOGLE_TOKEN_ENCRYPTION_KEYS = ["dGVzdF9nb29nbGVfdG9rZW5fa2V5X29ubHlfMDEyMzQ="] 
 GOOGLE_OAUTH_CLIENT_FILE = BASE_DIR / ".test-missing-google-client.json"  # noqa: F405 - tests inject config
 GOOGLE_OAUTH_CLIENT_ID = "test-client-id.apps.googleusercontent.com"
 GOOGLE_OAUTH_CLIENT_SECRET = "test-client-secret"
+CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE = False  # mirrors dev; the strict mode is tested explicitly
