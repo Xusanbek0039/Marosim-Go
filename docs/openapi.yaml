@@ -1895,6 +1895,546 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/ceremonies/{ceremony_id}/media/:
+    get:
+      operationId: ceremonies_media_list
+      summary: Marosimning yuklangan fayllari va holati
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - PHOTO
+          - VIDEO
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - EXPIRED
+          - FAILED
+          - READY
+          - UPLOADING
+      tags:
+      - media
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMediaList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+        (boshqasi 404); SUPER_ADMIN: barchasi.'
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+          (boshqasi 404); SUPER_ADMIN: barchasi.'
+        conditions: []
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{ceremony_id}/media/uploads/:
+    post:
+      operationId: ceremonies_media_uploads_create
+      description: |-
+        Javobdagi `upload_url` ga fayl baytlari to'g'ridan-to'g'ri yuboriladi (PUT, `Content-Range` bilan bo'laklab; uzilsa davom ettiriladi). So'ng `complete/` chaqiriladi. Backend hech qachon OAuth tokenini bermaydi; Drive fayli public qilinmaydi.
+
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+        * Google Drive ulangan bo'lishi shart (aks holda 503 storage_unavailable).
+        * Arxivlangan marosimga yuklab bo'lmaydi; tur va hajm cheklangan.
+      summary: Media yuklashni boshlash (Google Drive resumable sessiya)
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadStartRequest'
+            examples:
+              VideoYuklashniBoshlash:
+                value:
+                  filename: IMG_2041.MOV
+                  mime_type: video/quicktime
+                  size_bytes: 734003200
+                summary: Video yuklashni boshlash
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadStartRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadStartRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSession'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+        (boshqasi 404); SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+      - Google Drive ulangan bo'lishi shart (aks holda 503 storage_unavailable).
+      - Arxivlangan marosimga yuklab bo'lmaydi; tur va hajm cheklangan.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+          (boshqasi 404); SUPER_ADMIN: barchasi.'
+        conditions:
+        - Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+        - Google Drive ulangan bo'lishi shart (aks holda 503 storage_unavailable).
+        - Arxivlangan marosimga yuklab bo'lmaydi; tur va hajm cheklangan.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/:
+    get:
+      operationId: ceremonies_media_uploads_retrieve
+      summary: Yuklash holati (Google'dan jonli progress)
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - media
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSession'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+        (boshqasi 404); SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+          (boshqasi 404); SUPER_ADMIN: barchasi.'
+        conditions:
+        - upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/:
+    post:
+      operationId: ceremonies_media_uploads_cancel_create
+      summary: Yuklashni bekor qilish
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - media
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSession'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+        (boshqasi 404); SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+          (boshqasi 404); SUPER_ADMIN: barchasi.'
+        conditions:
+        - Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/:
+    post:
+      operationId: ceremonies_media_uploads_complete_create
+      summary: Yuklashni yakunlash va tekshirish
+      parameters:
+      - in: path
+        name: ceremony_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - media
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSession'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - STUDIO
+        - SUPER_ADMIN
+        permission: null
+        label: SUPER_ADMIN yoki STUDIO
+      x-allowed-roles:
+      - STUDIO
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+        (boshqasi 404); SUPER_ADMIN: barchasi.'
+      x-access-conditions:
+      - Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+      - Fayl Drive'dan qayta o'qilib tekshiriladi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - STUDIO
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: 'STUDIO: faqat faol a''zolik bo''lgan studiyaning marosimi
+          (boshqasi 404); SUPER_ADMIN: barchasi.'
+        conditions:
+        - Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+        - Fayl Drive'dan qayta o'qilib tekshiriladi.
+        permission_classes:
+        - IsStudioMemberOrSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki STUDIO
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki STUDIO
+
+        **Ma'lumot doirasi:** STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.
+
+        **Shartlar:**
+        * Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+        * Fayl Drive'dan qayta o'qilib tekshiriladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/ceremonies/{id}/:
     get:
       operationId: ceremonies_retrieve
@@ -8371,6 +8911,96 @@ components:
       - pinfl_masked
       - profile_picture
       - role
+    Media:
+      type: object
+      description: Studio view of a media item. Drive ids and the session URI are
+        never included.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/MediaKindEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MediaStatusEnum'
+          readOnly: true
+        original_name:
+          type: string
+          readOnly: true
+        mime_type:
+          type: string
+          readOnly: true
+        size_bytes:
+          type: integer
+          readOnly: true
+        width:
+          type: integer
+          readOnly: true
+          nullable: true
+        height:
+          type: integer
+          readOnly: true
+          nullable: true
+        duration_ms:
+          type: integer
+          readOnly: true
+          nullable: true
+        error_code:
+          type: string
+          readOnly: true
+        uploaded_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - completed_at
+      - created_at
+      - duration_ms
+      - error_code
+      - height
+      - id
+      - kind
+      - mime_type
+      - original_name
+      - size_bytes
+      - status
+      - uploaded_by_name
+      - width
+    MediaKindEnum:
+      enum:
+      - PHOTO
+      - VIDEO
+      type: string
+      description: |-
+        * `PHOTO` - Rasm
+        * `VIDEO` - Video
+    MediaStatusEnum:
+      enum:
+      - UPLOADING
+      - READY
+      - FAILED
+      - CANCELLED
+      - EXPIRED
+      type: string
+      description: |-
+        * `UPLOADING` - Yuklanmoqda
+        * `READY` - Tayyor
+        * `FAILED` - Xato
+        * `CANCELLED` - Bekor qilingan
+        * `EXPIRED` - Sessiya muddati tugagan
     MemberOwner:
       type: object
       properties:
@@ -8468,6 +9098,30 @@ components:
       - owners
       - pending_owner_requests
       - viewers
+    MimeTypeEnum:
+      enum:
+      - image/heic
+      - image/heif
+      - image/jpeg
+      - image/png
+      - image/webp
+      - video/mp4
+      - video/quicktime
+      - video/webm
+      - video/x-m4v
+      - video/x-matroska
+      type: string
+      description: |-
+        * `image/heic` - image/heic
+        * `image/heif` - image/heif
+        * `image/jpeg` - image/jpeg
+        * `image/png` - image/png
+        * `image/webp` - image/webp
+        * `video/mp4` - video/mp4
+        * `video/quicktime` - video/quicktime
+        * `video/webm` - video/webm
+        * `video/x-m4v` - video/x-m4v
+        * `video/x-matroska` - video/x-matroska
     MonitoringEndpointCatalog:
       type: object
       properties:
@@ -9096,6 +9750,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ManagedUser'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PaginatedMediaList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Media'
         page:
           type: integer
         page_size:
@@ -9953,6 +10636,59 @@ components:
           description: 'Faqat X-Client: mobile'
       required:
       - user
+    UploadSession:
+      type: object
+      properties:
+        media:
+          $ref: '#/components/schemas/Media'
+        upload_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Google Drive resumable session URI — baytlar shu manzilga PUT
+            qilinadi (Authorization kerak emas). Faqat yuklashni boshlagan foydalanuvchiga
+            va UPLOADING holatida qaytariladi; uni log'ga yozmang.
+        session_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        received_bytes:
+          type: integer
+          nullable: true
+          description: Google qabul qilgan baytlar (jonli).
+        chunk_size_multiple:
+          type: integer
+          description: Oxirgisidan boshqa har bir bo'lak shu songa karrali.
+      required:
+      - chunk_size_multiple
+      - media
+      - received_bytes
+      - session_expires_at
+      - upload_url
+    UploadStartRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          description: Faqat ko'rsatish uchun; Drive'da fayl nomi = media id.
+          maxLength: 255
+        mime_type:
+          $ref: '#/components/schemas/MimeTypeEnum'
+        size_bytes:
+          type: integer
+          minimum: 1
+        md5:
+          description: 'Ixtiyoriy: yakunda Drive checksum''i bilan solishtiriladi.'
+          oneOf:
+          - type: string
+            pattern: ^[0-9a-fA-F]{32}$
+          - type: string
+            maxLength: 0
+      required:
+      - filename
+      - mime_type
+      - size_bytes
     UserSummary:
       type: object
       description: Compact, safe representation used inside other resources (studios,

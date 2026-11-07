@@ -105,7 +105,4 @@ Admin bloklagan to'yxonada (`is_active=false`) a'zolarda faqat VIEW qoladi. Nofa
 1. **PostgreSQL o'rnatiladi** — Phase C concurrency/exclusion constraint testlari shu muhitda (SQLite'da `skip`).
 2. **Studiya va to'yxona — alohida hisoblar** (rol darvozasi `User.role` bo'yicha qoladi).
 3. **A'zolar endpointi qo'shildi** (`/venue-owner/venues/{id}/members/`).
-
-## Ochiq savollar
-1. APPROVED to'yxona profili (nom, manzil, narx) o'zgartirilsa, qayta tasdiq talab qilinsinmi (Phase E)?
-2. APPROVED to'yxona profili (nom, manzil, narx) o'zgartirilsa, qayta tasdiq talab qilinsinmi (Phase E)?
+4. **Tasdiqlangan profil o'zgarsa — qayta tasdiq (Phase E).** APPROVED to'yxonaning ommaga ko'rinadigan maydonlari (nom, manzil, hudud/tuman, narx, sig'im, turi, koordinatalar, muqova) o'zgarsa, holat PENDING_APPROVAL ga qaytadi va admin qayta ko'rib chiqadi. Kalendar (bandlik) o'zgarishlari qayta tasdiq talab qilmaydi.

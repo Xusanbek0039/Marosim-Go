@@ -1,6 +1,6 @@
 # Marosim egaligi, takliflar va shaxsiy media — arxitektura (V4.1)
 
-Holat: **Phase A, B, C ✅ 2026-11-07**. D–G — tasdiq kutilmoqda.
+Holat: **Phase A, B, C, D ✅ 2026-11-07**. E–G — tasdiq kutilmoqda. Media upload: [STORAGE_ARCHITECTURE.md §6](STORAGE_ARCHITECTURE.md).
 
 ## Phase A — mavjud loyiha auditi
 

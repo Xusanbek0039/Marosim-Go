@@ -88,7 +88,7 @@ def test_mobile_guide_separates_planned_from_available(super_admin, client_for):
     user = {f["key"]: f for f in apps["user"]["features"]}
     assert user["login"]["status"] == "AVAILABLE" and user["photos"]["status"] == "PLANNED"
     studio = {f["key"]: f for f in apps["studio"]["features"]}
-    assert studio["media_upload"]["status"] == "PLANNED"
+    assert studio["media_upload"]["status"] == "AVAILABLE" and studio["media_management"]["status"] == "PLANNED"
     assert {o["id"] for o in studio["create_ceremony"]["operations"]} == {"ceremonies_create"}
 
 

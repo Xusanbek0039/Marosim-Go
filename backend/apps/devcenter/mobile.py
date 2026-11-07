@@ -69,10 +69,18 @@ STUDIO_APP = MobileApp(
             "Kelin / kuyovni biriktirish",
             ("ceremonies_participants_list", "ceremonies_participants_create", "ceremonies_participants_destroy"),
         ),
-        Feature("media_upload", "Media yuklash", planned="Google Drive'ga resumable media upload API'si"),
-        Feature("upload_progress", "Yuklash jarayoni", planned="Upload sessiyasi holati / progress API'si"),
-        Feature("upload_retry", "Yuklashni qayta urinish", planned="Uzilgan upload'ni davom ettirish API'si"),
-        Feature("media_management", "Media boshqaruvi", planned="Media ro'yxati, o'chirish, tartiblash API'si"),
+        Feature(
+            "media_upload",
+            "Media yuklash",
+            ("ceremonies_media_uploads_create", "ceremonies_media_uploads_complete_create"),
+        ),
+        Feature("upload_progress", "Yuklash jarayoni", ("ceremonies_media_uploads_retrieve", "ceremonies_media_list")),
+        Feature(
+            "upload_retry",
+            "Yuklashni davom ettirish / bekor qilish",
+            ("ceremonies_media_uploads_retrieve", "ceremonies_media_uploads_cancel_create"),
+        ),
+        Feature("media_management", "Media boshqaruvi", planned="Media o'chirish, tartiblash, muqova tanlash API'si"),
     ),
 )
 

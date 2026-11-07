@@ -306,6 +306,22 @@
       "changed": {},
       "breaking": [],
       "schema_changed": []
+    },
+    {
+      "revision": 7,
+      "date": "2026-11-07",
+      "note": "V4.1 Phase D: studio media upload — /ceremonies/{ceremony_id}/media/ (list), uploads/ (Drive resumable sessiya), uploads/{media_id}/ (progress), complete/, cancel/",
+      "added": [
+        "GET /api/v1/ceremonies/{ceremony_id}/media/",
+        "GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/"
+      ],
+      "removed": [],
+      "changed": {},
+      "breaking": [],
+      "schema_changed": []
     }
   ]
 }

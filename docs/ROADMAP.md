@@ -5,9 +5,9 @@
 | v1 | Super Admin panel: users, admins, studios, RBAC, JSHSHIR himoyasi, audit | ✅ |
 | v2 | Telefon orqali auth (mobil API), profil, API Monitoring, health, OpenAPI | ✅ |
 | **A** | **Google OAuth Connection** (shaxsiy Gmail, drive.file, shifrlangan refresh token, panel sahifasi) | ✅ 2026-11-07 |
-| B | Drive papkalar: root papka (Picker / ilova yaratgan), `Studio_{uuid}/Ceremony_{uuid}/Videos,Photos`, idempotency, reconciliation | ⏳ tasdiq kutilmoqda |
+| B | Drive papkalar: root papka (Picker / ilova yaratgan), `Studio_{uuid}/Ceremony_{uuid}/Videos,Photos`, idempotency, reconciliation | ✅ 2026-11-07 (V4.1-D: ilova yaratgan root + idempotent daraxt; Picker — ochiq) |
 | — | Studios & Ceremonies API (Ceremony, CeremonyParticipant, `/studios/me/`, `/ceremonies/`, takliflar) | ✅ 2026-11-07 |
-| C | Media upload: chunked resumable upload, vaqtinchalik disk, background worker (Celery/Redis qarori) | ⏳ |
+| C | Media upload: chunked resumable upload, vaqtinchalik disk, background worker (Celery/Redis qarori) | ✅ 2026-11-07 (V4.1-D: to'g'ridan-to'g'ri Drive resumable sessiya — disk/worker kerak emas) |
 | D | Super Admin: Storage dashboard statistikasi, Upload Queue | ⏳ |
 | E | Test & Security: real Drive integration rejimi, quota/expired/recovery testlari | qisman (A uchun ✅) |
 | — | Media access API (`/me/ceremonies/`, stream, Range) | ⏳ |
@@ -20,8 +20,8 @@
 | A | Mavjud loyiha auditi va DB munosabatlari dizayni | ✅ 2026-11-07 |
 | B | Ownership modellari (`CeremonyInvitation`, `CeremonyOwnership`, `CeremonyOwnershipApproval`, `CeremonyViewerAccess`), migratsiyalar + v1 backfill, ruxsat qatlami (`ownership.py`) | ✅ 2026-11-07 |
 | C | Xavfsiz taklif tizimi: telefon/JSHSHIR, qabul/rad, egalar tasdig'i, qayta yuborish, muddat, bekor qilish; v1 endpointlarini ko'chirish | ✅ 2026-11-07 |
-| D | Google Drive media upload (studiya) | ⏳ tasdiq kutilmoqda |
-| E | Foydalanuvchi media API: galereya, thumbnail/preview/stream/download — har so'rovda object-level tekshiruv | ⏳ |
+| D | Google Drive media upload (studiya): resumable sessiya, papka daraxti, yakunda Drive'dan tekshiruv | ✅ 2026-11-07 |
+| E | Foydalanuvchi media API: galereya, thumbnail/preview/stream/download — har so'rovda object-level tekshiruv | ⏳ tasdiq kutilmoqda |
 | F | Super Admin: marosimlar monitoringi + API Developer Center (CEREMONY_OWNER / CEREMONY_VIEWER guruhlari) | ⏳ |
 | G | Xavfsizlik / integratsiya testlari, hujjatlar | ⏳ (B uchun ✅) |
 
@@ -53,3 +53,4 @@ Qarorlar (V5.0):
 * Studiya URL'lari mavjud standartda: `/studios/me/calendar/` (spec'dagi `/studio/calendar/` o'rniga).
 * Pul — `Decimal(14,2)`, faqat UZS, API'da string.
 * Studiya va to'yxona uchun alohida hisoblar; PostgreSQL Phase C'dan oldin o'rnatiladi; a'zolar endpointi qo'shildi (2026-11-07, foydalanuvchi qarori).
+* APPROVED to'yxonaning ommaviy profili o'zgarsa — qayta PENDING_APPROVAL (Phase E, 2026-11-07, foydalanuvchi qarori).

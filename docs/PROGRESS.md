@@ -1,5 +1,30 @@
 # Progress
 
+## 2026-11-07 — V4.1 Ceremony Ownership: Phase D (Google Drive media upload) ✅
+
+Batafsil: [STORAGE_ARCHITECTURE.md §6](STORAGE_ARCHITECTURE.md).
+
+* Arxitektura: mobil ilova baytlarni **to'g'ridan-to'g'ri Google Drive resumable sessiyaga** yuboradi; backend
+  sessiyani ochadi va yakunda faylni Drive'dan qayta o'qib tekshiradi. Disk / Celery / Redis kerak bo'lmadi.
+* Yangi `apps/media`: `CeremonyMedia` (PHOTO/VIDEO; UPLOADING → READY / FAILED / CANCELLED / EXPIRED), servislar,
+  `manage.py expire_media_uploads`. `apps/storage`: `DriveFolder` (idempotent papka daraxti), `folders.py`,
+  gateway: `start_resumable_upload`, `upload_status`, `cancel_upload`, `file_metadata`, `find_child_folder`.
+* Endpointlar (studiya: istalgan faol a'zo — OWNER/MANAGER/UPLOADER, SUPER_ADMIN):
+  `GET /ceremonies/{id}/media/`, `POST …/media/uploads/`, `GET …/uploads/{media_id}/` (jonli progress),
+  `POST …/uploads/{media_id}/complete/`, `POST …/uploads/{media_id}/cancel/`.
+* Xavfsizlik: OAuth token mijozga berilmaydi; session URI shifrlangan, faqat yuklovchiga; Drive ID'lar API'da yo'q;
+  fayl ID'si sessiyadan olinadi; papka/marker/hajm/tur/md5 tekshiruvi, mos kelmasa fayl o'chiriladi; Drive nomlarida PII yo'q.
+* Migratsiyalar: `storage/0002_drive_folder`, `media/0001_initial`, `audit/0006_media_upload_failed`.
+* Developer Center: Studio Mobile "Media yuklash / jarayoni / davom ettirish" endi AVAILABLE; `planned.py` dan D olib tashlandi.
+
+**Testlar**: to'liq to'plam yashil (venues bilan). Yangi `tests/test_media_upload.py` — 18 (soxta Drive:
+papka daraxti, idempotentlik, o'chirilgan papka, rollar/cross-studio, validatsiya, ombor yo'q, jonli progress,
+yakunlash, 6 xil soxtalashtirish, muddat, bekor qilish, akkaunt almashishi), `tests/test_drive_gateway_upload.py` — 9
+(haqiqiy gateway HTTP tahlili, `requests` stub). Mutatsiya: 4 qoida ataylab buzildi — hammasi ushlandi.
+**Jonli Drive bilan tekshirilmagan** — Google akkaunt ulanishi kerak (pastda).
+
+**Keyingi**: Phase E (foydalanuvchi media API: galereya, thumbnail, stream, download) — tasdiq kutilmoqda.
+
 ## 2026-11-07 — V4.1 Ceremony Ownership: Phase C (xavfsiz taklif tizimi) ✅
 
 Batafsil: [CEREMONY_OWNERSHIP.md](CEREMONY_OWNERSHIP.md#phase-c--xavfsiz-taklif-tizimi-endpointlar).

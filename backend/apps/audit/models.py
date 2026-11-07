@@ -34,6 +34,7 @@ class AuditAction(models.TextChoices):
     ACCESS_REVOKE = "ACCESS_REVOKE", "Marosimga kirish huquqi bekor qilindi"
     RECIPIENT_LOOKUP = "RECIPIENT_LOOKUP", "Taklif oluvchi qidirildi"
     MEDIA_UPLOAD = "MEDIA_UPLOAD", "Media yuklandi"
+    MEDIA_UPLOAD_FAILED = "MEDIA_UPLOAD_FAILED", "Media tekshiruvdan o'tmadi"
     STORAGE_CONNECT = "STORAGE_CONNECT", "Google Drive ulandi"
     STORAGE_CONNECT_FAILED = "STORAGE_CONNECT_FAILED", "Google Drive ulanmadi"
     STORAGE_DISCONNECT = "STORAGE_DISCONNECT", "Google Drive uzildi"

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.monitoring",
     "apps.storage",
     "apps.ceremonies",
+    "apps.media",
     "apps.venues",
     "apps.devcenter",
 ]
@@ -123,6 +124,7 @@ REST_FRAMEWORK = {
         "register": env.str("THROTTLE_REGISTER", default="10/hour"),
         "ceremony_invite": env.str("THROTTLE_CEREMONY_INVITE", default="60/hour"),
         "invitation_respond": env.str("THROTTLE_INVITATION_RESPOND", default="30/hour"),
+        "media_upload": env.str("THROTTLE_MEDIA_UPLOAD", default="600/hour"),
         "venue_member_add": env.str("THROTTLE_VENUE_MEMBER_ADD", default="30/hour"),
         "storage_connect": env.str("THROTTLE_STORAGE_CONNECT", default="20/hour"),
         "storage_callback": env.str("THROTTLE_STORAGE_CALLBACK", default="30/hour"),
@@ -257,6 +259,8 @@ SPECTACULAR_SETTINGS = {
         "InvitationStatusEnum": "apps.ceremonies.models.InvitationStatus",
         "OwnershipStatusEnum": "apps.ceremonies.models.OwnershipStatus",
         "InvitationAcceptStatusEnum": ["ACCEPTED", "PENDING_APPROVAL"],
+        "MediaKindEnum": "apps.media.models.MediaKind",
+        "MediaStatusEnum": "apps.media.models.MediaStatus",
         "StorageConnectionStatusEnum": "apps.storage.models.ConnectionStatus",
         "VenueRegionEnum": "apps.venues.models.Region",
         "VenueTypeEnum": "apps.venues.models.VenueType",
@@ -280,6 +284,15 @@ CEREMONY_INVITATION_TTL_DAYS = env.int("CEREMONY_INVITATION_TTL_DAYS", default=1
 # Abuse limits: open invitations per ceremony, renewals per invitation.
 CEREMONY_MAX_PENDING_INVITATIONS = env.int("CEREMONY_MAX_PENDING_INVITATIONS", default=50)
 CEREMONY_MAX_INVITATION_SENDS = env.int("CEREMONY_MAX_INVITATION_SENDS", default=5)
+
+# Ceremony media (Phase D): client → Google Drive resumable sessions; nothing is public.
+MEDIA_UPLOAD = {
+    "PHOTO_MAX_BYTES": env.int("MEDIA_PHOTO_MAX_MB", default=50) * 1024 * 1024,
+    "VIDEO_MAX_BYTES": env.int("MEDIA_VIDEO_MAX_MB", default=20 * 1024) * 1024 * 1024,
+    "MAX_ACTIVE_PER_CEREMONY": env.int("MEDIA_MAX_ACTIVE_UPLOADS", default=50),
+    # Google keeps a resumable session for about a week; close ours a little earlier.
+    "SESSION_TTL_HOURS": env.int("MEDIA_SESSION_TTL_HOURS", default=144),
+}
 
 # ----------------------------------------------------------- Google Drive storage
 # OAuth "Web application" client. Read from the JSON downloaded from Google Cloud Console

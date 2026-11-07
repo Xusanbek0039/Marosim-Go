@@ -1,6 +1,6 @@
 # Storage arxitekturasi
 
-Holat: **Phase A (OAuth Connection) — tayyor.** B (papkalar), C (upload), D (dashboard) — rejada.
+Holat: **Phase A (OAuth) va media upload (papkalar + resumable upload, V4.1-D) — tayyor.** Dashboard — rejada.
 
 ## 1. Modul
 
@@ -85,8 +85,44 @@ ga yoziladi. Bu token-ni-brauzerga-berish qarori Phase B boshida tasdiqlanadi.
 Jonli tekshiruv: `python manage.py storage_selftest [--parent <picked_folder_id>]` — test papka,
 `Videos/` subpapka va kichik fayl yaratadi, o'qiydi va **faqat ularni** o'chiradi.
 
-## 6. Keyingi bosqichlar uchun eslatma (Phase C)
+## 6. Media upload (V4.1 Phase D) — to'g'ridan-to'g'ri Drive resumable sessiya
 
-Celery/Redis hozir **yo'q**. Katta video upload (Client → chunk API → vaqtinchalik disk → worker → Drive
-resumable) uchun Phase C boshida worker varianti (Celery+Redis yoki DB-queue + alohida jarayon) tanlanadi;
-qimmat infratuzilma ruxsatsiz o'rnatilmaydi. Drive — CDN emas: uzoq muddatda S3-compatible + CDN rejasi.
+**Qaror**: baytlar backend orqali o'tmaydi. Vaqtinchalik disk, Celery/Redis kerak emas (yangi infratuzilma yo'q).
+
+```
+Mobil ilova (studiya)            Django                                  Google Drive
+ POST …/media/uploads/ ─────▶ ruxsat · tur/hajm · arxiv emas · limit
+  {filename, mime_type,        CeremonyMedia(UPLOADING) yaratiladi
+   size_bytes, md5?}           papka: MarosimGo/Studio_<id>/Ceremony_<id>/{Photos,Videos}
+                               (DriveFolder kesh, unique key — idempotent)
+                               resumable sessiya ochadi ───────────────▶ (nom = <media_id>.<ext>,
+                                                                         appProperties.mg_media = <id>,
+                                                                         X-Upload-Content-Length)
+  ◀── {upload_url, chunk_size_multiple=256 KiB}  (session URI shifrlangan holda saqlanadi)
+ PUT upload_url (bo'laklab, Content-Range) ─────────────────────────────▶ (Authorization shart emas;
+                                                                         URI faqat shu bitta fayl uchun)
+ GET …/uploads/{id}/ ─────────▶ PUT bytes */N → Google'dan jonli progress (uzilsa davom ettirish)
+ POST …/uploads/{id}/complete/ ▶ fayl id'si SESSIYANING O'ZIDAN olinadi (mijozdan emas)
+                               files.get qayta o'qiladi va tekshiriladi:
+                               trashed emas · parent = ceremony papkasi · mg_media = id ·
+                               size = e'lon qilingan · mimeType · (md5 berilgan bo'lsa)
+                               mos → READY (CAS, bir marta, audit MEDIA_UPLOAD)
+                               mos emas → Drive fayli o'chiriladi, FAILED (audit MEDIA_UPLOAD_FAILED)
+```
+
+| Mavzu | Yechim |
+|---|---|
+| OAuth token | hech qachon mijozga berilmaydi; faqat bitta faylga yaroqli session URI |
+| Session URI | `vault` (Fernet) bilan shifrlangan; faqat yuklashni boshlagan foydalanuvchiga va UPLOADING holatida qaytadi |
+| Drive ID'lar | API javoblarida yo'q; fayl hech qachon public qilinmaydi; kirish faqat `CeremonyMedia` qatori orqali (Phase E) |
+| Fayl nomlari | Drive'da faqat `<uuid>.<ext>` va `Studio_<uuid>`/`Ceremony_<uuid>` — ism/telefon yo'q |
+| Papka idempotentligi | `DriveFolder(account_email, key)` unique; kesh yo'qolsa mavjud papka topiladi; poygada yutqazgan dublikat o'chiriladi; papka Drive'da o'chirilgan bo'lsa (`not_found`) bir marta qayta quriladi |
+| Akkaunt almashsa | `DriveFolder` akkauntga bog'langan — eski ID'lar qayta ishlatilmaydi |
+| Limitlar | `MEDIA_PHOTO_MAX_MB` (50), `MEDIA_VIDEO_MAX_MB` (20480), `MEDIA_MAX_ACTIVE_UPLOADS` (50/marosim), throttle `media_upload` |
+| Muddat | sessiya TTL 144 soat (`MEDIA_SESSION_TTL_HOURS`); `manage.py expire_media_uploads` (cron) |
+| Drive ulanmagan / kvota | 503 `storage_unavailable` (sabab kodi bilan), qator FAILED |
+
+**Cheklov (ochiq)**: server faylni yuklab olib kontentini "sniff" qilmaydi — tur e'lon qilingan qiymat va Drive
+metadatasi bilan tekshiriladi. Phase E'da media faqat avtorizatsiyalangan proksi orqali, qat'iy `Content-Type`
+va `X-Content-Type-Options: nosniff` bilan beriladi. Drive — CDN emas: uzoq muddatda S3-compatible + CDN rejasi.
+Picker orqali mavjud papkani root qilish — hali ochiq (hozir ilova `MarosimGo` papkasini o'zi yaratadi).

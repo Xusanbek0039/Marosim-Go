@@ -238,6 +238,17 @@ OWNERSHIP_TESTS = {
     ),
     "me_ceremonies_leave_create": "ownership_leave_is_own_access",
     "me_invitations_retrieve": "ownership_invitation_detail_is_recipient_only",
+    # media (Phase D) — tests live in tests/test_media_upload.py
+    **dict.fromkeys(
+        [
+            "ceremonies_media_list",
+            "ceremonies_media_uploads_create",
+            "ceremonies_media_uploads_retrieve",
+            "ceremonies_media_uploads_complete_create",
+            "ceremonies_media_uploads_cancel_create",
+        ],
+        "ownership_media_scope_is_own_studio",
+    ),
     # venues — tests live in tests/test_venues.py
     **dict.fromkeys(
         [
@@ -271,6 +282,10 @@ ownership_owner_revokes_only_own_grants = _ownership_tests.test_owner_cannot_rev
 ownership_owner_request_votes = _ownership_tests.test_multiple_owners_need_existing_owner_approval
 ownership_leave_is_own_access = _ownership_tests.test_leaving_owner_takes_their_pending_invitations_and_votes_along
 ownership_invitation_detail_is_recipient_only = _ownership_tests.test_wrong_user_cannot_see_or_accept_invitation
+
+from . import test_media_upload as _media_tests  # noqa: E402
+
+ownership_media_scope_is_own_studio = _media_tests.test_upload_scope_and_roles
 
 from . import test_venues as _venue_tests  # noqa: E402
 

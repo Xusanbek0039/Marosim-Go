@@ -29,6 +29,11 @@
 | POST | `/api/v1/auth/register/` | Ro'yxatdan o'tish (telefon + parol) | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/ceremonies/` | Marosimlar ro'yxati | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | POST | `/api/v1/ceremonies/` | Marosim yaratish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| GET | `/api/v1/ceremonies/{ceremony_id}/media/` | Marosimning yuklangan fayllari va holati | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/{ceremony_id}/media/uploads/` | Media yuklashni boshlash (Google Drive resumable sessiya) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| GET | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` | Yuklash holati (Google'dan jonli progress) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/` | Yuklashni bekor qilish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/` | Yuklashni yakunlash va tekshirish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/ceremonies/{id}/` | Marosim ma'lumotlari | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | PATCH | `/api/v1/ceremonies/{id}/` | Marosimni tahrirlash | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/ceremonies/{id}/owners/` | Marosim egalari va egalik takliflari | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
@@ -121,12 +126,17 @@
 * `POST /api/v1/me/invitations/{id}/accept/` — Taklifni qabul qilish
 * `POST /api/v1/me/invitations/{id}/decline/` — Taklifni rad etish
 
-### STUDIO (13)
+### STUDIO (18)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
 * `GET /api/v1/ceremonies/` — Marosimlar ro'yxati
 * `POST /api/v1/ceremonies/` — Marosim yaratish
+* `GET /api/v1/ceremonies/{ceremony_id}/media/` — Marosimning yuklangan fayllari va holati
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/` — Media yuklashni boshlash (Google Drive resumable sessiya)
+* `GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` — Yuklash holati (Google'dan jonli progress)
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/` — Yuklashni bekor qilish
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/` — Yuklashni yakunlash va tekshirish
 * `GET /api/v1/ceremonies/{id}/` — Marosim ma'lumotlari
 * `PATCH /api/v1/ceremonies/{id}/` — Marosimni tahrirlash
 * `GET /api/v1/ceremonies/{id}/owners/` — Marosim egalari va egalik takliflari
@@ -170,7 +180,7 @@
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (43)
+### SUPER_ADMIN (48)
 
 * `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
 * `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
@@ -188,6 +198,11 @@
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
 * `GET /api/v1/ceremonies/` — Marosimlar ro'yxati
 * `POST /api/v1/ceremonies/` — Marosim yaratish
+* `GET /api/v1/ceremonies/{ceremony_id}/media/` — Marosimning yuklangan fayllari va holati
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/` — Media yuklashni boshlash (Google Drive resumable sessiya)
+* `GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` — Yuklash holati (Google'dan jonli progress)
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/` — Yuklashni bekor qilish
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/` — Yuklashni yakunlash va tekshirish
 * `GET /api/v1/ceremonies/{id}/` — Marosim ma'lumotlari
 * `PATCH /api/v1/ceremonies/{id}/` — Marosimni tahrirlash
 * `GET /api/v1/ceremonies/{id}/owners/` — Marosim egalari va egalik takliflari
@@ -239,6 +254,17 @@
 * `POST /api/v1/ceremonies/`
   * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
   * SUPER_ADMIN studio_id ni ko'rsatishi shart.
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/`
+  * Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+  * Google Drive ulangan bo'lishi shart (aks holda 503 storage_unavailable).
+  * Arxivlangan marosimga yuklab bo'lmaydi; tur va hajm cheklangan.
+* `GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/`
+  * upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi.
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/`
+  * Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.
+* `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/`
+  * Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+  * Fayl Drive'dan qayta o'qilib tekshiriladi.
 * `PATCH /api/v1/ceremonies/{id}/`
   * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
   * Holat o'tishlari cheklangan.
@@ -337,8 +363,6 @@
 
 | Bosqich | Metod | Yo'l | Tavsif | Kim | Shart |
 |---|---|---|---|---|---|
-| D | POST | `/api/v1/ceremonies/{id}/media/uploads/` | Resumable media upload sessiyasi | STUDIO | Studiya a'zoligi OWNER/MANAGER/UPLOADER |
-| D | GET | `/api/v1/ceremonies/{id}/media/` | Yuklangan fayllar va holati | STUDIO | — |
 | E | GET | `/api/v1/me/ceremonies/{id}/media/` | Media galereya | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi) |
 | E | GET | `/api/v1/me/ceremonies/{id}/media/{media_id}/thumbnail/` | Kichik rasm | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi); Drive fayli hech qachon public qilinmaydi |
 | E | GET | `/api/v1/me/ceremonies/{id}/media/{media_id}/preview/` | Ko'rib chiqish | CEREMONY_OWNER, CEREMONY_VIEWER | USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi); Drive fayli hech qachon public qilinmaydi |

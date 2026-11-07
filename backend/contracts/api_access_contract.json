@@ -227,6 +227,38 @@
       "operation_id": "ceremonies_list",
       "schema_fingerprint": "8b97fe26205a3408"
     },
+    "GET /api/v1/ceremonies/{ceremony_id}/media/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_list",
+      "schema_fingerprint": "9460a5627a83bf53"
+    },
+    "GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_uploads_retrieve",
+      "schema_fingerprint": "71d031a2417d8a1f"
+    },
     "GET /api/v1/ceremonies/{id}/": {
       "allowed_roles": [
         "STUDIO",
@@ -1019,6 +1051,60 @@
       "deprecated": false,
       "operation_id": "ceremonies_create",
       "schema_fingerprint": "147f91d4ba36c976"
+    },
+    "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.",
+        "Google Drive ulangan bo'lishi shart (aks holda 503 storage_unavailable).",
+        "Arxivlangan marosimga yuklab bo'lmaydi; tur va hajm cheklangan."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_uploads_create",
+      "schema_fingerprint": "bc6b1d0f34479e17"
+    },
+    "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_uploads_cancel_create",
+      "schema_fingerprint": "411d152f245c55ea"
+    },
+    "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.",
+        "Fayl Drive'dan qayta o'qilib tekshiriladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_uploads_complete_create",
+      "schema_fingerprint": "411d152f245c55ea"
     },
     "POST /api/v1/ceremonies/{id}/owners/invite/": {
       "allowed_roles": [

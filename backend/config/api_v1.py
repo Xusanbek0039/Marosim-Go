@@ -36,5 +36,6 @@ urlpatterns = [
     # Before the router: "studios/me/" must not be captured by "studios/{id}/".
     path("studios/me/", StudioMeView.as_view(), name="studio-me"),
     path("studios/me/ceremonies/", StudioMeCeremoniesView.as_view(), name="studio-me-ceremonies"),
+    path("ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls")),
     path("", include(router.urls)),
 ]

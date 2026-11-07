@@ -28,16 +28,6 @@ _ID = "{id}"
 MEMBER = "USER roli + ACCEPTED ownership yoki viewer access (har so'rovda qayta tekshiriladi)"
 
 PLANNED_ENDPOINTS: tuple[PlannedEndpoint, ...] = (
-    # ------------------------------------------------------------ Phase D
-    PlannedEndpoint(
-        "POST",
-        f"/api/v1/ceremonies/{_ID}/media/uploads/",
-        "Resumable media upload sessiyasi",
-        ("STUDIO",),
-        "D",
-        "Studiya a'zoligi OWNER/MANAGER/UPLOADER",
-    ),
-    PlannedEndpoint("GET", f"/api/v1/ceremonies/{_ID}/media/", "Yuklangan fayllar va holati", ("STUDIO",), "D"),
     # ------------------------------------------------------------ Phase E
     PlannedEndpoint(
         "GET", f"/api/v1/me/ceremonies/{_ID}/media/", "Media galereya", (CEREMONY_OWNER, CEREMONY_VIEWER), "E", MEMBER
