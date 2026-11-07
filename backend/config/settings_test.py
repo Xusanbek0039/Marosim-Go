@@ -17,6 +17,7 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {  # noqa: F405
     "login": "10000/min",
     "register": "10000/min",
     "storage_connect": "10000/min",
+    "ceremony_invite": "10000/min",
     "storage_callback": "10000/min",
     "token_refresh": "10000/min",
     "pinfl_reveal": "10000/min",

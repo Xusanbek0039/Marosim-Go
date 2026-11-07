@@ -9,8 +9,9 @@ from apps.audit.services import AuditAction, diff, record, snapshot
 
 from .models import Studio
 from .serializers import StudioSerializer
+from .services import sync_owner_membership
 
-AUDITED_FIELDS = ["name", "profile_picture", "address", "responsible_user", "is_active"]
+AUDITED_FIELDS = ["name", "description", "profile_picture", "address", "responsible_user", "is_active"]
 
 
 class StudioFilter(django_filters.FilterSet):
@@ -58,13 +59,16 @@ class StudioViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def perform_create(self, serializer):
         studio = serializer.save()
+        sync_owner_membership(studio)
         record(self.request, AuditAction.CREATE, studio, changes=snapshot(studio, AUDITED_FIELDS))
 
     @transaction.atomic
     def perform_update(self, serializer):
         before = snapshot(serializer.instance, AUDITED_FIELDS)
         was_active = serializer.instance.is_active
+        previous_owner_id = serializer.instance.responsible_user_id
         studio = serializer.save()
+        sync_owner_membership(studio, previous_owner_id)
         changes = diff(before, snapshot(studio, AUDITED_FIELDS))
         if was_active != studio.is_active:
             record(self.request, AuditAction.ACTIVATE if studio.is_active else AuditAction.DEACTIVATE, studio)

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.dashboard",
     "apps.monitoring",
     "apps.storage",
+    "apps.ceremonies",
 ]
 
 MIDDLEWARE = [
@@ -118,6 +119,7 @@ REST_FRAMEWORK = {
         "user": env.str("THROTTLE_USER", default="600/min"),
         "login": env.str("THROTTLE_LOGIN", default="5/min"),
         "register": env.str("THROTTLE_REGISTER", default="10/hour"),
+        "ceremony_invite": env.str("THROTTLE_CEREMONY_INVITE", default="60/hour"),
         "storage_connect": env.str("THROTTLE_STORAGE_CONNECT", default="20/hour"),
         "storage_callback": env.str("THROTTLE_STORAGE_CALLBACK", default="30/hour"),
         "token_refresh": env.str("THROTTLE_REFRESH", default="30/min"),
@@ -246,6 +248,11 @@ SPECTACULAR_SETTINGS = {
         ["rest_framework.permissions.AllowAny"] if DEBUG else ["apps.accounts.permissions.IsSuperAdmin"]
     ),
 }
+
+# -------------------------------------------------------------------- ceremonies
+# Accepting a ceremony invitation proves ownership of the invited phone number only if the
+# number is OTP-verified. Until an SMS provider exists this is relaxed in DEBUG only.
+CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE = env.bool("CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE", default=not DEBUG)
 
 # ----------------------------------------------------------- Google Drive storage
 # OAuth "Web application" client. Read from the JSON downloaded from Google Cloud Console

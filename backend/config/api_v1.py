@@ -4,6 +4,13 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from apps.accounts.views import AdminViewSet, UserViewSet
+from apps.ceremonies.views import (
+    CeremonyViewSet,
+    InvitationViewSet,
+    MyCeremonyViewSet,
+    StudioMeCeremoniesView,
+    StudioMeView,
+)
 from apps.monitoring.health import LiveView, ReadyView
 from apps.studios.views import StudioViewSet
 
@@ -12,6 +19,9 @@ router.include_root_view = False
 router.register("users", UserViewSet, basename="user")
 router.register("admins", AdminViewSet, basename="admin")
 router.register("studios", StudioViewSet, basename="studio")
+router.register("ceremonies", CeremonyViewSet, basename="ceremony")
+router.register("me/ceremonies", MyCeremonyViewSet, basename="my-ceremony")
+router.register("me/invitations", InvitationViewSet, basename="my-invitation")
 
 urlpatterns = [
     path("auth/", include("apps.accounts.auth_urls")),
@@ -20,5 +30,8 @@ urlpatterns = [
     path("admin/storage/", include("apps.storage.urls")),
     path("health/live/", LiveView.as_view(), name="health-live"),
     path("health/ready/", ReadyView.as_view(), name="health-ready"),
+    # Before the router: "studios/me/" must not be captured by "studios/{id}/".
+    path("studios/me/", StudioMeView.as_view(), name="studio-me"),
+    path("studios/me/ceremonies/", StudioMeCeremoniesView.as_view(), name="studio-me-ceremonies"),
     path("", include(router.urls)),
 ]

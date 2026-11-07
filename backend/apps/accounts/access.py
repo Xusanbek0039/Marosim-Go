@@ -80,9 +80,11 @@ def _known_grant(permission, view) -> Grant | None:
         return _grant(permission.op1, view) & _grant(permission.op2, view)
     if isinstance(permission, drf.OR):
         return _grant(permission.op1, view) | _grant(permission.op2, view)
-    if type(permission) is drf.AllowAny:
+    # Subclasses count only while they keep the built-in has_permission.
+    check = getattr(type(permission), "has_permission", None)
+    if check is drf.AllowAny.has_permission:
         return Grant(EVERYONE)
-    if type(permission) is drf.IsAuthenticated:
+    if check is drf.IsAuthenticated.has_permission:
         return Grant(AUTHENTICATED_ROLES)
     return None
 
@@ -105,12 +107,9 @@ def _class_name(permission) -> str:
 def _overrides_object_permission(permission) -> bool:
     if isinstance(permission, drf.AND | drf.OR):
         return _overrides_object_permission(permission.op1) or _overrides_object_permission(permission.op2)
+    # ``access_grant`` describes has_permission only — object rules always need an ownership note.
     impl = getattr(type(permission), "has_object_permission", None)
-    return (
-        impl is not None
-        and impl is not drf.BasePermission.has_object_permission
-        and not hasattr(permission, "access_grant")
-    )
+    return impl is not None and impl is not drf.BasePermission.has_object_permission
 
 
 def notes_for(view, method: str) -> AccessNote:
@@ -180,12 +179,14 @@ def resolve(view, method: str) -> AccessPolicy:
     for permission in perms:  # DRF requires every class to pass
         grant = grant & _grant(permission, view)
 
+    note = notes_for(view, method)
     reasons = [f"Noma'lum permission class: {name}" for name in grant.unknown]
-    reasons += [
-        f"{_class_name(p)} object-level tekshiruvga ega — `access_notes` da hujjatlashtiring"
-        for p in perms
-        if _overrides_object_permission(p)
-    ]
+    if not note.ownership:
+        reasons += [
+            f"{_class_name(p)} object-level tekshiruvga ega — `access_notes` da ownership'ni hujjatlashtiring"
+            for p in perms
+            if _overrides_object_permission(p)
+        ]
 
     authenticators = view.get_authenticators() if hasattr(view, "get_authenticators") else []
     roles = set(grant.roles)
@@ -198,10 +199,6 @@ def resolve(view, method: str) -> AccessPolicy:
         roles = set()  # never guess — an unknown class may restrict anyone (or no one)
     elif not roles:
         reasons.append("Hech bir rol o'ta olmaydi")
-
-    note = notes_for(view, method)
-    if any(p for p in perms if _overrides_object_permission(p)) and note.ownership:
-        reasons = [r for r in reasons if "object-level" not in r]
 
     requirements = {role: codes for role, codes in grant.requirements.items() if role in roles and codes}
     codes = sorted(set().union(*requirements.values())) if requirements else []

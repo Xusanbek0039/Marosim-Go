@@ -1,43 +1,145 @@
 # API endpointlar
 
 > Avtomatik yaratilgan: `python manage.py export_api_endpoints` (OpenAPI'dan). Qo'lda tahrirlamang.
+> Rollar DRF permission class'laridan olinadi (`apps/accounts/access.py`) va
+> `tests/test_api_access_contract.py` da har bir rol bilan haqiqiy so'rov orqali tekshiriladi.
 > Batafsil: Swagger `/api/v1/docs/`, panel → API Monitoring → Endpointlar.
 
-| Metod | Yo'l | Tavsif | Kirish |
-|---|---|---|---|
-| GET | `/api/v1/admin/storage/google/callback/` | Google OAuth callback (brauzer redirect) | Ochiq (public) |
-| GET | `/api/v1/admin/storage/google/connect/` | Google Drive'ni ulashni boshlash | Faqat SUPER_ADMIN |
-| POST | `/api/v1/admin/storage/google/disconnect/` | Google Drive'ni uzish | Faqat SUPER_ADMIN |
-| GET | `/api/v1/admin/storage/google/status/` | Google Drive ulanish holati | Faqat SUPER_ADMIN |
-| POST | `/api/v1/admin/storage/google/test/` | Ulanishni tekshirish | Faqat SUPER_ADMIN |
-| GET | `/api/v1/admins/` |  | Faqat SUPER_ADMIN |
-| POST | `/api/v1/admins/` |  | Faqat SUPER_ADMIN |
-| GET | `/api/v1/admins/permissions/` | Adminlarga beriladigan ruxsatlar ro'yxati | Faqat SUPER_ADMIN |
-| GET | `/api/v1/admins/{id}/` |  | Faqat SUPER_ADMIN |
-| PATCH | `/api/v1/admins/{id}/` |  | Faqat SUPER_ADMIN |
-| DELETE | `/api/v1/admins/{id}/` |  | Faqat SUPER_ADMIN |
-| GET | `/api/v1/admins/{id}/pinfl/` | Adminning to'liq JSHSHIRi (audit qilinadi) | Faqat SUPER_ADMIN |
-| GET | `/api/v1/auth/csrf/` | CSRF cookie olish (web panel) | Ochiq (public) |
-| POST | `/api/v1/auth/login/` | Tizimga kirish (telefon + parol) | Ochiq (public) |
-| POST | `/api/v1/auth/logout/` | Tizimdan chiqish | Ochiq (public) |
-| GET | `/api/v1/auth/me/` | Mening profilim | Har qanday tizimga kirgan foydalanuvchi |
-| PATCH | `/api/v1/auth/me/` | Profilni tahrirlash | Har qanday tizimga kirgan foydalanuvchi |
-| POST | `/api/v1/auth/refresh/` | Tokenni yangilash (rotation) | Ochiq (public) |
-| POST | `/api/v1/auth/register/` | Ro'yxatdan o'tish (telefon + parol) | Ochiq (public) |
-| GET | `/api/v1/dashboard/overview/` |  | SUPER_ADMIN yoki `dashboard.view` ruxsatli ADMIN |
-| GET | `/api/v1/health/live/` | Liveness — jarayon ishlayaptimi | Ochiq (public) |
-| GET | `/api/v1/health/ready/` | Readiness — bog'liqliklar (database, cache) tayyormi | Ochiq (public) |
-| GET | `/api/v1/monitoring/endpoints/` | API endpointlar katalogi (OpenAPI'dan avtomatik) | Faqat SUPER_ADMIN |
-| GET | `/api/v1/monitoring/logs/` | So'rovlar jurnali | Faqat SUPER_ADMIN |
-| GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | Faqat SUPER_ADMIN |
-| GET | `/api/v1/studios/` |  | SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN |
-| POST | `/api/v1/studios/` |  | SUPER_ADMIN yoki `studios.create` ruxsatli ADMIN |
-| GET | `/api/v1/studios/{id}/` |  | SUPER_ADMIN yoki `studios.view` ruxsatli ADMIN |
-| PATCH | `/api/v1/studios/{id}/` |  | SUPER_ADMIN yoki `studios.update` ruxsatli ADMIN |
-| DELETE | `/api/v1/studios/{id}/` |  | SUPER_ADMIN yoki `studios.delete` ruxsatli ADMIN |
-| GET | `/api/v1/users/` |  | SUPER_ADMIN yoki `users.view` ruxsatli ADMIN |
-| POST | `/api/v1/users/` |  | SUPER_ADMIN yoki `users.create` ruxsatli ADMIN |
-| GET | `/api/v1/users/{id}/` |  | SUPER_ADMIN yoki `users.view` ruxsatli ADMIN |
-| PATCH | `/api/v1/users/{id}/` |  | SUPER_ADMIN yoki `users.update` ruxsatli ADMIN |
-| DELETE | `/api/v1/users/{id}/` |  | SUPER_ADMIN yoki `users.delete` ruxsatli ADMIN |
-| GET | `/api/v1/users/{id}/pinfl/` | To'liq JSHSHIR (audit qilinadi) | SUPER_ADMIN yoki `users.view_pinfl` ruxsatli ADMIN |
+| Metod | Yo'l | Tavsif | Rollar | Ruxsat kodi (ADMIN) | Auth | Ma'lumot doirasi | Holat |
+|---|---|---|---|---|---|---|---|
+| GET | `/api/v1/admin/storage/google/callback/` | Google OAuth callback (brauzer redirect) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/admin/storage/google/connect/` | Google Drive'ni ulashni boshlash | SUPER_ADMIN | — | JWT | — | OK |
+| POST | `/api/v1/admin/storage/google/disconnect/` | Google Drive'ni uzish | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/admin/storage/google/status/` | Google Drive ulanish holati | SUPER_ADMIN | — | JWT | — | OK |
+| POST | `/api/v1/admin/storage/google/test/` | Ulanishni tekshirish | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/admins/` | Adminlar ro'yxati | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
+| POST | `/api/v1/admins/` | Admin qo'shish | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
+| GET | `/api/v1/admins/permissions/` | Adminlarga beriladigan ruxsatlar ro'yxati | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/admins/{id}/` | Admin ma'lumotlari | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
+| PATCH | `/api/v1/admins/{id}/` | Adminni tahrirlash (ruxsatlar bilan) | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
+| DELETE | `/api/v1/admins/{id}/` | Adminni o'chirish (soft delete) | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
+| GET | `/api/v1/admins/{id}/pinfl/` | Adminning to'liq JSHSHIRi (audit qilinadi) | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
+| GET | `/api/v1/auth/csrf/` | CSRF cookie olish (web panel) | PUBLIC | — | NONE | — | OK |
+| POST | `/api/v1/auth/login/` | Tizimga kirish (telefon + parol) | PUBLIC | — | NONE | — | OK |
+| POST | `/api/v1/auth/logout/` | Tizimdan chiqish | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/auth/me/` | Mening profilim | USER, STUDIO, ADMIN, SUPER_ADMIN | — | JWT | Faqat chaqiruvchining o'z hisobi (request.user). | OK |
+| PATCH | `/api/v1/auth/me/` | Profilni tahrirlash | USER, STUDIO, ADMIN, SUPER_ADMIN | — | JWT | Faqat chaqiruvchining o'z hisobi (request.user). | OK |
+| POST | `/api/v1/auth/refresh/` | Tokenni yangilash (rotation) | PUBLIC | — | NONE | — | OK |
+| POST | `/api/v1/auth/register/` | Ro'yxatdan o'tish (telefon + parol) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/dashboard/overview/` | Dashboard statistikasi | ADMIN, SUPER_ADMIN | `dashboard.view` | JWT | — | OK |
+| GET | `/api/v1/health/live/` | Liveness — jarayon ishlayaptimi | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/health/ready/` | Readiness — bog'liqliklar (database, cache) tayyormi | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/monitoring/endpoints/` | API endpointlar katalogi (OpenAPI'dan avtomatik) | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/monitoring/logs/` | So'rovlar jurnali | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/studios/` | Studiyalar ro'yxati | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| POST | `/api/v1/studios/` | Studiya qo'shish | ADMIN, SUPER_ADMIN | `studios.create` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| GET | `/api/v1/studios/{id}/` | Studiya ma'lumotlari | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| PATCH | `/api/v1/studios/{id}/` | Studiyani tahrirlash | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| DELETE | `/api/v1/studios/{id}/` | Studiyani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `studios.delete` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| GET | `/api/v1/users/` | Mijozlar ro'yxati (USER, STUDIO) | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| POST | `/api/v1/users/` | Mijoz qo'shish | ADMIN, SUPER_ADMIN | `users.create` | JWT | Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| GET | `/api/v1/users/{id}/` | Mijoz ma'lumotlari | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| PATCH | `/api/v1/users/{id}/` | Mijozni tahrirlash | ADMIN, SUPER_ADMIN | `users.update` | JWT | Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| DELETE | `/api/v1/users/{id}/` | Mijozni o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `users.delete` | JWT | Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| GET | `/api/v1/users/{id}/pinfl/` | To'liq JSHSHIR (audit qilinadi) | ADMIN, SUPER_ADMIN | `users.view_pinfl` | JWT | Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+
+## Rollar bo'yicha
+
+### PUBLIC (8)
+
+* `GET /api/v1/admin/storage/google/callback/` — Google OAuth callback (brauzer redirect)
+* `GET /api/v1/auth/csrf/` — CSRF cookie olish (web panel)
+* `POST /api/v1/auth/login/` — Tizimga kirish (telefon + parol)
+* `POST /api/v1/auth/logout/` — Tizimdan chiqish
+* `POST /api/v1/auth/refresh/` — Tokenni yangilash (rotation)
+* `POST /api/v1/auth/register/` — Ro'yxatdan o'tish (telefon + parol)
+* `GET /api/v1/health/live/` — Liveness — jarayon ishlayaptimi
+* `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
+
+### USER (2)
+
+* `GET /api/v1/auth/me/` — Mening profilim
+* `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+
+### STUDIO (2)
+
+* `GET /api/v1/auth/me/` — Mening profilim
+* `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+
+### ADMIN (14)
+
+* `GET /api/v1/auth/me/` — Mening profilim
+* `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+* `GET /api/v1/dashboard/overview/` — Dashboard statistikasi
+* `GET /api/v1/studios/` — Studiyalar ro'yxati
+* `POST /api/v1/studios/` — Studiya qo'shish
+* `GET /api/v1/studios/{id}/` — Studiya ma'lumotlari
+* `PATCH /api/v1/studios/{id}/` — Studiyani tahrirlash
+* `DELETE /api/v1/studios/{id}/` — Studiyani o'chirish (soft delete)
+* `GET /api/v1/users/` — Mijozlar ro'yxati (USER, STUDIO)
+* `POST /api/v1/users/` — Mijoz qo'shish
+* `GET /api/v1/users/{id}/` — Mijoz ma'lumotlari
+* `PATCH /api/v1/users/{id}/` — Mijozni tahrirlash
+* `DELETE /api/v1/users/{id}/` — Mijozni o'chirish (soft delete)
+* `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
+
+### SUPER_ADMIN (28)
+
+* `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
+* `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
+* `GET /api/v1/admin/storage/google/status/` — Google Drive ulanish holati
+* `POST /api/v1/admin/storage/google/test/` — Ulanishni tekshirish
+* `GET /api/v1/admins/` — Adminlar ro'yxati
+* `POST /api/v1/admins/` — Admin qo'shish
+* `GET /api/v1/admins/permissions/` — Adminlarga beriladigan ruxsatlar ro'yxati
+* `GET /api/v1/admins/{id}/` — Admin ma'lumotlari
+* `PATCH /api/v1/admins/{id}/` — Adminni tahrirlash (ruxsatlar bilan)
+* `DELETE /api/v1/admins/{id}/` — Adminni o'chirish (soft delete)
+* `GET /api/v1/admins/{id}/pinfl/` — Adminning to'liq JSHSHIRi (audit qilinadi)
+* `GET /api/v1/auth/me/` — Mening profilim
+* `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+* `GET /api/v1/dashboard/overview/` — Dashboard statistikasi
+* `GET /api/v1/monitoring/endpoints/` — API endpointlar katalogi (OpenAPI'dan avtomatik)
+* `GET /api/v1/monitoring/logs/` — So'rovlar jurnali
+* `GET /api/v1/monitoring/overview/` — API statistikasi (real so'rovlar asosida)
+* `GET /api/v1/studios/` — Studiyalar ro'yxati
+* `POST /api/v1/studios/` — Studiya qo'shish
+* `GET /api/v1/studios/{id}/` — Studiya ma'lumotlari
+* `PATCH /api/v1/studios/{id}/` — Studiyani tahrirlash
+* `DELETE /api/v1/studios/{id}/` — Studiyani o'chirish (soft delete)
+* `GET /api/v1/users/` — Mijozlar ro'yxati (USER, STUDIO)
+* `POST /api/v1/users/` — Mijoz qo'shish
+* `GET /api/v1/users/{id}/` — Mijoz ma'lumotlari
+* `PATCH /api/v1/users/{id}/` — Mijozni tahrirlash
+* `DELETE /api/v1/users/{id}/` — Mijozni o'chirish (soft delete)
+* `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
+
+## Qo'shimcha shartlar
+
+* `GET /api/v1/admin/storage/google/callback/`
+  * JWT talab qilinmaydi (Google brauzer redirect'i), lekin faqat ulashni boshlagan faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga bog'lovchi httpOnly cookie
+* `GET /api/v1/admins/{id}/pinfl/`
+  * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+* `POST /api/v1/auth/login/`
+  * Web (cookie) rejimida X-CSRFToken talab qilinadi
+  * Ketma-ket xatolardan so'ng hisob vaqtincha bloklanadi (429 account_locked)
+* `POST /api/v1/auth/logout/`
+  * Refresh token bo'lsa blacklistga qo'shiladi; web rejimida CSRF talab qilinadi
+* `PATCH /api/v1/auth/me/`
+  * Faqat first_name, last_name, profile_picture, address o'zgaradi
+* `POST /api/v1/auth/refresh/`
+  * Access token kerak emas, lekin amaldagi refresh token talab qilinadi (mobil: body, web: cookie+CSRF)
+  * Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi
+* `POST /api/v1/auth/register/`
+  * Yaratilgan hisob roli har doim USER
+  * Tokenlar faqat `X-Client: mobile` uchun qaytariladi
+  * Bot himoyasi yoqilgan bo'lsa bot-token sarlavhasi talab qilinadi
+* `GET /api/v1/dashboard/overview/`
+  * `recent_profiles` faqat `users.view` ruxsati bo'lsa to'ldiriladi, aks holda bo'sh
+  * ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi
+* `DELETE /api/v1/users/{id}/`
+  * Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
+* `GET /api/v1/users/{id}/pinfl/`
+  * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
+  * Throttle: pinfl_reveal

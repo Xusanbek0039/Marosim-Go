@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.permissions import IsSuperAdmin
 
-from . import catalog, services
+from . import catalog, contract, services
 from .filters import RequestLogFilter
 from .models import RequestLog
 
@@ -106,7 +106,7 @@ class EndpointCatalogView(MonitoringBase, APIView):
         responses=CatalogSerializer,
     )
     def get(self, request):
-        endpoints = catalog.build()
+        endpoints = contract.annotate(catalog.build())
         stats = services.endpoint_stats()
         empty = {"count": 0, "client_errors": 0, "server_errors": 0, "avg_ms": None, "last_seen": None}
         for endpoint in endpoints:

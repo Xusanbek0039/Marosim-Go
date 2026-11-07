@@ -24,6 +24,7 @@ class StudioSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            "description",
             "profile_picture",
             "address",
             "responsible_user",
@@ -42,6 +43,9 @@ class StudioSerializer(serializers.ModelSerializer):
         if qs.exists():
             raise serializers.ValidationError("Bu nomdagi studiya allaqachon mavjud.")
         return value
+
+    def validate_description(self, value: str) -> str:
+        return value.strip()
 
     def validate_address(self, value: str) -> str:
         value = value.strip()

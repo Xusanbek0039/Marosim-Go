@@ -9,9 +9,14 @@ def studio_upload_to(instance, filename):
 
 
 class Studio(BaseModel, SoftDeleteModel):
-    """An organisation. Personal data (PINFL) belongs to ``responsible_user``, not to the studio."""
+    """An organisation. Personal data (PINFL) belongs to ``responsible_user``, not to the studio.
+
+    ``responsible_user`` is the studio *owner*; it is mirrored as an OWNER ``StudioMembership``
+    (``services.sync_owner_membership``) so every studio-side permission checks memberships only.
+    """
 
     name = models.CharField(max_length=150)
+    description = models.TextField(max_length=2000, blank=True)
     profile_picture = models.ImageField(upload_to=studio_upload_to, null=True, blank=True)
     address = models.CharField(max_length=255)
     responsible_user = models.ForeignKey(
@@ -28,13 +33,18 @@ class Studio(BaseModel, SoftDeleteModel):
 
 
 class StudioMembership(BaseModel):
-    """Staff attached to a studio (operators, videographers…). API comes in a later phase."""
+    """A STUDIO-role account working for a studio. Studio-side API access is decided here.
+
+    OWNER/MANAGER manage ceremonies and participants; UPLOADER will only upload media (Phase C).
+    """
 
     class Role(models.TextChoices):
         OWNER = "OWNER", "Egasi"
         MANAGER = "MANAGER", "Menejer"
-        OPERATOR = "OPERATOR", "Operator"
-        VIDEOGRAPHER = "VIDEOGRAPHER", "Videograf"
+        UPLOADER = "UPLOADER", "Yuklovchi"
+
+    #: Roles allowed to create/edit ceremonies and manage participants.
+    MANAGING_ROLES = (Role.OWNER, Role.MANAGER)
 
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="memberships")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="studio_memberships")
@@ -43,6 +53,7 @@ class StudioMembership(BaseModel):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["studio", "user"], name="studios_membership_unique")]
+        indexes = [models.Index(fields=["user", "is_active"])]
 
     def __str__(self) -> str:
         return f"{self.studio} · {self.user} ({self.role})"

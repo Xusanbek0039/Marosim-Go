@@ -8,7 +8,8 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from apps.monitoring import catalog
+from apps.accounts.access import ROLE_ORDER
+from apps.monitoring import catalog, contract
 
 
 class Command(BaseCommand):
@@ -19,19 +20,53 @@ class Command(BaseCommand):
 
     def handle(self, *args, output, **options):
         catalog.reset_cache()
-        endpoints = catalog.build()
+        endpoints = contract.annotate(catalog.build())
         lines = [
             "# API endpointlar",
             "",
             "> Avtomatik yaratilgan: `python manage.py export_api_endpoints` (OpenAPI'dan). Qo'lda tahrirlamang.",
+            "> Rollar DRF permission class'laridan olinadi (`apps/accounts/access.py`) va",
+            "> `tests/test_api_access_contract.py` da har bir rol bilan haqiqiy so'rov orqali tekshiriladi.",
             "> Batafsil: Swagger `/api/v1/docs/`, panel → API Monitoring → Endpointlar.",
             "",
-            "| Metod | Yo'l | Tavsif | Kirish |",
-            "|---|---|---|---|",
+            "| Metod | Yo'l | Tavsif | Rollar | Ruxsat kodi (ADMIN) | Auth | Ma'lumot doirasi | Holat |",
+            "|---|---|---|---|---|---|---|---|",
         ]
         for e in endpoints:
-            access = e["access_label"] or ("Auth" if e["auth_required"] else "Ochiq")
-            summary = (e["summary"] or "").replace("|", "\\|")
-            lines.append(f"| {e['method']} | `{e['path']}` | {summary} | {access} |")
-        Path(output).write_text("\n".join(lines) + "\n", encoding="utf-8")
+            lines.append(
+                f"| {e['method']} | `{e['path']}` | {_cell(e['summary'])} | {', '.join(e['allowed_roles']) or '—'} "
+                f"| {', '.join(f'`{c}`' for c in e['required_permissions']) or '—'} | {e['auth_type']} "
+                f"| {_cell(e['ownership_scope'] or '—')} | {_status(e)} |"
+            )
+
+        lines += ["", "## Rollar bo'yicha", ""]
+        for role in ROLE_ORDER:
+            mine = [e for e in endpoints if role in e["allowed_roles"]]
+            lines += [f"### {role} ({len(mine)})", ""]
+            lines += [f"* `{e['method']} {e['path']}` — {_cell(e['summary'])}" for e in mine] or ["* —"]
+            lines.append("")
+
+        conditional = [e for e in endpoints if e["conditions"]]
+        lines += ["## Qo'shimcha shartlar", ""]
+        for e in conditional:
+            lines.append(f"* `{e['method']} {e['path']}`")
+            lines += [f"  * {_cell(c)}" for c in e["conditions"]]
+        Path(output).write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
         self.stdout.write(self.style.SUCCESS(f"{len(endpoints)} endpoints -> {output}"))
+
+
+def _cell(text: str) -> str:
+    return (text or "").replace("|", "\\|").replace("\n", " ")
+
+
+def _status(e: dict) -> str:
+    flags = []
+    if e["access_status"] != "DERIVED":
+        flags.append("REVIEW REQUIRED")
+    if e["documentation_status"] != "DOCUMENTED":
+        flags.append("Documentation Missing")
+    if e["contract_status"] != contract.MATCHES:
+        flags.append(e["contract_status"])
+    if e["deprecated"]:
+        flags.append("Deprecated")
+    return ", ".join(flags) or "OK"
