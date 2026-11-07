@@ -60,7 +60,9 @@ export function MotionDialog({
         {open && (
           <DialogPrimitive.Portal forceMount>
             <Overlay />
-            <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:items-center">
+            {/* Scrolling lives on the Content itself: Radix's scroll lock swallows wheel/touch events on
+                everything outside Content, so a scrollable wrapper here could never scroll (long forms got stuck). */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
               <DialogPrimitive.Content asChild forceMount>
                 <motion.div
                   variants={modalVariants}
@@ -68,7 +70,7 @@ export function MotionDialog({
                   animate="animate"
                   exit="exit"
                   className={cn(
-                    "glass-strong relative my-auto flex w-full flex-col gap-5 rounded-3xl p-6 shadow-[0_0_80px_-30px_rgb(6_182_212/0.5)] outline-none sm:p-7",
+                    "glass-strong relative flex max-h-[calc(100dvh-2rem)] w-full flex-col gap-5 overflow-y-auto overscroll-contain rounded-3xl p-6 shadow-[0_0_80px_-30px_rgb(6_182_212/0.5)] outline-none sm:p-7",
                     width,
                     className,
                   )}

@@ -4,12 +4,25 @@ from rest_framework import serializers
 from apps.accounts.serializers import PhoneNumberField
 from apps.core.uploads import process_image
 
+from apps.accounts.models import Role, User
+
 from . import services
-from .models import MembershipRole, Venue, VenueHall, VenueMembership
+from .models import MembershipRole, PublicationStatus, Venue, VenueHall, VenueImage, VenueMembership
 
 #: Explicit ceiling: without it DRF copies the DB's integer range into the schema
 #: (SQLite 2**63-1 vs PostgreSQL 2**31-1), so the API contract would depend on the database.
 MAX_CAPACITY = 100_000
+
+
+class VenueImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VenueImage
+        fields = ["id", "image", "position", "created_at"]
+        read_only_fields = fields
+
+
+class VenueImageUploadSerializer(serializers.Serializer):
+    image = serializers.ImageField(help_text="JPG / PNG / WEBP, 5 MB gacha. WEBP'ga qayta kodlanadi, EXIF o'chiriladi.")
 
 
 class VenueHallSerializer(serializers.ModelSerializer):
@@ -70,6 +83,7 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
     phone_number = PhoneNumberField(required=False, allow_blank=True)
     cover_image = serializers.ImageField(required=False, allow_null=True)
     halls = serializers.SerializerMethodField()
+    images = VenueImageSerializer(many=True, read_only=True)
     membership_role = serializers.SerializerMethodField()
     membership_capabilities = serializers.SerializerMethodField()
 
@@ -94,6 +108,7 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
             "is_active",
             "publication_status",
             "halls",
+            "images",
             "membership_role",
             "membership_capabilities",
             "created_at",
@@ -189,3 +204,50 @@ class VenueMemberCreateSerializer(serializers.Serializer):
 class VenueMemberUpdateSerializer(serializers.Serializer):
     role = serializers.ChoiceField(choices=MembershipRole.choices, required=False)
     is_active = serializers.BooleanField(required=False)
+
+
+# ------------------------------------------------------------- admin panel
+class VenueOwnerBriefSerializer(serializers.Serializer):
+    membership_id = serializers.UUIDField(source="id")
+    user_id = serializers.UUIDField(source="user.id")
+    full_name = serializers.CharField(source="user.full_name")
+    phone_number = serializers.CharField(source="user.phone_number")
+    role = serializers.ChoiceField(choices=MembershipRole.choices)
+    is_active = serializers.BooleanField()
+
+
+class AdminVenueSerializer(OwnerVenueSerializer):
+    """A venue in the Super Admin / Admin panel: everything, incl. block and publication status.
+
+    Changing ``publication_status`` additionally needs ``venues.publish`` (checked in the view).
+    """
+
+    owner_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role=Role.VENUE_OWNER, is_active=True, deleted_at__isnull=True),
+        write_only=True,
+        required=False,
+        help_text="Yaratishda majburiy: to'yxona egasi (faol VENUE_OWNER hisobi).",
+    )
+    members = serializers.SerializerMethodField()
+
+    class Meta(OwnerVenueSerializer.Meta):
+        fields = [
+            f for f in OwnerVenueSerializer.Meta.fields if f not in ("membership_role", "membership_capabilities")
+        ] + ["owner_id", "members"]
+        read_only_fields = ["id", "currency", "created_at", "updated_at"]
+
+    @extend_schema_field(VenueOwnerBriefSerializer(many=True))
+    def get_members(self, venue):
+        rows = [m for m in venue.memberships.all()]
+        return VenueOwnerBriefSerializer(rows, many=True).data
+
+    def validate_publication_status(self, value):
+        if value not in PublicationStatus.values:
+            raise serializers.ValidationError("Noma'lum holat.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if self.instance is None and "owner_id" not in attrs:
+            raise serializers.ValidationError({"owner_id": ["To'yxona egasini tanlang."]})
+        return attrs

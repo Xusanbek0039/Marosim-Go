@@ -11,8 +11,9 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from apps.accounts.models import Role
 from apps.audit.services import AuditAction, diff, record, snapshot
+from apps.core.uploads import process_image
 
-from .models import Capability, MembershipRole, Venue, VenueHall, VenueMembership
+from .models import Capability, MembershipRole, Venue, VenueHall, VenueImage, VenueMembership
 
 VENUE_AUDITED_FIELDS = [
     "name",
@@ -162,3 +163,36 @@ def add_member_by_phone(request, venue: Venue, phone_number: str, role: str) -> 
     if VenueMembership.objects.filter(venue=venue, user=user, is_active=True).exists():
         raise ValidationError({"phone_number": ["Bu hisob allaqachon a'zo — rolini PATCH orqali o'zgartiring."]})
     return add_member(request, venue, user, role)
+
+
+# ------------------------------------------------------------------ gallery
+#: User decision 2026-11-07: up to 20 gallery images per venue, 5 MB each (IMAGE_UPLOAD["MAX_BYTES"]).
+MAX_GALLERY_IMAGES = 20
+GALLERY_MAX_SIDE = 1920
+
+
+@transaction.atomic
+def add_gallery_image(request, venue: Venue, upload) -> VenueImage:
+    """Re-encode (WEBP, no EXIF) and append one image. The venue row is locked while counting, so two
+    parallel uploads cannot both take the 20th slot."""
+    venue = _lock(venue)
+    count = venue.images.count()
+    if count >= MAX_GALLERY_IMAGES:
+        raise ValidationError({"image": [f"Ko'pi bilan {MAX_GALLERY_IMAGES} ta rasm yuklash mumkin."]})
+    try:
+        content = process_image(upload, max_side=GALLERY_MAX_SIDE)
+    except ValidationError as exc:  # process_image speaks DRF: re-key the message to the field
+        detail = exc.detail if isinstance(exc.detail, list) else [exc.detail]
+        raise ValidationError({"image": detail}) from None
+    last = venue.images.order_by("-position").values_list("position", flat=True).first()
+    image = VenueImage.objects.create(venue=venue, image=content, position=(last or 0) + 1 if count else 0)
+    record(request, AuditAction.CREATE, image, changes={"venue": str(venue.pk), "position": image.position})
+    return image
+
+
+@transaction.atomic
+def delete_gallery_image(request, image: VenueImage) -> None:
+    image_id, venue_id, file = image.pk, image.venue_id, image.image
+    image.delete()
+    record(request, AuditAction.DELETE, image, changes={"venue": str(venue_id)}, target_label=f"VenueImage {image_id}")
+    transaction.on_commit(lambda: file.delete(save=False))

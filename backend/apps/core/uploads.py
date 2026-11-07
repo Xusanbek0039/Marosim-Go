@@ -15,7 +15,8 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from rest_framework.exceptions import ValidationError
 
 
-def process_image(upload) -> ContentFile:
+def process_image(upload, max_side: int | None = None) -> ContentFile:
+    """Validate, strip metadata (EXIF), re-encode as WEBP. ``max_side`` overrides IMAGE_UPLOAD["MAX_SIDE"]."""
     cfg = settings.IMAGE_UPLOAD
     if upload.size > cfg["MAX_BYTES"]:
         raise ValidationError(f"Rasm hajmi {cfg['MAX_BYTES'] // (1024 * 1024)} MB dan oshmasligi kerak.")
@@ -41,7 +42,8 @@ def process_image(upload) -> ContentFile:
 
     image = ImageOps.exif_transpose(image)
     image = image.convert("RGBA" if image.mode in ("RGBA", "LA", "P") else "RGB")
-    image.thumbnail((cfg["MAX_SIDE"], cfg["MAX_SIDE"]))
+    side = max_side or cfg["MAX_SIDE"]
+    image.thumbnail((side, side))
 
     buffer = io.BytesIO()
     image.save(buffer, format="WEBP", quality=85, method=4)
