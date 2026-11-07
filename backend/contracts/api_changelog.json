@@ -403,6 +403,63 @@
         "POST /api/v1/me/ceremonies/{id}/invitations/",
         "POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/"
       ]
+    },
+    {
+      "revision": 10,
+      "date": "2026-11-07",
+      "note": "To'yxonalar: admin panel API (/admin/venues/, venues.* ruxsatlari), galereya (20 ta rasm, 5 MB)",
+      "added": [
+        "DELETE /api/v1/admin/venues/{id}/",
+        "DELETE /api/v1/admin/venues/{id}/images/{image_id}/",
+        "DELETE /api/v1/venue-owner/venues/{id}/images/{image_id}/",
+        "GET /api/v1/admin/venues/",
+        "GET /api/v1/admin/venues/{id}/",
+        "GET /api/v1/venue-owner/venues/{id}/images/",
+        "PATCH /api/v1/admin/venues/{id}/",
+        "PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/",
+        "POST /api/v1/admin/venues/",
+        "POST /api/v1/admin/venues/{id}/halls/",
+        "POST /api/v1/admin/venues/{id}/images/",
+        "POST /api/v1/venue-owner/venues/{id}/images/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venue-owner/venues/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venue-owner/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/venue-owner/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/venue-owner/venues/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admins/",
+        "GET /api/v1/admins/{id}/",
+        "GET /api/v1/venue-owner/venues/",
+        "GET /api/v1/venue-owner/venues/{id}/",
+        "PATCH /api/v1/admins/{id}/",
+        "PATCH /api/v1/venue-owner/venues/{id}/",
+        "POST /api/v1/admins/",
+        "POST /api/v1/venue-owner/venues/"
+      ]
     }
   ]
 }

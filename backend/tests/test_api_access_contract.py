@@ -259,6 +259,25 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_member_media_scope",
     ),
+    # venue panel + gallery — tests live in tests/test_admin_venues.py
+    **dict.fromkeys(
+        [
+            "admin_venues_list",
+            "admin_venues_create",
+            "admin_venues_retrieve",
+            "admin_venues_partial_update",
+            "admin_venues_destroy",
+            "admin_venues_halls_create",
+            "admin_venues_halls_partial_update",
+            "admin_venues_images_create",
+            "admin_venues_images_destroy",
+        ],
+        "ownership_admin_venues_all",
+    ),
+    **dict.fromkeys(
+        ["venue_owner_venues_images_list", "venue_owner_venues_images_create", "venue_owner_venues_images_destroy"],
+        "ownership_venue_gallery_by_membership",
+    ),
     # venues — tests live in tests/test_venues.py
     **dict.fromkeys(
         [
@@ -304,6 +323,11 @@ ownership_member_media_scope = _sharing_tests.test_strangers_studio_and_other_ce
 from . import test_venues as _venue_tests  # noqa: E402
 
 ownership_venue_scope_is_own_membership = _venue_tests.test_venue_scope_is_own_membership
+
+from . import test_admin_venues as _admin_venue_tests  # noqa: E402
+
+ownership_admin_venues_all = _admin_venue_tests.test_admin_venue_rights_come_only_from_granted_codes
+ownership_venue_gallery_by_membership = _admin_venue_tests.test_gallery_rights_follow_membership
 
 
 @pytest.mark.parametrize(
