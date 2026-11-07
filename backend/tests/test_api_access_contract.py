@@ -216,6 +216,28 @@ OWNERSHIP_TESTS = {
         ["me_invitations_list", "me_invitations_accept_create", "me_invitations_decline_create"],
         "ownership_invitation_scope_is_own_phone",
     ),
+    # ceremony ownership (Phase C) — tests live in tests/test_ceremony_invitations.py
+    **dict.fromkeys(["ceremonies_owners_list", "ceremonies_owners_invite_create"], "ownership_studio_owner_scope"),
+    **dict.fromkeys(
+        [
+            "me_ceremonies_members_retrieve",
+            "me_ceremonies_invitations_list",
+            "me_ceremonies_invitations_create",
+            "me_ceremonies_owner_requests_list",
+        ],
+        "ownership_owner_actions_need_ownership",
+    ),
+    **dict.fromkeys(
+        ["me_ceremonies_invitations_revoke_create", "me_ceremonies_invitations_resend_create"],
+        "ownership_nested_ids_scoped_to_ceremony",
+    ),
+    "me_ceremonies_viewers_revoke_create": "ownership_owner_revokes_only_own_grants",
+    **dict.fromkeys(
+        ["me_ceremonies_owner_requests_approve_create", "me_ceremonies_owner_requests_reject_create"],
+        "ownership_owner_request_votes",
+    ),
+    "me_ceremonies_leave_create": "ownership_leave_is_own_access",
+    "me_invitations_retrieve": "ownership_invitation_detail_is_recipient_only",
     # venues — tests live in tests/test_venues.py
     **dict.fromkeys(
         [
@@ -236,6 +258,16 @@ ownership_ceremony_scope_is_own_studio = _ceremony_tests.test_ceremony_scope_is_
 ownership_studio_me_is_own_memberships = _ceremony_tests.test_studio_me_lists_own_memberships_only
 ownership_user_ceremony_scope = _ceremony_tests.test_user_ceremony_scope_is_own_participation
 ownership_invitation_scope_is_own_phone = _ceremony_tests.test_invitation_scope_is_own_phone
+
+from . import test_ceremony_invitations as _ownership_tests  # noqa: E402
+
+ownership_studio_owner_scope = _ownership_tests.test_cross_ceremony_and_cross_studio_denied
+ownership_owner_actions_need_ownership = _ownership_tests.test_viewer_cannot_invite_promote_or_manage
+ownership_nested_ids_scoped_to_ceremony = _ownership_tests.test_other_ceremony_ids_do_not_leak_through_nested_routes
+ownership_owner_revokes_only_own_grants = _ownership_tests.test_owner_cannot_revoke_unrelated_access
+ownership_owner_request_votes = _ownership_tests.test_multiple_owners_need_existing_owner_approval
+ownership_leave_is_own_access = _ownership_tests.test_leaving_owner_takes_their_pending_invitations_and_votes_along
+ownership_invitation_detail_is_recipient_only = _ownership_tests.test_wrong_user_cannot_see_or_accept_invitation
 
 from . import test_venues as _venue_tests  # noqa: E402
 

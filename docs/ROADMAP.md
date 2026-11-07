@@ -32,3 +32,23 @@ Qarorlar:
 * V4.1: spec'dagi `ceremony_type`/`ceremony_date` mavjud `event_type`/`event_date` maydonlari bilan beriladi (API buzilmaydi);
   studiya yo'llari mavjud `/api/v1/ceremonies/…` standartida qoladi (`/studio/ceremonies/` emas).
 * V4.1: OWNER huquqi faqat tasdiqlangan telefon bilan (`CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE`, DEBUG'da ham); JSHSHIR — faqat identifikator.
+
+## V5.0 — To'yxona va studiya bandlik tizimi ([VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md))
+
+| # | Bosqich | Holat |
+|---|---|---|
+| A | Loyiha auditi va DB arxitekturasi | ✅ 2026-11-07 |
+| B | `VENUE_OWNER` roli, `Venue` / `VenueHall` / `VenueImage` / `VenueMembership`, ruxsat qatlami, `/venue-owner/venues/` (+halls) | ✅ 2026-11-07 |
+| C | Umumiy scheduling engine (Resource, CalendarEntry, ish vaqti, exclusion constraint), StudioResource | ⏳ tasdiq kutilmoqda |
+| D | Dinamik narx (`VenuePricingRule`, snapshot) | ⏳ |
+| E | Public visibility, `venue.*` admin ruxsatlari, approval oqimi | ⏳ |
+| F | Sana bo'yicha qidiruv (venue + studiya) | ⏳ |
+| G | Bron so'rovlari, hold muddati, concurrency himoyasi | ⏳ |
+| H | Super Admin UI (kalendarlar, bronlar, narxlar, approval) | ⏳ |
+| I | API Developer Center (VENUE_OWNER bo'limi) va to'liq testlar | ⏳ |
+
+Qarorlar (V5.0):
+* `User.role` = hisob turi (rol darvozasi); to'yxona ichidagi huquqlar — `VenueMembership` imkoniyatlari (2026-11-07).
+* Bandlik zal (`VenueHall`) / studiya resursi darajasida; har bir venue standart zal bilan yaratiladi.
+* Studiya URL'lari mavjud standartda: `/studios/me/calendar/` (spec'dagi `/studio/calendar/` o'rniga).
+* Pul — `Decimal(14,2)`, faqat UZS, API'da string.

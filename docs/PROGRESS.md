@@ -1,5 +1,34 @@
 # Progress
 
+## 2026-11-07 — V5.0 Venue & Studio Availability: Phase A (audit) + Phase B (Venue/Hall, a'zoliklar) ✅
+
+Batafsil: [VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md).
+
+**Phase A — audit va DB arxitekturasi**
+* Mavjud pattern'lar qayta ishlatildi: `BaseModel`/`SoftDeleteModel`, rol darvozasi + a'zolik (`StudioMembership` kabi), `access_grant` kontrakti, audit.
+* C–I dizayni: umumiy `scheduling.Resource` (hall / studio resource), `CalendarEntry` + PostgreSQL exclusion constraint
+  (`btree_gist`, `tstzrange &&`) + `SELECT … FOR UPDATE`, deterministik narx tartibi, publication workflow, SQL availability search.
+* Xavflar: lokal PostgreSQL/Docker yo'q (SQLite'da concurrency isbotlanmaydi); parallel V4.1 sessiyasi va avto-commit.
+
+**Phase B — modellar, a'zoliklar, ruxsatlar**
+* `User.Role.VENUE_OWNER` (+ `CLIENT_ROLES`, `/users/` filtri, `access.ROLE_ORDER`). Migratsiya `accounts/0003_venue_owner_role`.
+* `apps/venues`: `Venue`, `VenueImage`, `VenueHall`, `VenueMembership` (OWNER/MANAGER/SCHEDULER/VIEWER) + `CAPABILITIES` matritsasi.
+  Migratsiya `venues/0001_initial`. DB cheklovlari: sig'im, narx ≥ 0, faqat UZS, koordinatalar, E.164, zal nomi unikal, a'zolik unikal.
+* Servislar: `create_venue` (OWNER a'zolik + "Asosiy zal", PRIVATE), `add_member`/`update_member` (faqat VENUE_OWNER hisoblar,
+  oxirgi OWNER himoyasi, venue qatori lock), `venues_for`/`ensure_capability` (blocked venue — faqat o'qish).
+* Endpointlar: `GET/POST /venue-owner/venues/`, `GET/PATCH /venue-owner/venues/{id}/`, `GET/POST …/halls/`, `PATCH …/halls/{hall_id}/`.
+* Audit: `Decimal` qiymatlar endi string sifatida yoziladi (avval JSON xatosi bo'lardi).
+* Panel (minimal, buzilmasligi uchun): `VENUE_OWNER` rol turi, badge, foydalanuvchi filtri va formasi (avval tahrirlash rolni USER'ga tushirib yuborardi),
+  Developer Center rol bo'limi `/developer/venue-owner`.
+
+**Testlar**: `tests/test_venues.py` — 36 (yaratish, egalik, cross-venue/hall izolyatsiyasi, a'zolik imkoniyatlari, bloklangan venue,
+admin maydonlari himoyasi, boshqa rollar 403, shaxsiy ma'lumot yo'qligi, DB constraint'lar, a'zolik servislari).
+Kontrakt runtime matritsasiga `VENUE_OWNER` chaqiruvchisi qo'shildi. `ruff`, `makemigrations --check`, `tsc`, `eslint` toza.
+Migratsiyalar dev DB nusxasida oldinga/orqaga/oldinga tekshirildi.
+To'liq to'plamdagi qolgan yiqilishlar — parallel V4.1 Phase C sessiyasining tugallanmagan ceremony o'zgarishlari (venues'ga bog'liq emas).
+
+**Keyingi**: Phase C (umumiy scheduling engine) — tasdiq va PostgreSQL test muhiti qarori kutilmoqda.
+
 ## 2026-11-07 — V4.1 Ceremony Ownership: Phase A (audit) + Phase B (modellar, ruxsatlar) ✅
 
 Batafsil: [CEREMONY_OWNERSHIP.md](CEREMONY_OWNERSHIP.md).
