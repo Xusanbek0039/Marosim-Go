@@ -106,3 +106,78 @@ export interface Invitation {
   phone_verification_required: boolean;
   requires_owner_approval: boolean;
 }
+
+// -------------------------------------------------------------------- venues
+export type Region =
+  | "TASHKENT_CITY"
+  | "TASHKENT"
+  | "ANDIJAN"
+  | "BUKHARA"
+  | "FERGANA"
+  | "JIZZAKH"
+  | "KHOREZM"
+  | "NAMANGAN"
+  | "NAVOI"
+  | "KASHKADARYA"
+  | "KARAKALPAKSTAN"
+  | "SAMARKAND"
+  | "SIRDARYO"
+  | "SURKHANDARYA";
+export type VenueType = "BANQUET_HALL" | "RESTAURANT" | "CAFE" | "OUTDOOR" | "OTHER";
+export type PublicationStatus = "PRIVATE" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "SUSPENDED";
+export type MembershipRole = "OWNER" | "MANAGER" | "SCHEDULER" | "VIEWER";
+export type Capability =
+  | "VIEW"
+  | "EDIT_PROFILE"
+  | "MANAGE_HALLS"
+  | "MANAGE_SCHEDULE"
+  | "MANAGE_PRICING"
+  | "MANAGE_BOOKINGS"
+  | "REQUEST_PUBLICATION"
+  | "MANAGE_MEMBERS";
+
+export interface VenueHall {
+  id: string;
+  name: string;
+  capacity: number;
+  /** null = the venue's base_price applies. */
+  base_price: string | null;
+  effective_base_price: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Venue {
+  id: string;
+  name: string;
+  description: string;
+  venue_type: VenueType;
+  address: string;
+  region: Region;
+  district: string;
+  latitude: string | null;
+  longitude: string | null;
+  phone_number: string;
+  cover_image: string | null;
+  capacity_min: number;
+  capacity_max: number;
+  base_price: string;
+  currency: "UZS";
+  is_active: boolean;
+  publication_status: PublicationStatus;
+  halls: VenueHall[];
+  membership_role: MembershipRole | null;
+  membership_capabilities: Capability[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VenueMember {
+  id: string;
+  user: { id: string; full_name: string; phone_number: string };
+  role: MembershipRole;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
