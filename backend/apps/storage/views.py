@@ -19,6 +19,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+from apps.accounts.access import AccessNote
 from apps.accounts.permissions import IsSuperAdmin
 
 from . import client_config, services
@@ -158,6 +159,14 @@ class CallbackView(APIView):
     permission_classes = [AllowAny]
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "storage_callback"
+    access_notes = {
+        "*": AccessNote(
+            conditions=(
+                "JWT talab qilinmaydi (Google brauzer redirect'i), lekin faqat ulashni boshlagan faol SUPER_ADMIN "
+                "uchun yakunlanadi: bir martalik `state` + brauzerga bog'lovchi httpOnly cookie",
+            )
+        )
+    }
 
     @extend_schema(
         summary="Google OAuth callback (brauzer redirect)",

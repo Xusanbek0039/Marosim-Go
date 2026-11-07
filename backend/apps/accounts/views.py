@@ -1,5 +1,5 @@
 from django.db import transaction
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +9,7 @@ from apps.audit.services import AuditAction, diff, record, snapshot
 from apps.core.exceptions import Conflict
 
 from . import permissions_catalog as catalog
+from .access import AccessNote
 from .filters import AdminFilter, ManagedUserFilter
 from .models import CLIENT_ROLES, Role, User
 from .permissions import HasAdminPermission, IsSuperAdmin
@@ -100,6 +101,13 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
         return Response(PinflRevealSerializer({"pinfl": value or ""}).data)
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Mijozlar ro'yxati (USER, STUDIO)"),
+    create=extend_schema(summary="Mijoz qo'shish"),
+    retrieve=extend_schema(summary="Mijoz ma'lumotlari"),
+    partial_update=extend_schema(summary="Mijozni tahrirlash"),
+    destroy=extend_schema(summary="Mijozni o'chirish (soft delete)"),
+)
 class UserViewSet(ManagedUserViewSetBase):
     """Clients of the platform: USER and STUDIO accounts."""
 
@@ -109,6 +117,14 @@ class UserViewSet(ManagedUserViewSetBase):
     permission_classes = [HasAdminPermission]
     permission_module = "users"
     action_permissions = {"pinfl": "users.view_pinfl"}
+    access_notes = {
+        "*": AccessNote(
+            ownership="Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). "
+            "ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404)."
+        ),
+        "pinfl": AccessNote(conditions=("Har bir ko'rish audit qilinadi (PINFL_REVEAL)", "Throttle: pinfl_reveal")),
+        "destroy": AccessNote(conditions=("Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)",)),
+    }
 
     @extend_schema(responses=PinflRevealSerializer, summary="To'liq JSHSHIR (audit qilinadi)")
     @action(detail=True, methods=["get"])
@@ -122,6 +138,13 @@ class UserViewSet(ManagedUserViewSetBase):
         return super().get_throttles()
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Adminlar ro'yxati"),
+    create=extend_schema(summary="Admin qo'shish"),
+    retrieve=extend_schema(summary="Admin ma'lumotlari"),
+    partial_update=extend_schema(summary="Adminni tahrirlash (ruxsatlar bilan)"),
+    destroy=extend_schema(summary="Adminni o'chirish (soft delete)"),
+)
 class AdminViewSet(ManagedUserViewSetBase):
     """ADMIN accounts and their granular permissions — Super Admin only."""
 
@@ -129,6 +152,11 @@ class AdminViewSet(ManagedUserViewSetBase):
     serializer_class = AdminSerializer
     filterset_class = AdminFilter
     permission_classes = [IsSuperAdmin]
+    access_notes = {
+        "*": AccessNote(ownership="Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset)."),
+        "permissions": AccessNote(ownership=""),
+        "pinfl": AccessNote(conditions=("Har bir ko'rish audit qilinadi (PINFL_REVEAL)",)),
+    }
 
     @extend_schema(responses=PermissionDefSerializer(many=True), summary="Adminlarga beriladigan ruxsatlar ro'yxati")
     @action(detail=False, methods=["get"], pagination_class=None, filter_backends=[])

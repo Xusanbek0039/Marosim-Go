@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.accounts.access import AccessNote
 from apps.accounts.models import CLIENT_ROLES, Role, User
 from apps.accounts.permissions import HasAdminPermission
 from apps.accounts.serializers import UserSummarySerializer
@@ -26,8 +27,16 @@ OverviewSerializer = inline_serializer(
 class DashboardOverviewView(APIView):
     permission_classes = [HasAdminPermission]
     required_permission = "dashboard.view"
+    access_notes = {
+        "*": AccessNote(
+            conditions=(
+                "`recent_profiles` faqat `users.view` ruxsati bo'lsa to'ldiriladi, aks holda bo'sh",
+                "ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi",
+            )
+        )
+    }
 
-    @extend_schema(responses=OverviewSerializer)
+    @extend_schema(summary="Dashboard statistikasi", responses=OverviewSerializer)
     def get(self, request):
         alive = User.objects.alive()
         since = timezone.now() - timedelta(days=30)

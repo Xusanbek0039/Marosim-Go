@@ -30,6 +30,7 @@ from apps.core.exceptions import AccountLocked
 
 from . import bot_protection, lockout
 from . import phone as phone_utils
+from .access import AccessNote
 from .authentication import enforce_csrf
 from .models import User
 from .serializers import (
@@ -110,6 +111,15 @@ class RegisterView(PublicAuthView):
 
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "register"
+    access_notes = {
+        "*": AccessNote(
+            conditions=(
+                "Yaratilgan hisob roli har doim USER",
+                "Tokenlar faqat `X-Client: mobile` uchun qaytariladi",
+                "Bot himoyasi yoqilgan bo'lsa bot-token sarlavhasi talab qilinadi",
+            )
+        )
+    }
 
     @extend_schema(
         summary="Ro'yxatdan o'tish (telefon + parol)",
@@ -138,6 +148,14 @@ class RegisterView(PublicAuthView):
 class LoginView(PublicAuthView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
+    access_notes = {
+        "*": AccessNote(
+            conditions=(
+                "Web (cookie) rejimida X-CSRFToken talab qilinadi",
+                "Ketma-ket xatolardan so'ng hisob vaqtincha bloklanadi (429 account_locked)",
+            )
+        )
+    }
 
     @extend_schema(
         summary="Tizimga kirish (telefon + parol)",
@@ -190,6 +208,14 @@ class LoginView(PublicAuthView):
 class RefreshView(PublicAuthView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "token_refresh"
+    access_notes = {
+        "*": AccessNote(
+            conditions=(
+                "Access token kerak emas, lekin amaldagi refresh token talab qilinadi (mobil: body, web: cookie+CSRF)",
+                "Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi",
+            )
+        )
+    }
 
     @extend_schema(
         summary="Tokenni yangilash (rotation)",
@@ -232,6 +258,10 @@ class RefreshView(PublicAuthView):
 
 
 class LogoutView(PublicAuthView):
+    access_notes = {
+        "*": AccessNote(conditions=("Refresh token bo'lsa blacklistga qo'shiladi; web rejimida CSRF talab qilinadi",))
+    }
+
     @extend_schema(
         summary="Tizimdan chiqish",
         description="Refresh token blacklistga qo'shiladi; web panelda cookie'lar tozalanadi.",
@@ -255,6 +285,10 @@ class LogoutView(PublicAuthView):
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
+    access_notes = {
+        "*": AccessNote(ownership="Faqat chaqiruvchining o'z hisobi (request.user)."),
+        "patch": AccessNote(conditions=("Faqat first_name, last_name, profile_picture, address o'zgaradi",)),
+    }
 
     @extend_schema(summary="Mening profilim", responses=MeSerializer)
     def get(self, request):

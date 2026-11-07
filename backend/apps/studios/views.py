@@ -1,7 +1,9 @@
 import django_filters
 from django.db import transaction
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 
+from apps.accounts.access import AccessNote
 from apps.accounts.permissions import HasAdminPermission
 from apps.audit.services import AuditAction, diff, record, snapshot
 
@@ -22,10 +24,22 @@ class StudioFilter(django_filters.FilterSet):
         fields = ["is_active", "responsible_user", "created_after", "created_before"]
 
 
+@extend_schema_view(
+    list=extend_schema(summary="Studiyalar ro'yxati"),
+    create=extend_schema(summary="Studiya qo'shish"),
+    retrieve=extend_schema(summary="Studiya ma'lumotlari"),
+    partial_update=extend_schema(summary="Studiyani tahrirlash"),
+    destroy=extend_schema(summary="Studiyani o'chirish (soft delete)"),
+)
 class StudioViewSet(viewsets.ModelViewSet):
+    """Panel management of studios. Not the STUDIO role's own API (that comes with StudioMembership)."""
+
     serializer_class = StudioSerializer
     permission_classes = [HasAdminPermission]
     permission_module = "studios"
+    access_notes = {
+        "*": AccessNote(ownership="Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi.")
+    }
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     filterset_class = StudioFilter
     search_fields = [

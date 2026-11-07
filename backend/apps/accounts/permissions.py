@@ -3,6 +3,10 @@
 * ``IsSuperAdmin`` — only SUPER_ADMIN (e.g. managing admins and their permissions).
 * ``HasAdminPermission`` — SUPER_ADMIN always; ADMIN only with the permission code the view
   requires for the current action (see ``permissions_catalog``); every other role is denied.
+
+Each class also describes itself through ``access_grant(view)`` — read by ``apps.accounts.access``
+to publish the role metadata. Keep the two in sync: the contract tests call every endpoint as
+every role and fail when the description and ``has_permission`` disagree.
 """
 
 from rest_framework.permissions import BasePermission
@@ -30,6 +34,11 @@ class IsSuperAdmin(BasePermission):
         user = request.user
         return _is_staff_user(user) and user.role == Role.SUPER_ADMIN
 
+    def access_grant(self, view):
+        from .access import Grant
+
+        return Grant(frozenset({Role.SUPER_ADMIN.value}))
+
 
 class HasAdminPermission(BasePermission):
     """The view declares ``permission_module`` and optionally ``action_permissions`` overrides."""
@@ -45,6 +54,16 @@ class HasAdminPermission(BasePermission):
             return user.role == Role.SUPER_ADMIN
         return user.has_admin_permission(code)
 
+    def access_grant(self, view):
+        from .access import Grant
+
+        code = self.required_code(view)
+        if code is None:
+            return Grant(frozenset({Role.SUPER_ADMIN.value}))
+        return Grant(
+            frozenset({Role.SUPER_ADMIN.value, Role.ADMIN.value}), requirements={Role.ADMIN.value: frozenset({code})}
+        )
+
     @staticmethod
     def required_code(view) -> str | None:
         explicit = getattr(view, "required_permission", None)
@@ -59,33 +78,17 @@ class HasAdminPermission(BasePermission):
         return f"{module}.{suffix}" if module and suffix else None
 
 
-def describe_access(view) -> dict:
-    """Machine-readable access rule of a view/action — published in OpenAPI as ``x-access``.
+def describe_access(view, method: str = "GET") -> dict:
+    """Legacy ``x-access`` shape (kept for existing clients); see ``apps.accounts.access`` for the full policy."""
+    from .access import resolve
 
-    Derived from the real permission classes, so the docs cannot drift from the enforcement.
-    """
-    from rest_framework.permissions import AllowAny, IsAuthenticated
+    return legacy_access(resolve(view, method))
 
-    permissions = view.get_permissions() if hasattr(view, "get_permissions") else []
-    authenticators = getattr(view, "authentication_classes", None)
-    public = any(isinstance(p, AllowAny) for p in permissions) or authenticators == []
-    access = {"auth_required": not public, "roles": [], "permission": None, "label": "Ochiq (public)"}
-    if public:
-        return access
 
-    for perm in permissions:
-        if isinstance(perm, IsSuperAdmin):
-            return {**access, "roles": [Role.SUPER_ADMIN.value], "label": "Faqat SUPER_ADMIN"}
-        if isinstance(perm, HasAdminPermission):
-            code = HasAdminPermission.required_code(view)
-            if code is None:
-                return {**access, "roles": [Role.SUPER_ADMIN.value], "label": "Faqat SUPER_ADMIN"}
-            return {
-                **access,
-                "roles": [Role.SUPER_ADMIN.value, Role.ADMIN.value],
-                "permission": code,
-                "label": f"SUPER_ADMIN yoki `{code}` ruxsatli ADMIN",
-            }
-        if isinstance(perm, IsAuthenticated):
-            access = {**access, "label": "Har qanday tizimga kirgan foydalanuvchi"}
-    return access
+def legacy_access(policy) -> dict:
+    return {
+        "auth_required": not policy.is_public,
+        "roles": list(policy.allowed_roles),
+        "permission": policy.required_permissions[0] if policy.required_permissions else None,
+        "label": policy.label,
+    }
