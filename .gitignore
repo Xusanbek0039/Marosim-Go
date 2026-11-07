@@ -228,3 +228,5 @@ next-env.d.ts
 backend/media/
 # The Python template above ignores every "lib/" — keep the frontend source library tracked.
 !frontend/src/lib/
+# Local development database is shared through git on purpose (not production data).
+!backend/db.sqlite3
