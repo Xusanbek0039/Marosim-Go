@@ -280,6 +280,62 @@
       "operation_id": "dashboard_overview_retrieve",
       "schema_fingerprint": "f07b30c60ed01d95"
     },
+    "GET /api/v1/devcenter/changelog/": {
+      "allowed_roles": [
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "devcenter_changelog_retrieve",
+      "schema_fingerprint": "ef9ceafc23bc1684"
+    },
+    "GET /api/v1/devcenter/endpoints/": {
+      "allowed_roles": [
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "devcenter_endpoints_retrieve",
+      "schema_fingerprint": "417971fff6e2b0d9"
+    },
+    "GET /api/v1/devcenter/mobile/": {
+      "allowed_roles": [
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "devcenter_mobile_retrieve",
+      "schema_fingerprint": "e01b7bf0c61caf08"
+    },
+    "GET /api/v1/devcenter/overview/": {
+      "allowed_roles": [
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "devcenter_overview_retrieve",
+      "schema_fingerprint": "fd17574791e8bdbf"
+    },
     "GET /api/v1/health/live/": {
       "allowed_roles": [
         "PUBLIC"
