@@ -25,6 +25,10 @@ CITIES = ["Toshkent", "Samarqand", "Buxoro", "Andijon", "Farg'ona", "Namangan", 
 STUDIOS = ["Nur Studio", "Oq Saroy Media", "To'yona Video", "Lola Studio", "Visol Production"]
 
 
+def demo_phone(n: int) -> str:
+    return f"+99890{1_000_000 + n:07d}"
+
+
 def fake_pinfl() -> str:
     return str(secrets.choice("3456")) + "".join(secrets.choice("0123456789") for _ in range(13))
 
@@ -43,9 +47,11 @@ class Command(BaseCommand):
         for i in range(24):
             role = Role.STUDIO if i < len(STUDIOS) else Role.USER
             email = f"demo{i + 1}@marosimgo.uz"
-            if User.objects.filter(email=email).exists():
+            phone = demo_phone(i + 1)
+            if self._exists(email, phone):
                 continue
             User.objects.create_user(
+                phone_number=phone,
                 email=email,
                 password=password,
                 first_name=FIRST[i % len(FIRST)],
@@ -59,8 +65,10 @@ class Command(BaseCommand):
 
         for i, perms in enumerate([["dashboard.view", "users.view", "studios.view"], ["dashboard.view"]]):
             email = f"admin{i + 1}@marosimgo.uz"
-            if not User.objects.filter(email=email).exists():
+            phone = demo_phone(101 + i)
+            if not self._exists(email, phone):
                 User.objects.create_user(
+                    phone_number=phone,
                     email=email,
                     password=password,
                     first_name=FIRST[-1 - i],
@@ -75,4 +83,20 @@ class Command(BaseCommand):
         for name, owner in zip(STUDIOS, owners, strict=False):
             Studio.objects.get_or_create(name=name, defaults={"address": owner.address, "responsible_user": owner})
 
-        self.stdout.write(self.style.SUCCESS(f"Demo data ready ({created} new accounts). Password: {password}"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Demo data ready ({created} new accounts). Login: {demo_phone(1)}…, "
+                f"admins {demo_phone(101)} / {demo_phone(102)}. Password: {password}"
+            )
+        )
+
+    @staticmethod
+    def _exists(email: str, phone: str) -> bool:
+        """Demo accounts from before phone login get their demo number instead of a duplicate."""
+        legacy = User.objects.filter(email=email).first()
+        if legacy is None:
+            return User.objects.filter(phone_number=phone).exists()
+        if not legacy.phone_number and not User.objects.filter(phone_number=phone).exists():
+            legacy.phone_number = phone
+            legacy.save(update_fields=["phone_number", "updated_at"])
+        return True

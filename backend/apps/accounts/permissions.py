@@ -57,3 +57,35 @@ class HasAdminPermission(BasePermission):
         suffix = ACTION_SUFFIX.get(action)
         module = getattr(view, "permission_module", None)
         return f"{module}.{suffix}" if module and suffix else None
+
+
+def describe_access(view) -> dict:
+    """Machine-readable access rule of a view/action — published in OpenAPI as ``x-access``.
+
+    Derived from the real permission classes, so the docs cannot drift from the enforcement.
+    """
+    from rest_framework.permissions import AllowAny, IsAuthenticated
+
+    permissions = view.get_permissions() if hasattr(view, "get_permissions") else []
+    authenticators = getattr(view, "authentication_classes", None)
+    public = any(isinstance(p, AllowAny) for p in permissions) or authenticators == []
+    access = {"auth_required": not public, "roles": [], "permission": None, "label": "Ochiq (public)"}
+    if public:
+        return access
+
+    for perm in permissions:
+        if isinstance(perm, IsSuperAdmin):
+            return {**access, "roles": [Role.SUPER_ADMIN.value], "label": "Faqat SUPER_ADMIN"}
+        if isinstance(perm, HasAdminPermission):
+            code = HasAdminPermission.required_code(view)
+            if code is None:
+                return {**access, "roles": [Role.SUPER_ADMIN.value], "label": "Faqat SUPER_ADMIN"}
+            return {
+                **access,
+                "roles": [Role.SUPER_ADMIN.value, Role.ADMIN.value],
+                "permission": code,
+                "label": f"SUPER_ADMIN yoki `{code}` ruxsatli ADMIN",
+            }
+        if isinstance(perm, IsAuthenticated):
+            access = {**access, "label": "Har qanday tizimga kirgan foydalanuvchi"}
+    return access

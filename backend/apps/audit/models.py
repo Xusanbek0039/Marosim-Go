@@ -11,6 +11,7 @@ class AuditAction(models.TextChoices):
     ACTIVATE = "ACTIVATE", "Faollashtirildi"
     DELETE = "DELETE", "O'chirildi (soft)"
     PERMISSIONS_CHANGE = "PERMISSIONS_CHANGE", "Ruxsatlar o'zgartirildi"
+    REGISTER = "REGISTER", "Ro'yxatdan o'tdi"
     LOGIN = "LOGIN", "Tizimga kirdi"
     LOGIN_FAILED = "LOGIN_FAILED", "Kirish muvaffaqiyatsiz"
     LOGIN_LOCKED = "LOGIN_LOCKED", "Hisob vaqtincha bloklandi"

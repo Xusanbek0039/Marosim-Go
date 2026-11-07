@@ -16,6 +16,7 @@ from .serializers import AdminSerializer, ManagedUserSerializer, PermissionDefSe
 from .tokens import revoke_all_sessions
 
 AUDITED_FIELDS = [
+    "phone_number",
     "email",
     "first_name",
     "last_name",
@@ -32,8 +33,8 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
 
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     managed_roles: tuple[str, ...] = ()
-    search_fields = ["first_name", "last_name", "email", "address"]
-    ordering_fields = ["created_at", "updated_at", "first_name", "last_name", "email", "last_login"]
+    search_fields = ["first_name", "last_name", "phone_number", "email", "address"]
+    ordering_fields = ["created_at", "updated_at", "first_name", "last_name", "phone_number", "email", "last_login"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
@@ -60,7 +61,8 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
             record(self.request, AuditAction.DEACTIVATE, user)
         elif not was_active and user.is_active:
             record(self.request, AuditAction.ACTIVATE, user)
-        if "password" in touched:
+        if "password" in touched or before.get("phone_number") != after.get("phone_number"):
+            # New credentials or a new login identifier: every existing session must sign in again.
             revoke_all_sessions(user)
         if before.get("admin_permissions") != after.get("admin_permissions"):
             record(

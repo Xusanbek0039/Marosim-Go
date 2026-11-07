@@ -1,5 +1,7 @@
 """Authentication endpoints.
 
+Login identifier: the phone number (normalized to E.164).
+
 Web panel (default): tokens are set as httpOnly cookies and never returned in the body;
 every state-changing request must carry the ``X-CSRFToken`` header (double submit).
 
@@ -10,11 +12,12 @@ web page cannot use this mode from a browser.
 
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.db import transaction
 from django.middleware.csrf import get_token, rotate_token
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from drf_spectacular.utils import OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -22,13 +25,21 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from apps.audit.services import AuditAction, record
+from apps.audit.services import AuditAction, diff, record, snapshot
 from apps.core.exceptions import AccountLocked
 
-from . import lockout
+from . import bot_protection, lockout
+from . import phone as phone_utils
 from .authentication import enforce_csrf
 from .models import User
-from .serializers import LoginSerializer, MeSerializer, RefreshSerializer
+from .serializers import (
+    LoginSerializer,
+    MeSerializer,
+    MeUpdateSerializer,
+    RefreshSerializer,
+    RegisterSerializer,
+    TokenPairSerializer,
+)
 from .tokens import (
     blacklist_quietly,
     clear_auth_cookies,
@@ -37,8 +48,18 @@ from .tokens import (
     set_auth_cookies,
 )
 
-INVALID_CREDENTIALS = "Email yoki parol noto'g'ri."
+INVALID_CREDENTIALS = "Telefon raqam yoki parol noto'g'ri."
 LOCKED = "Juda ko'p muvaffaqiyatsiz urinish. Hisob vaqtincha bloklandi, keyinroq qayta urinib ko'ring."
+PROFILE_FIELDS = ["first_name", "last_name", "profile_picture", "address"]
+
+X_CLIENT = OpenApiParameter(
+    "X-Client",
+    str,
+    OpenApiParameter.HEADER,
+    required=False,
+    enum=["mobile"],
+    description="`mobile` — tokenlar javob tanasida qaytadi. Yuborilmasa: web panel (httpOnly cookie + CSRF).",
+)
 
 
 def is_mobile(request) -> bool:
@@ -70,40 +91,94 @@ class CsrfView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    @extend_schema(responses={200: OpenApiResponse(description="CSRF cookie o'rnatildi")})
+    @extend_schema(
+        summary="CSRF cookie olish (web panel)",
+        responses={200: OpenApiResponse(description="CSRF cookie o'rnatildi")},
+    )
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
         get_token(request)
         return Response({"detail": "ok"})
 
 
+class RegisterView(PublicAuthView):
+    """Public sign-up for the mobile app (there is no web sign-up page).
+
+    The account always gets the USER role and ``is_phone_verified = false`` until an OTP flow
+    exists. Web clients get no session: tokens are only issued to ``X-Client: mobile``.
+    """
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "register"
+
+    @extend_schema(
+        summary="Ro'yxatdan o'tish (telefon + parol)",
+        description=(
+            "Rol har doim `USER`. Telefon raqam E.164 ga keltiriladi (`901234567` → `+998901234567`). "
+            "Telefon egaligi hali tasdiqlanmagan (`is_phone_verified=false`). "
+            f"Bot himoyasi yoqilgan bo'lsa, `{bot_protection.BOT_TOKEN_HEADER}` sarlavhasi talab qilinadi."
+        ),
+        parameters=[X_CLIENT],
+        request=RegisterSerializer,
+        responses={201: TokenPairSerializer},
+    )
+    def post(self, request):
+        bot_protection.verify(request)
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            user = serializer.save()
+            record(request, AuditAction.REGISTER, user, actor=user)
+        payload = {"user": MeSerializer(user, context={"request": request}).data}
+        if is_mobile(request):
+            payload.update(issue_tokens(user))
+        return Response(payload, status=status.HTTP_201_CREATED)
+
+
 class LoginView(PublicAuthView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
 
-    @extend_schema(request=LoginSerializer, responses={200: MeSerializer})
+    @extend_schema(
+        summary="Tizimga kirish (telefon + parol)",
+        description=(
+            "Noto'g'ri telefon, noto'g'ri parol va nofaol hisob uchun bir xil `401 invalid_credentials` qaytadi. "
+            "Ketma-ket muvaffaqiyatsiz urinishlardan so'ng hisob vaqtincha bloklanadi (`429 account_locked`)."
+        ),
+        parameters=[X_CLIENT],
+        request=LoginSerializer,
+        responses={200: TokenPairSerializer},
+    )
     def post(self, request):
         if not is_mobile(request):
             enforce_csrf(request)
 
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data["email"].strip().lower()
+        raw_phone = serializer.validated_data["phone_number"]
         password = serializer.validated_data["password"]
+        phone = phone_utils.try_normalize(raw_phone)
+        lock_key = phone or raw_phone.strip()
 
-        if lockout.is_locked(email):
+        if lockout.is_locked(lock_key):
             raise AccountLocked(LOCKED)
 
-        user = authenticate(request, username=email, password=password)
+        if phone is None:
+            User().set_password(password)  # spend the same hashing time as a real lookup
+            user = None
+        else:
+            user = authenticate(request, phone_number=phone, password=password)
+
         if user is None or user.is_deleted:
-            locked_now = lockout.register_failure(email)
-            target = User.objects.filter(email__iexact=email).first()
-            record(request, AuditAction.LOGIN_FAILED, target, target_label=email)
+            locked_now = lockout.register_failure(lock_key)
+            target = User.objects.filter(phone_number=phone).first() if phone else None
+            label = phone or "invalid-phone"
+            record(request, AuditAction.LOGIN_FAILED, target, target_label=label)
             if locked_now:
-                record(request, AuditAction.LOGIN_LOCKED, target, target_label=email)
+                record(request, AuditAction.LOGIN_LOCKED, target, target_label=label)
             raise AuthenticationFailed(INVALID_CREDENTIALS, code="invalid_credentials")
 
-        lockout.reset(email)
+        lockout.reset(lock_key)
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
         record(request, AuditAction.LOGIN, user, actor=user)
@@ -116,7 +191,13 @@ class RefreshView(PublicAuthView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "token_refresh"
 
-    @extend_schema(request=RefreshSerializer, responses={200: MeSerializer})
+    @extend_schema(
+        summary="Tokenni yangilash (rotation)",
+        description="Refresh token bir martalik. Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi.",
+        parameters=[X_CLIENT],
+        request=RefreshSerializer,
+        responses={200: TokenPairSerializer},
+    )
     def post(self, request):
         if is_mobile(request):
             serializer = RefreshSerializer(data=request.data)
@@ -149,7 +230,13 @@ class RefreshView(PublicAuthView):
 
 
 class LogoutView(PublicAuthView):
-    @extend_schema(request=RefreshSerializer, responses={204: None})
+    @extend_schema(
+        summary="Tizimdan chiqish",
+        description="Refresh token blacklistga qo'shiladi; web panelda cookie'lar tozalanadi.",
+        parameters=[X_CLIENT],
+        request=RefreshSerializer,
+        responses={204: None},
+    )
     def post(self, request):
         if is_mobile(request):
             raw = (request.data or {}).get("refresh")
@@ -167,6 +254,27 @@ class LogoutView(PublicAuthView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses=MeSerializer)
+    @extend_schema(summary="Mening profilim", responses=MeSerializer)
     def get(self, request):
         return Response(MeSerializer(request.user, context={"request": request}).data)
+
+    @extend_schema(
+        summary="Profilni tahrirlash",
+        description=(
+            "Faqat `first_name`, `last_name`, `profile_picture`, `address` o'zgaradi. "
+            "Rol, holat, telefon va JSHSHIR bu yerda o'zgartirilmaydi (boshqa maydonlar e'tiborsiz qoldiriladi)."
+        ),
+        request=MeUpdateSerializer,
+        responses=MeSerializer,
+    )
+    def patch(self, request):
+        user = request.user
+        serializer = MeUpdateSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            before = snapshot(user, PROFILE_FIELDS)
+            serializer.save()
+            changes = diff(before, snapshot(user, PROFILE_FIELDS))
+            if changes:
+                record(request, AuditAction.UPDATE, user, changes=changes, actor=user)
+        return Response(MeSerializer(user, context={"request": request}).data)

@@ -62,7 +62,7 @@ def record(
 
     entry = AuditLog.objects.create(
         actor=actor,
-        actor_label=getattr(actor, "email", "") or "",
+        actor_label=getattr(actor, "identifier", "") or "",
         action=action,
         target_type=target._meta.label if target is not None else "",
         target_id=str(target.pk) if target is not None else "",
