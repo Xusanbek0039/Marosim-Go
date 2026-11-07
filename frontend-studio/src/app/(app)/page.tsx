@@ -31,23 +31,29 @@ function CreateCeremonyModal({
   onClose: () => void;
   managed: MyStudioMembership[];
 }) {
+  // The modal mounts its children only while open, so the form starts fresh every time.
+  return (
+    <Modal open={open} onClose={onClose} title="Yangi marosim">
+      <CreateCeremonyForm onClose={onClose} managed={managed} />
+    </Modal>
+  );
+}
+
+function CreateCeremonyForm({ onClose, managed }: { onClose: () => void; managed: MyStudioMembership[] }) {
   const router = useRouter();
   const create = useCreateCeremony();
-  const [values, setValues] = useState({ title: "", event_date: "", description: "", studio_id: "" });
+  const [values, setValues] = useState({
+    title: "",
+    event_date: "",
+    description: "",
+    studio_id: managed[0]?.studio.id ?? "",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (open) {
-      setValues({ title: "", event_date: "", description: "", studio_id: managed[0]?.studio.id ?? "" });
-      setErrors({});
-    }
-  }, [open, managed]);
 
   const set = (key: keyof typeof values) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setValues((v) => ({ ...v, [key]: e.target.value }));
 
   return (
-    <Modal open={open} onClose={onClose} title="Yangi marosim">
       <form
         noValidate
         className="flex flex-col gap-4"
@@ -104,7 +110,6 @@ function CreateCeremonyModal({
           </Button>
         </div>
       </form>
-    </Modal>
   );
 }
 
