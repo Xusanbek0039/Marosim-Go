@@ -27,7 +27,7 @@ export const PhoneInput = forwardRef<HTMLInputElement, Props>(function PhoneInpu
       )}
     >
       <span className="flex h-full items-center border-r border-input bg-muted/60 px-3 text-sm font-semibold text-muted-foreground tabular-nums select-none" aria-hidden>
-        🇺🇿 {PHONE_PREFIX}
+        {PHONE_PREFIX}
       </span>
       <input
         ref={ref}
@@ -35,7 +35,6 @@ export const PhoneInput = forwardRef<HTMLInputElement, Props>(function PhoneInpu
         inputMode="numeric"
         autoComplete="tel-national"
         placeholder="90 123 45 67"
-        maxLength={12}
         value={display(value)}
         onChange={(e) => onChange(toUzE164(e.target.value))}
         className="h-full min-w-0 flex-1 bg-transparent px-3 text-base tabular-nums outline-none placeholder:text-muted-foreground md:text-sm"

@@ -1,8 +1,9 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, FilmIcon, ImageIcon, PlayIcon, XIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, FilmIcon, ImageIcon, Loader2Icon, PlayIcon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { downloadUrl, streamUrl, thumbUrl, useCeremonyMedia } from "@/lib/sharing";
 import type { MyMedia } from "@/lib/types";
@@ -23,6 +24,8 @@ function duration(ms: number | null) {
 
 function Thumb({ ceremonyId, media, className }: { ceremonyId: string; media: MyMedia; className?: string }) {
   const [failed, setFailed] = useState(false);
+  // The first preview request is fetched from Google Drive (a few seconds): pulse until it arrives.
+  const [loaded, setLoaded] = useState(false);
   const Icon = media.kind === "VIDEO" ? FilmIcon : ImageIcon;
   return failed ? (
     <span className={cn("flex items-center justify-center bg-gradient-to-br from-blue-600/25 to-cyan-500/25 text-cyan-700 dark:text-cyan-300", className)}>
@@ -30,7 +33,14 @@ function Thumb({ ceremonyId, media, className }: { ceremonyId: string; media: My
     </span>
   ) : (
     // eslint-disable-next-line @next/next/no-img-element -- authenticated same-origin media, not optimisable by next/image
-    <img src={thumbUrl(ceremonyId, media.id)} alt="" loading="lazy" onError={() => setFailed(true)} className={cn("object-cover", className)} />
+    <img
+      src={thumbUrl(ceremonyId, media.id)}
+      alt=""
+      loading="lazy"
+      onLoad={() => setLoaded(true)}
+      onError={() => setFailed(true)}
+      className={cn("object-cover", !loaded && "animate-pulse bg-muted", className)}
+    />
   );
 }
 
@@ -61,6 +71,9 @@ function Viewer({
   }, [go, onClose]);
 
   const blockSave = media.can_download ? undefined : (e: React.MouseEvent) => e.preventDefault();
+  // Bytes come from Google Drive through the server: show a spinner until the current item is ready.
+  const [readyId, setReadyId] = useState<string | null>(null);
+  const ready = readyId === media.id;
 
   return (
     <motion.div
@@ -88,6 +101,7 @@ function Viewer({
         </div>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-6 sm:px-16" onContextMenu={blockSave}>
+        {!ready && <Loader2Icon className="absolute size-10 animate-spin text-white/60" aria-label="Yuklanmoqda" />}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={media.id}
@@ -104,6 +118,7 @@ function Viewer({
                 controls
                 autoPlay
                 playsInline
+                onLoadedData={() => setReadyId(media.id)}
                 controlsList={media.can_download ? undefined : "nodownload"}
                 disablePictureInPicture={!media.can_download}
                 className="max-h-full max-w-full rounded-2xl bg-black"
@@ -114,7 +129,8 @@ function Viewer({
                 src={BROWSER_IMAGE.has(media.mime_type) ? streamUrl(ceremonyId, media.id) : thumbUrl(ceremonyId, media.id, 960)}
                 alt=""
                 draggable={media.can_download}
-                className="max-h-full max-w-full rounded-2xl object-contain"
+                onLoad={() => setReadyId(media.id)}
+                className={cn("max-h-full max-w-full rounded-2xl object-contain transition-opacity", ready ? "opacity-100" : "opacity-0")}
               />
             )}
           </motion.div>
@@ -201,11 +217,16 @@ export function Gallery({ ceremonyId, isOwner }: { ceremonyId: string; isOwner: 
         </>
       )}
 
-      <AnimatePresence>
-        {open !== null && ordered[open] && (
-          <Viewer ceremonyId={ceremonyId} items={ordered} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />
+      {/* Portal: the Card's transform / backdrop-filter would otherwise trap this fixed overlay inside the card. */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {open !== null && ordered[open] && (
+              <Viewer ceremonyId={ceremonyId} items={ordered} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
     </Card>
   );
 }

@@ -1,5 +1,15 @@
 # Progress
 
+## 2026-11-07 (kech) — Admin panelda To'yxonalar, venues.* ruxsatlari, galereya, +998 telefon, UI tuzatishlari ✅
+
+* **Ruxsatlar:** `venues.view / create / update / delete / publish` — Super Admin adminlarga beradi/oladi (Adminlar → "N ta ruxsat"); har so'rovda qayta tekshiriladi.
+* **Admin panel → To'yxonalar** (`/venues`, Studiyalar yonida): ro'yxat (holat, ommaga chiqish, hudud filtrlari), yaratish (egasi — "To'yxona" rolidagi foydalanuvchi), tahrirlash, bloklash, o'chirish, ommaga chiqish holati (`venues.publish`), zallar, galereya, jamoa. API: `/api/v1/admin/venues/…`.
+* **Galereya:** 20 tagacha rasm, har biri 5 MB (JPG/PNG/WEBP → WEBP, EXIF yo'q, 1920 px); egasi (`frontend-toyxona` → Rasmlar) va admin paneli; chegara qulf ostida.
+* **Telefon:** barcha formalarda `+998` qotirilgan maydon, faqat 9 raqam; backend faqat UZ (o'zgarmagan). Ikki marta prefiks qo'shish xatosi brauzer testida topilib tuzatildi.
+* **UI tuzatishlari:** (1) "Yangi foydalanuvchi" oynasi scroll bo'lmasdi — Radix scroll-lock tashqi o'rovchini bloklardi; scroll endi oynaning o'zida. (2) Studiya/foydalanuvchi/to'yxona ilovalaridagi modal va galereya ko'rish oynasi karta ichida "qamalib" qolardi (transform/backdrop-filter) — portal orqali `body`ga. (3) Studiya ro'yxatida har marosimda "Video yuklash" tugmasi (to'g'ridan-to'g'ri yuklash bo'limiga).
+* **Tekshiruv:** backend 1384 passed (SQLite + PostgreSQL); 4 ta frontend tsc/eslint/build; ko'rinadigan Chrome'da to'liq ssenariy (admin → ruxsat → to'yxona + galereya; studiya → Drive'ga yuklash; mijoz → galereya va ko'rish oynasi; to'yxona → Rasmlar).
+* **Demo hisoblar (dev DB):** `+998900000001…05`, parol `Demo12345!` (Super Admin, Admin, Studiya, To'yxonachi, Mijoz).
+
 ## 2026-11-07 (kech) — V4.1 Phase E: studiya yuklash UI, foydalanuvchi galereyasi, muddatli ulashish ✅
 
 * **Studiya** (`frontend-studio`, marosim sahifasi): drag & drop, bir vaqtda 2 fayl, bo'laklab to'g'ridan-to'g'ri Google Drive'ga, progress, bekor qilish, uzilsa davom etish.

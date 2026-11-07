@@ -7,15 +7,19 @@ export const PHONE_PREFIX = "+998";
 
 /** Any typed form ("90 123 45 67", "998901234567", "+998 (90) 123-45-67") → "+998901234567" or "". */
 export function toUzE164(raw: string): string {
-  let digits = raw.replace(/\D/g, "");
-  if (digits.startsWith("998") && digits.length > 9) digits = digits.slice(3);
+  const text = raw.trim();
+  // Already ours ("+998…", possibly incomplete): never prefix twice.
+  let digits = (text.startsWith(PHONE_PREFIX) ? text.slice(PHONE_PREFIX.length) : text).replace(/\D/g, "");
+  // A full international number pasted without "+": 998 + 9 digits. (A 9-digit local number may itself
+  // start with "99 8…" — operator 99 — so only a 12-digit value is treated as international.)
+  if (!text.startsWith(PHONE_PREFIX) && digits.length >= 12 && digits.startsWith("998")) digits = digits.slice(3);
   return digits ? `${PHONE_PREFIX}${digits.slice(0, 9)}` : "";
 }
 
 export const isUzPhone = (value: string) => /^\+998\d{9}$/.test(value);
 
 function display(value: string) {
-  const d = toUzE164(value).slice(PHONE_PREFIX.length);
+  const d = toUzE164(value).slice(PHONE_PREFIX.length); // value is already "+998…": no double prefix
   return [d.slice(0, 2), d.slice(2, 5), d.slice(5, 7), d.slice(7, 9)].filter(Boolean).join(" ");
 }
 
@@ -43,7 +47,6 @@ export function PhoneInput({
         type="tel"
         inputMode="numeric"
         placeholder="90 123 45 67"
-        maxLength={12}
         value={display(value)}
         onChange={(e) => onChange(toUzE164(e.target.value))}
         className="h-full min-w-0 flex-1 bg-transparent px-3 text-sm tabular-nums outline-none placeholder:text-muted-foreground"

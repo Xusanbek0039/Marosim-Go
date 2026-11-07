@@ -3,6 +3,7 @@
 import { AlertTriangleIcon, InboxIcon, Loader2Icon, RotateCwIcon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 import { ApiError } from "@/lib/api";
 import { initials } from "@/lib/format";
@@ -206,35 +207,39 @@ export function Modal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onMouseDown={(e) => e.target === e.currentTarget && onClose()}
-        >
+  // Portal to <body>: a Card's transform / backdrop-filter becomes the containing block of
+  // position:fixed descendants, which would trap the overlay inside the card.
+  if (typeof document === "undefined") return null;
+  return createPortal(
+      <AnimatePresence>
+        {open && (
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label={title}
-            className="glass-strong max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl p-6 sm:rounded-3xl"
-            initial={{ y: 40, opacity: 0, scale: 0.98 }}
-            animate={{ y: 0, opacity: 1, scale: 1, transition: { type: "spring", stiffness: 380, damping: 32 } }}
-            exit={{ y: 24, opacity: 0, transition: { duration: 0.15 } }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={(e) => e.target === e.currentTarget && onClose()}
           >
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-bold">{title}</h2>
-              <button type="button" onClick={onClose} aria-label="Yopish" className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted">
-                <XIcon className="size-5" />
-              </button>
-            </div>
-            {children}
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={title}
+              className="glass-strong max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl p-6 sm:rounded-3xl"
+              initial={{ y: 40, opacity: 0, scale: 0.98 }}
+              animate={{ y: 0, opacity: 1, scale: 1, transition: { type: "spring", stiffness: 380, damping: 32 } }}
+              exit={{ y: 24, opacity: 0, transition: { duration: 0.15 } }}
+            >
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-bold">{title}</h2>
+                <button type="button" onClick={onClose} aria-label="Yopish" className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted">
+                  <XIcon className="size-5" />
+                </button>
+              </div>
+              {children}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>,
+    document.body,
   );
 }
