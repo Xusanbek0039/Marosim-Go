@@ -78,6 +78,50 @@
       "changed": {},
       "breaking": [],
       "schema_changed": []
+    },
+    {
+      "revision": 3,
+      "date": "2026-11-07",
+      "note": "Phase B: ceremony_type (event_type) qiymatlari kengaytirildi (ENGAGEMENT, SUNNAT, BESHIK, BIRTHDAY, ANNIVERSARY, OTHER) — breaking emas",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/ceremonies/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/ceremonies/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/me/ceremonies/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/ceremonies/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/ceremonies/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/invitations/{id}/accept/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/ceremonies/",
+        "GET /api/v1/ceremonies/{id}/",
+        "GET /api/v1/me/ceremonies/",
+        "GET /api/v1/me/ceremonies/{id}/",
+        "GET /api/v1/studios/me/ceremonies/",
+        "PATCH /api/v1/ceremonies/{id}/",
+        "POST /api/v1/ceremonies/",
+        "POST /api/v1/me/invitations/{id}/accept/"
+      ]
     }
   ]
 }

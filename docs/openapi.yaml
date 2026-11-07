@@ -916,6 +916,95 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/admins/{id}/verify-phone/:
+    post:
+      operationId: admins_verify_phone_create
+      description: |-
+        ADMIN accounts and their granular permissions — Super Admin only.
+
+        **Ruxsat:** Faqat SUPER_ADMIN
+
+        **Ma'lumot doirasi:** Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      summary: Telefon raqamini qo'lda tasdiqlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - admins
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedUser'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - SUPER_ADMIN
+        permission: null
+        label: Faqat SUPER_ADMIN
+      x-allowed-roles:
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset).
+        conditions: []
+        permission_classes:
+        - IsSuperAdmin
+        status: DERIVED
+        review_reasons: []
+        label: Faqat SUPER_ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admins/permissions/:
     get:
       operationId: admins_permissions_list
@@ -4808,6 +4897,104 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/users/{id}/verify-phone/:
+    post:
+      operationId: users_verify_phone_create
+      description: |-
+        Clients of the platform: USER and STUDIO accounts.
+
+        **Ruxsat:** SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      summary: Telefon raqamini qo'lda tasdiqlash
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedUser'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: users.update
+        label: SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - users.update
+      x-ownership-scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+        ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - users.update
+        role_requirements:
+          ADMIN:
+          - users.update
+        ownership_scope: Faqat USER va STUDIO rolidagi, o'chirilmagan hisoblar (get_queryset).
+          ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `users.update` ruxsatli ADMIN
+      x-api-version: v1
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
 components:
   schemas:
     Admin:
@@ -5234,8 +5421,21 @@ components:
     EventTypeEnum:
       enum:
       - WEDDING
+      - ENGAGEMENT
+      - SUNNAT
+      - BESHIK
+      - BIRTHDAY
+      - ANNIVERSARY
+      - OTHER
       type: string
-      description: '* `WEDDING` - To''y'
+      description: |-
+        * `WEDDING` - To'y
+        * `ENGAGEMENT` - Fotiha / unashtiruv
+        * `SUNNAT` - Sunnat to'yi
+        * `BESHIK` - Beshik to'yi
+        * `BIRTHDAY` - Tug'ilgan kun
+        * `ANNIVERSARY` - Yubiley
+        * `OTHER` - Boshqa marosim
     GoogleDriveConnect:
       type: object
       properties:

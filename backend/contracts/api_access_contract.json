@@ -222,7 +222,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_list",
-      "schema_fingerprint": "e780961089a7552c"
+      "schema_fingerprint": "8b97fe26205a3408"
     },
     "GET /api/v1/ceremonies/{id}/": {
       "allowed_roles": [
@@ -237,7 +237,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_retrieve",
-      "schema_fingerprint": "11c3ae8334855989"
+      "schema_fingerprint": "98d368c508498584"
     },
     "GET /api/v1/ceremonies/{id}/participants/": {
       "allowed_roles": [
@@ -376,7 +376,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_list",
-      "schema_fingerprint": "21acfc2fe305e669"
+      "schema_fingerprint": "5e8739c996694ac5"
     },
     "GET /api/v1/me/ceremonies/{id}/": {
       "allowed_roles": [
@@ -390,7 +390,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_retrieve",
-      "schema_fingerprint": "7c721cff1ecf7464"
+      "schema_fingerprint": "9b36a7202baff8b4"
     },
     "GET /api/v1/me/invitations/": {
       "allowed_roles": [
@@ -495,7 +495,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_ceremonies_list",
-      "schema_fingerprint": "164292ad0c83abf5"
+      "schema_fingerprint": "03dc4f6c17b37190"
     },
     "GET /api/v1/studios/{id}/": {
       "allowed_roles": [
@@ -633,7 +633,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_partial_update",
-      "schema_fingerprint": "d7c6e6d18b602d30"
+      "schema_fingerprint": "b5c1499a623d97eb"
     },
     "PATCH /api/v1/studios/{id}/": {
       "allowed_roles": [
@@ -817,7 +817,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_create",
-      "schema_fingerprint": "5664bdbacf873c05"
+      "schema_fingerprint": "147f91d4ba36c976"
     },
     "POST /api/v1/ceremonies/{id}/participants/": {
       "allowed_roles": [
@@ -848,7 +848,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_invitations_accept_create",
-      "schema_fingerprint": "0b3f583366092822"
+      "schema_fingerprint": "f4f4eab7f2087fec"
     },
     "POST /api/v1/me/invitations/{id}/decline/": {
       "allowed_roles": [

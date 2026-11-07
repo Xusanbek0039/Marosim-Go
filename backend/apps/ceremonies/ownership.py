@@ -158,7 +158,7 @@ def accessible_ceremonies(user):
         return Ceremony.objects.none()
     owned = CeremonyOwnership.objects.filter(user=user, status=OwnershipStatus.ACCEPTED).values("ceremony_id")
     viewed = CeremonyViewerAccess.objects.filter(user=user, status=ViewerStatus.ACCEPTED).values("ceremony_id")
-    return _shareable_ceremonies().filter(pk__in=owned.union(viewed))
+    return _shareable_ceremonies().filter(Q(pk__in=owned) | Q(pk__in=viewed))
 
 
 # ------------------------------------------------------------- invitations
@@ -234,9 +234,10 @@ def response_refusal(user, invitation: CeremonyInvitation, *, accepting: bool) -
     ).exists()
     if open_ownership:
         return Refusal.ALREADY_HAS_ACCESS
-    if invitation.requested_role == AccessRole.VIEWER and CeremonyViewerAccess.objects.filter(
-        ceremony=ceremony, user=user, status=ViewerStatus.ACCEPTED
-    ).exists():
+    if (
+        invitation.requested_role == AccessRole.VIEWER
+        and CeremonyViewerAccess.objects.filter(ceremony=ceremony, user=user, status=ViewerStatus.ACCEPTED).exists()
+    ):
         return Refusal.ALREADY_HAS_ACCESS
     return None
 

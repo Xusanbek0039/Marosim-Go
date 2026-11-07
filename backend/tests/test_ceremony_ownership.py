@@ -50,7 +50,9 @@ def world(make_user, make_studio):
     sync_owner_membership(other_studio)
     uploader = make_user(Role.STUDIO)
     StudioMembership.objects.create(studio=studio, user=uploader, role=StudioMembership.Role.UPLOADER)
-    ceremony = Ceremony.objects.create(studio=studio, title="To'y", event_date="2026-09-12", status=CeremonyStatus.READY)
+    ceremony = Ceremony.objects.create(
+        studio=studio, title="To'y", event_date="2026-09-12", status=CeremonyStatus.READY
+    )
     other = Ceremony.objects.create(
         studio=other_studio, title="Boshqa to'y", event_date="2026-10-01", status=CeremonyStatus.READY
     )
@@ -190,17 +192,17 @@ def test_invite_capacities(world, make_user, super_admin):
     owner, guest, stranger, c = make_user(), make_user(), make_user(), world["ceremony"]
     own(c, owner)
     view(c, guest, granted_by=owner)
-    V, O = AccessRole.VIEWER, AccessRole.OWNER
-    assert ownership.inviter_kind(owner, c, V) == InviterKind.OWNER
-    assert ownership.inviter_kind(owner, c, O) == InviterKind.OWNER
-    assert ownership.inviter_kind(world["studio_owner"], c, O) == InviterKind.STUDIO
-    assert ownership.inviter_kind(super_admin, c, O) == InviterKind.SUPER_ADMIN
+    viewer, owner_role = AccessRole.VIEWER, AccessRole.OWNER
+    assert ownership.inviter_kind(owner, c, viewer) == InviterKind.OWNER
+    assert ownership.inviter_kind(owner, c, owner_role) == InviterKind.OWNER
+    assert ownership.inviter_kind(world["studio_owner"], c, owner_role) == InviterKind.STUDIO
+    assert ownership.inviter_kind(super_admin, c, owner_role) == InviterKind.SUPER_ADMIN
     # Viewers cannot reshare; studios/admins cannot hand out VIEWER; strangers/uploaders/other studios nothing.
-    assert not ownership.can_invite(guest, c, V) and not ownership.can_invite(guest, c, O)
-    assert not ownership.can_invite(world["studio_owner"], c, V)
-    assert not ownership.can_invite(super_admin, c, V)
+    assert not ownership.can_invite(guest, c, viewer) and not ownership.can_invite(guest, c, owner_role)
+    assert not ownership.can_invite(world["studio_owner"], c, viewer)
+    assert not ownership.can_invite(super_admin, c, viewer)
     for nobody in (stranger, world["uploader"], world["other_studio_owner"]):
-        assert not ownership.can_invite(nobody, c, V) and not ownership.can_invite(nobody, c, O)
+        assert not ownership.can_invite(nobody, c, viewer) and not ownership.can_invite(nobody, c, owner_role)
 
 
 # --------------------------------------------------------------- revocation
@@ -258,9 +260,7 @@ def test_owner_request_needs_every_current_owner(world, make_user):
     assert ownership.approvers_for(c, exclude_user_id=bride.pk) == [groom.pk]
 
     request = own(c, father, OwnerType.FAMILY_OWNER, status=OwnershipStatus.PENDING, invited_by=bride)
-    approvals = {
-        u.pk: CeremonyOwnershipApproval.objects.create(ownership=request, approver=u) for u in (bride, groom)
-    }
+    approvals = {u.pk: CeremonyOwnershipApproval.objects.create(ownership=request, approver=u) for u in (bride, groom)}
     assert ownership.approval_outcome(request) == ApprovalDecision.PENDING
     assert ownership.can_decide_owner_request(groom, request)
     assert not ownership.can_decide_owner_request(father, request)  # cannot approve themself
@@ -304,9 +304,10 @@ def test_identifiers_are_normalised_encrypted_and_domain_separated(world):
     assert pinfl not in p["recipient_identifier_encrypted"] and pinfl not in p["recipient_hint"]
     assert p["recipient_hint"].endswith(pinfl[-4:]) and p["recipient_hint"].count("*") == 10
     # Same digits as phone vs. JSHSHIR never collide.
-    assert ownership.phone_index("+998901234567") != ownership.seal_identifier(IdentifierType.PINFL, pinfl)[
-        "recipient_identifier_hash"
-    ]
+    assert (
+        ownership.phone_index("+998901234567")
+        != ownership.seal_identifier(IdentifierType.PINFL, pinfl)["recipient_identifier_hash"]
+    )
 
     inv = invitation(world["ceremony"], pinfl, identifier_type=IdentifierType.PINFL)
     stored = " ".join(str(v) for v in CeremonyInvitation.objects.filter(pk=inv.pk).values().get().values())
@@ -355,9 +356,9 @@ def test_unverified_phone_cannot_claim_ownership(world, make_user):
     assert ownership.response_refusal(user, owner_inv, accepting=True) == ownership.Refusal.PHONE_NOT_VERIFIED
     assert ownership.response_refusal(user, owner_inv, accepting=False) is None  # declining is always allowed
 
-    inviter = make_user()
-    own(c, inviter)
-    viewer_inv = invitation(c, user.phone_number, role=AccessRole.VIEWER, by=inviter)
+    inviter, other = make_user(), world["other"]
+    own(other, inviter)
+    viewer_inv = invitation(other, user.phone_number, role=AccessRole.VIEWER, by=inviter)
     assert ownership.response_refusal(user, viewer_inv, accepting=True) is None
 
     user.is_phone_verified = True
