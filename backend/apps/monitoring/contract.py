@@ -134,3 +134,53 @@ def annotate(endpoints: list[dict], schema: dict | None = None) -> list[dict]:
         name = key(endpoint["method"], endpoint["path"])
         endpoint["contract_status"] = status_of(live[name], reviewed, name) if name in live else NOT_IN_CONTRACT
     return endpoints
+
+
+# ------------------------------------------------------------------ changelog
+CHANGELOG_PATH = Path(settings.BASE_DIR) / "contracts" / "api_changelog.json"
+#: Changes a client written against the old contract may break on.
+BREAKING_FIELDS = {"allowed_roles", "auth_type", "required_permissions", "role_requirements"}
+
+
+def load_changelog(path: Path = CHANGELOG_PATH) -> list[dict]:
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))["entries"]
+
+
+def changelog_entry(changes: dict, *, revision: int, date: str, note: str = "") -> dict:
+    changed = {name: sorted(fields) for name, fields in changes["changed"].items()}
+    breaking = sorted(
+        {*changes["removed"]} | {name for name, fields in changed.items() if BREAKING_FIELDS & set(fields)}
+    )
+    return {
+        "revision": revision,
+        "date": date,
+        "note": note,
+        "added": changes["added"],
+        "removed": changes["removed"],
+        "changed": changed,
+        # Removed operations or narrowed access: review whether a new API version is needed.
+        "breaking": breaking,
+        # Request/response shape changed: may or may not be breaking — review the diff.
+        "schema_changed": sorted(n for n, f in changed.items() if "schema_fingerprint" in f),
+    }
+
+
+def append_changelog(entry: dict, path: Path = CHANGELOG_PATH) -> None:
+    entries = [*load_changelog(path), entry]
+    doc = {
+        "_comment": "Appended by `python manage.py api_contract --write`. One entry per accepted contract change.",
+        "entries": entries,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def replay(entries: list[dict]) -> set[str]:
+    """Operation names the changelog says exist — must equal the contract's operations."""
+    names: set[str] = set()
+    for entry in entries:
+        names |= set(entry["added"])
+        names -= set(entry["removed"])
+    return names

@@ -27,6 +27,7 @@ urlpatterns = [
     path("auth/", include("apps.accounts.auth_urls")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("monitoring/", include("apps.monitoring.urls")),
+    path("devcenter/", include("apps.devcenter.urls")),
     path("admin/storage/", include("apps.storage.urls")),
     path("health/live/", LiveView.as_view(), name="health-live"),
     path("health/ready/", ReadyView.as_view(), name="health-ready"),

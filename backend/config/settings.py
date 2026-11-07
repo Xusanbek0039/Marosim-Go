@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.monitoring",
     "apps.storage",
     "apps.ceremonies",
+    "apps.devcenter",
 ]
 
 MIDDLEWARE = [
