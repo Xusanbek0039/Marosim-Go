@@ -336,3 +336,69 @@ def test_deactivated_account_loses_venue_access(venue_owner, make_venue):
     venue_owner.save(update_fields=["is_active"])
     assert services.capabilities_for(venue_owner, venue) == frozenset()
     assert not services.venues_for(venue_owner).exists()
+
+
+# ------------------------------------------------------- members API
+@pytest.mark.django_db
+def test_owner_manages_members_by_phone(venue_owner, make_venue, make_user, client_for):
+    venue = make_venue(venue_owner)
+    client = client_for(venue_owner)
+    url = f"{BASE}{venue.pk}/members/"
+    staff = make_user(Role.VENUE_OWNER)
+
+    res = client.post(url, {"phone_number": staff.phone_number, "role": "SCHEDULER"}, format="json")
+    assert res.status_code == 201, res.data
+    assert res.data["role"] == "SCHEDULER" and res.data["user"]["id"] == str(staff.pk)
+    assert set(res.data["user"]) == {"id", "full_name", "phone_number"}  # no JSHSHIR / email / address
+    again = client.post(url, {"phone_number": staff.phone_number, "role": "VIEWER"}, format="json")
+    assert again.status_code == 400
+
+    # unknown number, a non-venue account and an inactive account all get the same answer
+    plain, inactive = make_user(Role.USER), make_user(Role.VENUE_OWNER, is_active=False)
+    errors = {
+        str(client.post(url, {"phone_number": phone, "role": "VIEWER"}, format="json").data["error"]["details"])
+        for phone in ("+998939999999", plain.phone_number, inactive.phone_number)
+    }
+    assert len(errors) == 1 and services.MEMBER_NOT_FOUND in errors.pop()
+
+    rows = client.get(url).data
+    assert {r["user"]["id"] for r in rows} == {str(venue_owner.pk), str(staff.pk)}
+    membership_id = res.data["id"]
+    res = client.patch(f"{url}{membership_id}/", {"role": "MANAGER"}, format="json")
+    assert res.status_code == 200 and res.data["role"] == "MANAGER"
+    assert client_for(staff).patch(f"{BASE}{venue.pk}/", {"district": "X"}, format="json").status_code == 200
+    res = client.patch(f"{url}{membership_id}/", {"is_active": False}, format="json")
+    assert res.status_code == 200 and res.data["is_active"] is False
+    assert client_for(staff).get(f"{BASE}{venue.pk}/").status_code == 404
+
+    own = VenueMembership.objects.get(venue=venue, user=venue_owner)
+    assert client.patch(f"{url}{own.pk}/", {"role": "VIEWER"}, format="json").status_code == 400  # last OWNER
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("role", [MembershipRole.MANAGER, MembershipRole.SCHEDULER, MembershipRole.VIEWER])
+def test_only_owners_manage_members(make_user, make_venue, client_for, role):
+    venue = make_venue(make_user(Role.VENUE_OWNER))
+    member = make_user(Role.VENUE_OWNER)
+    target = _member(venue, make_user(Role.VENUE_OWNER), MembershipRole.VIEWER)
+    _member(venue, member, role)
+    client = client_for(member)
+    url = f"{BASE}{venue.pk}/members/"
+    assert client.get(url).status_code == 403
+    newcomer = make_user(Role.VENUE_OWNER)
+    assert client.post(url, {"phone_number": newcomer.phone_number, "role": "OWNER"}, format="json").status_code == 403
+    assert client.patch(f"{url}{target.pk}/", {"role": "OWNER"}, format="json").status_code == 403
+    target.refresh_from_db()
+    assert target.role == MembershipRole.VIEWER
+
+
+@pytest.mark.django_db
+def test_member_of_another_venue_is_not_reachable(make_user, make_venue, client_for):
+    owner_a, owner_b = make_user(Role.VENUE_OWNER), make_user(Role.VENUE_OWNER)
+    venue_a, venue_b = make_venue(owner_a, name="A"), make_venue(owner_b, name="B")
+    foreign = VenueMembership.objects.get(venue=venue_b)
+    client = client_for(owner_a)
+    assert (
+        client.patch(f"{BASE}{venue_a.pk}/members/{foreign.pk}/", {"role": "VIEWER"}, format="json").status_code == 404
+    )
+    assert client.get(f"{BASE}{venue_b.pk}/members/").status_code == 404
