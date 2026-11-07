@@ -1,5 +1,32 @@
 # Progress
 
+## 2026-11-07 — API Developer Center: Phase 3 (backend) + Phase 4 (UI) ✅
+
+**Phase 3 — backend** (`apps/devcenter`, faqat SUPER_ADMIN, faqat o'qish, SSRF yuzasi yo'q)
+* `GET /api/v1/devcenter/overview/` — operatsiyalar, rollar, hujjat/kontrakt/holat statistikasi, oxirgi o'zgarish.
+* `GET /api/v1/devcenter/endpoints/?role=&version=&method=` — rol bo'yicha katalog + 24 soatlik real trafik.
+* `GET /api/v1/devcenter/mobile/` — User / Studio Mobile funksiyalari real `operation_id` larga bog'langan
+  (`apps/devcenter/mobile.py`); API'si yo'q funksiyalar alohida `PLANNED` (rasmlar, videolar, media upload…).
+* `GET /api/v1/devcenter/changelog/` — `contracts/api_changelog.json`. `manage.py api_contract --write [--note]`
+  har bir kontrakt o'zgarishini avtomatik yozadi; `breaking` (o'chirilgan / kirish o'zgargan) va
+  `schema_changed` alohida belgilanadi.
+
+**Phase 4 — UI** (`frontend/`)
+* Sidebar: yig'iladigan **Developer Center** guruhi — API Overview, All Endpoints, User / Studio / Admin /
+  Super Admin / Public APIs, Mobile API, API Monitoring, API Changelog.
+* **API Monitoring → Endpointlar**: rol tablari (Barchasi · Public · User · Studio · Admin · Super Admin, sonlari bilan),
+  ro'yxatda rol belgilari, tafsilotda "Kirish siyosati" (rollar, ADMIN ruxsat kodlari, ma'lumot doirasi,
+  shartlar, REVIEW / Documentation Missing / kontrakt ogohlantirishlari).
+* Kod namunalari: cURL, JavaScript, Python, **Kotlin/Retrofit, Swift/URLSession, Dart/Dio** — Copy bilan.
+* Endpoint ro'yxati frontendda hardcode qilinmagan — hammasi backend API'dan.
+
+**Testlar**: backend 728 passed (`tests/test_devcenter.py` qo'shildi: SUPER_ADMIN-only, rol guruhlari,
+mobil xarita faqat mavjud va rol chaqira oladigan operatsiyalarga ishora qiladi, changelog = kontrakt).
+`tsc`, `eslint`, `next build` toza. Jonli tekshiruv (vaqtinchalik DB nusxasi + Chrome headless): 6 ta Developer
+Center sahifasi, Monitoring rol filtri (Studio = 11), Kotlin namunasi, 390px ekran — konsolda xato yo'q.
+
+**Keyingi**: Phase 5 (API Testing Console) — tasdiq kutilmoqda.
+
 ## 2026-11-07 — API Developer Center: Phase 1 (audit) + Phase 2 (rol kontrakti) ✅
 
 **Phase 1 — inventarizatsiya** ([API_INVENTORY.md](API_INVENTORY.md), [API_ENDPOINTS.md](API_ENDPOINTS.md))
