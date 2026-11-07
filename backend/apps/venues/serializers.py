@@ -1,10 +1,9 @@
 from drf_spectacular.utils import OpenApiExample, extend_schema_field, extend_schema_serializer
 from rest_framework import serializers
 
+from apps.accounts.models import Role, User
 from apps.accounts.serializers import PhoneNumberField
 from apps.core.uploads import process_image
-
-from apps.accounts.models import Role, User
 
 from . import services
 from .models import MembershipRole, PublicationStatus, Venue, VenueHall, VenueImage, VenueMembership
