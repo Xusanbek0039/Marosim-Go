@@ -68,7 +68,9 @@ function InviteForm({ ceremonyId, takenCouple }: { ceremonyId: string; takenCoup
   const invite = useInvite(ceremonyId);
   const firstFree: ParticipantType = !takenCouple.has("BRIDE") ? "BRIDE" : !takenCouple.has("GROOM") ? "GROOM" : "OTHER";
   const [phone, setPhone] = useState("");
-  const [type, setType] = useState<ParticipantType>(firstFree);
+  const [chosen, setChosen] = useState<ParticipantType>(firstFree);
+  // Derived, not stored: participants load/change after mount, so never offer a taken slot.
+  const type: ParticipantType = chosen !== "OTHER" && takenCouple.has(chosen) ? firstFree : chosen;
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   return (
@@ -84,7 +86,7 @@ function InviteForm({ ceremonyId, takenCouple }: { ceremonyId: string; takenCoup
             onSuccess: () => {
               toast.success("Taklif yuborildi");
               setPhone("");
-              setType("OTHER");
+              setChosen("OTHER");
             },
             onError: (err) => {
               if (err instanceof ApiError && Object.keys(err.fieldErrors).length) setErrors(err.fieldErrors);
@@ -112,7 +114,7 @@ function InviteForm({ ceremonyId, takenCouple }: { ceremonyId: string; takenCoup
           </div>
         </Field>
         <Field label="Kim" htmlFor="invite_type" error={errors.participant_type}>
-          <Select id="invite_type" value={type} onChange={(e) => setType(e.target.value as ParticipantType)}>
+          <Select id="invite_type" value={type} onChange={(e) => setChosen(e.target.value as ParticipantType)}>
             {(["BRIDE", "GROOM", "OTHER"] as const).map((t) => (
               <option key={t} value={t} disabled={t !== "OTHER" && takenCouple.has(t)}>
                 {PARTICIPANT_LABELS[t]}
