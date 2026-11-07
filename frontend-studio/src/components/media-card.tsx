@@ -2,7 +2,7 @@
 
 import { CheckCircle2Icon, CloudUploadIcon, FileImageIcon, FileVideoIcon, Loader2Icon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ApiError } from "@/lib/api";
@@ -158,8 +158,13 @@ export function MediaCard({ ceremony }: { ceremony: Ceremony }) {
   const totals = { photos: ready.filter((m) => m.kind === "PHOTO").length, videos: ready.filter((m) => m.kind === "VIDEO").length };
   const finished = jobs.some((j) => j.state === "done" || j.state === "error" || j.state === "cancelled");
 
+  // Arriving from the list's "Video yuklash" button (#media): bring the upload area into view.
+  useEffect(() => {
+    if (window.location.hash === "#media") document.getElementById("media")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   return (
-    <Card className="flex flex-col gap-4">
+    <Card id="media" className="flex scroll-mt-24 flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold">Video va rasmlar</h2>

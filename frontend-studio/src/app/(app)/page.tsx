@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarHeartIcon, ChevronRightIcon, PlusIcon, SearchIcon, UsersIcon } from "lucide-react";
+import { CalendarHeartIcon, ChevronRightIcon, CloudUploadIcon, PlusIcon, SearchIcon, UsersIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -220,7 +220,8 @@ export default function StudioHomePage() {
                   animate={{ opacity: 1, y: 0, transition: { delay: i * 0.03 } }}
                   className="border-t border-border/70 first:border-t-0"
                 >
-                  <Link href={`/ceremonies/${c.id}`} className="group flex items-center gap-3 rounded-2xl px-2 py-3 transition hover:bg-muted/60">
+                  <div className="flex items-center gap-2">
+                  <Link href={`/ceremonies/${c.id}`} className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-2 py-3 transition hover:bg-muted/60">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white">
                       <CalendarHeartIcon className="size-5" aria-hidden />
                     </span>
@@ -237,6 +238,16 @@ export default function StudioHomePage() {
                     <Badge tone={STATUS_TONE[c.status]}>{STATUS_LABELS[c.status]}</Badge>
                     <ChevronRightIcon className="size-4 text-muted-foreground transition group-hover:translate-x-0.5" />
                   </Link>
+                  {c.status !== "ARCHIVED" && (
+                    <Link
+                      href={`/ceremonies/${c.id}#media`}
+                      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-xl bg-blue-500/10 px-3 text-xs font-bold text-blue-700 transition hover:bg-blue-500/20 dark:text-cyan-300"
+                    >
+                      <CloudUploadIcon className="size-4" aria-hidden />
+                      <span className="hidden sm:inline">Video yuklash</span>
+                    </Link>
+                  )}
+                  </div>
                 </motion.li>
               ))}
             </ul>

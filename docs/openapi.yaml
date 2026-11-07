@@ -360,6 +360,977 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/admin/venues/:
+    get:
+      operationId: admin_venues_list
+      summary: To'yxonalar ro'yxati (panel)
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: publication_status
+        schema:
+          type: string
+          enum:
+          - APPROVED
+          - PENDING_APPROVAL
+          - PRIVATE
+          - REJECTED
+          - SUSPENDED
+        description: |-
+          * `PRIVATE` - Yopiq
+          * `PENDING_APPROVAL` - Tasdiq kutilmoqda
+          * `APPROVED` - Tasdiqlangan
+          * `REJECTED` - Rad etilgan
+          * `SUSPENDED` - To'xtatilgan
+      - in: query
+        name: region
+        schema:
+          type: string
+          enum:
+          - ANDIJAN
+          - BUKHARA
+          - FERGANA
+          - JIZZAKH
+          - KARAKALPAKSTAN
+          - KASHKADARYA
+          - KHOREZM
+          - NAMANGAN
+          - NAVOI
+          - SAMARKAND
+          - SIRDARYO
+          - SURKHANDARYA
+          - TASHKENT
+          - TASHKENT_CITY
+        description: |-
+          * `TASHKENT_CITY` - Toshkent shahri
+          * `TASHKENT` - Toshkent viloyati
+          * `ANDIJAN` - Andijon viloyati
+          * `BUKHARA` - Buxoro viloyati
+          * `FERGANA` - Farg'ona viloyati
+          * `JIZZAKH` - Jizzax viloyati
+          * `KHOREZM` - Xorazm viloyati
+          * `NAMANGAN` - Namangan viloyati
+          * `NAVOI` - Navoiy viloyati
+          * `KASHKADARYA` - Qashqadaryo viloyati
+          * `KARAKALPAKSTAN` - Qoraqalpog'iston Respublikasi
+          * `SAMARKAND` - Samarqand viloyati
+          * `SIRDARYO` - Sirdaryo viloyati
+          * `SURKHANDARYA` - Surxondaryo viloyati
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin-venues
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminVenueList'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.view
+        label: SUPER_ADMIN yoki `venues.view` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.view
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.view
+        role_requirements:
+          ADMIN:
+          - venues.view
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.view` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.view` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: admin_venues_create
+      summary: To'yxona qo'shish (egasi bilan)
+      tags:
+      - admin-venues
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminVenueRequest'
+            examples:
+              To'yxonaYaratish:
+                value:
+                  name: Navro'z to'yxonasi
+                  address: Toshkent, Chilonzor 9-kvartal
+                  region: TASHKENT_CITY
+                  district: Chilonzor
+                  phone_number: '+998901234567'
+                  capacity_min: 100
+                  capacity_max: 600
+                  base_price: '45000000.00'
+                summary: To'yxona yaratish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminVenueRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminVenueRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminVenue'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.create
+        label: SUPER_ADMIN yoki `venues.create` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.create
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.create
+        role_requirements:
+          ADMIN:
+          - venues.create
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.create` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.create` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/admin/venues/{id}/:
+    get:
+      operationId: admin_venues_retrieve
+      summary: To'yxona ma'lumotlari (panel)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminVenue'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.view
+        label: SUPER_ADMIN yoki `venues.view` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.view
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.view
+        role_requirements:
+          ADMIN:
+          - venues.view
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.view` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.view` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    patch:
+      operationId: admin_venues_partial_update
+      summary: To'yxonani tahrirlash / bloklash / holat
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminVenueRequest'
+            examples:
+              To'yxonaYaratish:
+                value:
+                  name: Navro'z to'yxonasi
+                  address: Toshkent, Chilonzor 9-kvartal
+                  region: TASHKENT_CITY
+                  district: Chilonzor
+                  phone_number: '+998901234567'
+                  capacity_min: 100
+                  capacity_max: 600
+                  base_price: '45000000.00'
+                summary: To'yxona yaratish
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminVenueRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminVenueRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminVenue'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.update
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.update
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions:
+      - publication_status o'zgarishi uchun qo'shimcha `venues.publish`
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.update
+        role_requirements:
+          ADMIN:
+          - venues.update
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions:
+        - publication_status o'zgarishi uchun qo'shimcha `venues.publish`
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+
+        **Shartlar:**
+        * publication_status o'zgarishi uchun qo'shimcha `venues.publish`
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    delete:
+      operationId: admin_venues_destroy
+      summary: To'yxonani o'chirish (soft delete)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.delete
+        label: SUPER_ADMIN yoki `venues.delete` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.delete
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.delete
+        role_requirements:
+          ADMIN:
+          - venues.delete
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.delete` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.delete` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/admin/venues/{id}/halls/:
+    post:
+      operationId: admin_venues_halls_create
+      summary: Zal qo'shish (panel)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VenueHallRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VenueHallRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VenueHallRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueHall'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.update
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.update
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.update
+        role_requirements:
+          ADMIN:
+          - venues.update
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/admin/venues/{id}/halls/{hall_id}/:
+    patch:
+      operationId: admin_venues_halls_partial_update
+      summary: Zalni tahrirlash (panel)
+      parameters:
+      - in: path
+        name: hall_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueHallRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueHallRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVenueHallRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueHall'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.update
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.update
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.update
+        role_requirements:
+          ADMIN:
+          - venues.update
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/admin/venues/{id}/images/:
+    post:
+      operationId: admin_venues_images_create
+      summary: Galereyaga rasm qo'shish (panel)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VenueImageUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueImage'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.update
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.update
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions:
+      - Ko'pi bilan 20 ta rasm, har biri 5 MB gacha
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.update
+        role_requirements:
+          ADMIN:
+          - venues.update
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions:
+        - Ko'pi bilan 20 ta rasm, har biri 5 MB gacha
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+
+        **Shartlar:**
+        * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/admin/venues/{id}/images/{image_id}/:
+    delete:
+      operationId: admin_venues_images_destroy
+      summary: Galereyadan rasmni o'chirish (panel)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: image_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - admin-venues
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - ADMIN
+        - SUPER_ADMIN
+        permission: venues.update
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-allowed-roles:
+      - ADMIN
+      - SUPER_ADMIN
+      x-auth-type: JWT
+      x-required-permissions:
+      - venues.update
+      x-ownership-scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+        hisoblari bu API'ga kira olmaydi.
+      x-access-conditions: []
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - ADMIN
+        - SUPER_ADMIN
+        auth_type: JWT
+        required_permissions:
+        - venues.update
+        role_requirements:
+          ADMIN:
+          - venues.update
+        ownership_scope: Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona
+          hisoblari bu API'ga kira olmaydi.
+        conditions: []
+        permission_classes:
+        - HasAdminPermission
+        status: DERIVED
+        review_reasons: []
+        label: SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** SUPER_ADMIN yoki `venues.update` ruxsatli ADMIN
+
+        **Ma'lumot doirasi:** Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/admins/:
     get:
       operationId: admins_list
@@ -8031,6 +9002,303 @@ paths:
       x-documentation:
         status: DOCUMENTED
         missing: []
+  /api/v1/venue-owner/venues/{id}/images/:
+    get:
+      operationId: venue_owner_venues_images_list
+      summary: Galereya rasmlari
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VenueImage'
+          description: ''
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - 'POST: A''zolik roli `EDIT_PROFILE` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).'
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      - Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - 'POST: A''zolik roli `EDIT_PROFILE` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).'
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        - Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * POST: A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+    post:
+      operationId: venue_owner_venues_images_create
+      summary: Galereyaga rasm qo'shish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VenueImageUploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VenueImage'
+          description: ''
+        '400':
+          description: validation_error — maydonlar bo'yicha xatolar `details` ichida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - 'POST: A''zolik roli `EDIT_PROFILE` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).'
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      - Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - 'POST: A''zolik roli `EDIT_PROFILE` imkoniyatiga ega bo''lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).'
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        - Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * POST: A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
+  /api/v1/venue-owner/venues/{id}/images/{image_id}/:
+    delete:
+      operationId: venue_owner_venues_images_destroy
+      summary: Galereyadan rasmni o'chirish
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      - in: path
+        name: image_id
+        schema:
+          type: string
+          pattern: ^[0-9a-fA-F-]{36}$
+        required: true
+      tags:
+      - venue-owner
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          description: not_authenticated / invalid_credentials / session_invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: permission_denied — rol yoki ruxsat yetarli emas (yoki CSRF)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: throttled / account_locked — `details.retry_after` soniyalarda
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+      x-access:
+        auth_required: true
+        roles:
+        - VENUE_OWNER
+        permission: null
+        label: VENUE_OWNER
+      x-allowed-roles:
+      - VENUE_OWNER
+      x-auth-type: JWT
+      x-required-permissions: []
+      x-ownership-scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+        to'yxonalar; boshqalari 404.
+      x-access-conditions:
+      - A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+        docs/VENUE_AVAILABILITY.md).
+      - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-access-status: DERIVED
+      x-access-policy:
+        allowed_roles:
+        - VENUE_OWNER
+        auth_type: JWT
+        required_permissions: []
+        role_requirements: {}
+        ownership_scope: Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan
+          to'yxonalar; boshqalari 404.
+        conditions:
+        - A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…,
+          docs/VENUE_AVAILABILITY.md).
+        - Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+        permission_classes:
+        - IsVenueAccount
+        status: DERIVED
+        review_reasons: []
+        label: VENUE_OWNER
+      x-api-version: v1
+      description: |-
+        **Ruxsat:** VENUE_OWNER
+
+        **Ma'lumot doirasi:** Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.
+
+        **Shartlar:**
+        * A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+        * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+      x-documentation:
+        status: DOCUMENTED
+        missing: []
   /api/v1/venue-owner/venues/{id}/members/:
     get:
       operationId: venue_owner_venues_members_list
@@ -8485,7 +9753,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PermissionsEnum'
-          maxItems: 10
+          maxItems: 15
       required:
       - created_at
       - full_name
@@ -8543,12 +9811,181 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PermissionsEnum'
-          maxItems: 10
+          maxItems: 15
     AdminRoleEnum:
       enum:
       - ADMIN
       type: string
       description: '* `ADMIN` - Admin'
+    AdminVenue:
+      type: object
+      description: |-
+        A venue in the Super Admin / Admin panel: everything, incl. block and publication status.
+
+        Changing ``publication_status`` additionally needs ``venues.publish`` (checked in the view).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 4000
+        venue_type:
+          $ref: '#/components/schemas/VenueTypeEnum'
+        address:
+          type: string
+          maxLength: 255
+        region:
+          $ref: '#/components/schemas/VenueRegionEnum'
+        district:
+          type: string
+          maxLength: 100
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        phone_number:
+          type: string
+          maxLength: 32
+        cover_image:
+          type: string
+          format: uri
+          nullable: true
+        capacity_min:
+          type: integer
+          maximum: 100000
+          minimum: 0
+        capacity_max:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/CurrencyEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+        publication_status:
+          $ref: '#/components/schemas/VenuePublicationStatusEnum'
+        halls:
+          type: array
+          items:
+            $ref: '#/components/schemas/VenueHall'
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/VenueImage'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/VenueOwnerBrief'
+          readOnly: true
+      required:
+      - address
+      - base_price
+      - capacity_max
+      - created_at
+      - currency
+      - halls
+      - id
+      - images
+      - members
+      - name
+      - region
+      - updated_at
+    AdminVenueRequest:
+      type: object
+      description: |-
+        A venue in the Super Admin / Admin panel: everything, incl. block and publication status.
+
+        Changing ``publication_status`` additionally needs ``venues.publish`` (checked in the view).
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 4000
+        venue_type:
+          $ref: '#/components/schemas/VenueTypeEnum'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        region:
+          $ref: '#/components/schemas/VenueRegionEnum'
+        district:
+          type: string
+          maxLength: 100
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        phone_number:
+          type: string
+          maxLength: 32
+        cover_image:
+          type: string
+          format: binary
+          nullable: true
+        capacity_min:
+          type: integer
+          maximum: 100000
+          minimum: 0
+        capacity_max:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+        publication_status:
+          $ref: '#/components/schemas/VenuePublicationStatusEnum'
+        owner_id:
+          type: string
+          format: uuid
+          writeOnly: true
+          description: 'Yaratishda majburiy: to''yxona egasi (faol VENUE_OWNER hisobi).'
+      required:
+      - address
+      - base_price
+      - capacity_max
+      - name
+      - region
     ApprovalBrief:
       type: object
       properties:
@@ -10031,6 +11468,11 @@ components:
           items:
             $ref: '#/components/schemas/VenueHall'
           readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/VenueImage'
+          readOnly: true
         membership_role:
           nullable: true
           readOnly: true
@@ -10058,6 +11500,7 @@ components:
       - currency
       - halls
       - id
+      - images
       - is_active
       - membership_capabilities
       - membership_role
@@ -10158,6 +11601,35 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Admin'
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+    PaginatedAdminVenueList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminVenue'
         page:
           type: integer
         page_size:
@@ -10507,7 +11979,70 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PermissionsEnum'
-          maxItems: 10
+          maxItems: 15
+    PatchedAdminVenueRequest:
+      type: object
+      description: |-
+        A venue in the Super Admin / Admin panel: everything, incl. block and publication status.
+
+        Changing ``publication_status`` additionally needs ``venues.publish`` (checked in the view).
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+          maxLength: 4000
+        venue_type:
+          $ref: '#/components/schemas/VenueTypeEnum'
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        region:
+          $ref: '#/components/schemas/VenueRegionEnum'
+        district:
+          type: string
+          maxLength: 100
+        latitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        longitude:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,6})?$
+          nullable: true
+        phone_number:
+          type: string
+          maxLength: 32
+        cover_image:
+          type: string
+          format: binary
+          nullable: true
+        capacity_min:
+          type: integer
+          maximum: 100000
+          minimum: 0
+        capacity_max:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+        publication_status:
+          $ref: '#/components/schemas/VenuePublicationStatusEnum'
+        owner_id:
+          type: string
+          format: uuid
+          writeOnly: true
+          description: 'Yaratishda majburiy: to''yxona egasi (faol VENUE_OWNER hisobi).'
     PatchedCeremonyRequest:
       type: object
       properties:
@@ -10725,6 +12260,11 @@ components:
       - studios.create
       - studios.update
       - studios.delete
+      - venues.view
+      - venues.create
+      - venues.update
+      - venues.delete
+      - venues.publish
       type: string
       description: |-
         * `dashboard.view` - dashboard.view
@@ -10737,6 +12277,11 @@ components:
         * `studios.create` - studios.create
         * `studios.update` - studios.update
         * `studios.delete` - studios.delete
+        * `venues.view` - venues.view
+        * `venues.create` - venues.create
+        * `venues.update` - venues.update
+        * `venues.delete` - venues.delete
+        * `venues.publish` - venues.publish
     PinflReveal:
       type: object
       properties:
@@ -11276,6 +12821,40 @@ components:
       required:
       - capacity
       - name
+    VenueImage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - image
+      - position
+    VenueImageUploadRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+          description: JPG / PNG / WEBP, 5 MB gacha. WEBP'ga qayta kodlanadi, EXIF
+            o'chiriladi.
+      required:
+      - image
     VenueMember:
       type: object
       properties:
@@ -11334,6 +12913,30 @@ components:
         * `MANAGER` - Menejer
         * `SCHEDULER` - Jadval yurituvchi
         * `VIEWER` - Kuzatuvchi
+    VenueOwnerBrief:
+      type: object
+      properties:
+        membership_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        full_name:
+          type: string
+        phone_number:
+          type: string
+        role:
+          $ref: '#/components/schemas/VenueMembershipRoleEnum'
+        is_active:
+          type: boolean
+      required:
+      - full_name
+      - is_active
+      - membership_id
+      - phone_number
+      - role
+      - user_id
     VenuePublicationStatusEnum:
       enum:
       - PRIVATE

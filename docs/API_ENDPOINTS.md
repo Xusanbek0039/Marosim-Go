@@ -12,6 +12,15 @@
 | POST | `/api/v1/admin/storage/google/disconnect/` | Google Drive'ni uzish | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/admin/storage/google/status/` | Google Drive ulanish holati | SUPER_ADMIN | — | JWT | — | OK |
 | POST | `/api/v1/admin/storage/google/test/` | Ulanishni tekshirish | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/admin/venues/` | To'yxonalar ro'yxati (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/` | To'yxona qo'shish (egasi bilan) | ADMIN, SUPER_ADMIN | `venues.create` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| GET | `/api/v1/admin/venues/{id}/` | To'yxona ma'lumotlari (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| PATCH | `/api/v1/admin/venues/{id}/` | To'yxonani tahrirlash / bloklash / holat | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| DELETE | `/api/v1/admin/venues/{id}/` | To'yxonani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `venues.delete` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/halls/` | Zal qo'shish (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| PATCH | `/api/v1/admin/venues/{id}/halls/{hall_id}/` | Zalni tahrirlash (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/images/` | Galereyaga rasm qo'shish (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| DELETE | `/api/v1/admin/venues/{id}/images/{image_id}/` | Galereyadan rasmni o'chirish (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | GET | `/api/v1/admins/` | Adminlar ro'yxati | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
 | POST | `/api/v1/admins/` | Admin qo'shish | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
 | GET | `/api/v1/admins/permissions/` | Adminlarga beriladigan ruxsatlar ro'yxati | SUPER_ADMIN | — | JWT | — | OK |
@@ -92,6 +101,9 @@
 | GET | `/api/v1/venue-owner/venues/{id}/halls/` | To'yxona zallari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/halls/` | Zal qo'shish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/halls/{hall_id}/` | Zalni tahrirlash | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venue-owner/venues/{id}/images/` | Galereya rasmlari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/images/` | Galereyaga rasm qo'shish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| DELETE | `/api/v1/venue-owner/venues/{id}/images/{image_id}/` | Galereyadan rasmni o'chirish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | GET | `/api/v1/venue-owner/venues/{id}/members/` | To'yxona a'zolari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/members/` | A'zo qo'shish (telefon raqam bo'yicha) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/members/{membership_id}/` | A'zoning rolini / faolligini o'zgartirish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
@@ -155,7 +167,7 @@
 * `GET /api/v1/studios/me/` — Mening studiyalarim
 * `GET /api/v1/studios/me/ceremonies/` — Mening studiyamning marosimlari
 
-### VENUE_OWNER (12)
+### VENUE_OWNER (15)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -166,12 +178,24 @@
 * `GET /api/v1/venue-owner/venues/{id}/halls/` — To'yxona zallari
 * `POST /api/v1/venue-owner/venues/{id}/halls/` — Zal qo'shish
 * `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash
+* `GET /api/v1/venue-owner/venues/{id}/images/` — Galereya rasmlari
+* `POST /api/v1/venue-owner/venues/{id}/images/` — Galereyaga rasm qo'shish
+* `DELETE /api/v1/venue-owner/venues/{id}/images/{image_id}/` — Galereyadan rasmni o'chirish
 * `GET /api/v1/venue-owner/venues/{id}/members/` — To'yxona a'zolari
 * `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
 * `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
-### ADMIN (15)
+### ADMIN (24)
 
+* `GET /api/v1/admin/venues/` — To'yxonalar ro'yxati (panel)
+* `POST /api/v1/admin/venues/` — To'yxona qo'shish (egasi bilan)
+* `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
+* `PATCH /api/v1/admin/venues/{id}/` — To'yxonani tahrirlash / bloklash / holat
+* `DELETE /api/v1/admin/venues/{id}/` — To'yxonani o'chirish (soft delete)
+* `POST /api/v1/admin/venues/{id}/halls/` — Zal qo'shish (panel)
+* `PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash (panel)
+* `POST /api/v1/admin/venues/{id}/images/` — Galereyaga rasm qo'shish (panel)
+* `DELETE /api/v1/admin/venues/{id}/images/{image_id}/` — Galereyadan rasmni o'chirish (panel)
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
 * `GET /api/v1/dashboard/overview/` — Dashboard statistikasi
@@ -188,12 +212,21 @@
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (48)
+### SUPER_ADMIN (57)
 
 * `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
 * `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
 * `GET /api/v1/admin/storage/google/status/` — Google Drive ulanish holati
 * `POST /api/v1/admin/storage/google/test/` — Ulanishni tekshirish
+* `GET /api/v1/admin/venues/` — To'yxonalar ro'yxati (panel)
+* `POST /api/v1/admin/venues/` — To'yxona qo'shish (egasi bilan)
+* `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
+* `PATCH /api/v1/admin/venues/{id}/` — To'yxonani tahrirlash / bloklash / holat
+* `DELETE /api/v1/admin/venues/{id}/` — To'yxonani o'chirish (soft delete)
+* `POST /api/v1/admin/venues/{id}/halls/` — Zal qo'shish (panel)
+* `PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash (panel)
+* `POST /api/v1/admin/venues/{id}/images/` — Galereyaga rasm qo'shish (panel)
+* `DELETE /api/v1/admin/venues/{id}/images/{image_id}/` — Galereyadan rasmni o'chirish (panel)
 * `GET /api/v1/admins/` — Adminlar ro'yxati
 * `POST /api/v1/admins/` — Admin qo'shish
 * `GET /api/v1/admins/permissions/` — Adminlarga beriladigan ruxsatlar ro'yxati
@@ -243,6 +276,10 @@
 
 * `GET /api/v1/admin/storage/google/callback/`
   * JWT talab qilinmaydi (Google brauzer redirect'i), lekin faqat ulashni boshlagan faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga bog'lovchi httpOnly cookie
+* `PATCH /api/v1/admin/venues/{id}/`
+  * publication_status o'zgarishi uchun qo'shimcha `venues.publish`
+* `POST /api/v1/admin/venues/{id}/images/`
+  * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha
 * `GET /api/v1/admins/{id}/pinfl/`
   * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
 * `POST /api/v1/auth/login/`
@@ -354,6 +391,17 @@
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
 * `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/`
   * A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `GET /api/v1/venue-owner/venues/{id}/images/`
+  * POST: A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+* `POST /api/v1/venue-owner/venues/{id}/images/`
+  * POST: A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha (JPG/PNG/WEBP)
+* `DELETE /api/v1/venue-owner/venues/{id}/images/{image_id}/`
+  * A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
 * `GET /api/v1/venue-owner/venues/{id}/members/`
   * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
