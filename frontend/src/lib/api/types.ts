@@ -10,7 +10,12 @@ export type PermissionCode =
   | "studios.view"
   | "studios.create"
   | "studios.update"
-  | "studios.delete";
+  | "studios.delete"
+  | "venues.view"
+  | "venues.create"
+  | "venues.update"
+  | "venues.delete"
+  | "venues.publish";
 
 export interface Me {
   id: string;
@@ -308,4 +313,62 @@ export interface GoogleDriveTest {
   quota_limit: number | null;
   quota_usage: number | null;
   connection: StorageConnection;
+}
+
+// -------------------------------------------------------------------- venues
+export type VenueRegion =
+  | "TASHKENT_CITY" | "TASHKENT" | "ANDIJAN" | "BUKHARA" | "FERGANA" | "JIZZAKH" | "KHOREZM"
+  | "NAMANGAN" | "NAVOI" | "KASHKADARYA" | "KARAKALPAKSTAN" | "SAMARKAND" | "SIRDARYO" | "SURKHANDARYA";
+export type VenueType = "BANQUET_HALL" | "RESTAURANT" | "CAFE" | "OUTDOOR" | "OTHER";
+export type PublicationStatus = "PRIVATE" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "SUSPENDED";
+export type VenueMemberRole = "OWNER" | "MANAGER" | "SCHEDULER" | "VIEWER";
+
+export interface VenueHall {
+  id: string;
+  name: string;
+  capacity: number;
+  base_price: string | null;
+  effective_base_price: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VenueImage {
+  id: string;
+  image: string;
+  position: number;
+  created_at: string;
+}
+
+export interface AdminVenue {
+  id: string;
+  name: string;
+  description: string;
+  venue_type: VenueType;
+  address: string;
+  region: VenueRegion;
+  district: string;
+  latitude: string | null;
+  longitude: string | null;
+  phone_number: string;
+  cover_image: string | null;
+  capacity_min: number;
+  capacity_max: number;
+  base_price: string;
+  currency: "UZS";
+  is_active: boolean;
+  publication_status: PublicationStatus;
+  halls: VenueHall[];
+  images: VenueImage[];
+  members: {
+    membership_id: string;
+    user_id: string;
+    full_name: string;
+    phone_number: string;
+    role: VenueMemberRole;
+    is_active: boolean;
+  }[];
+  created_at: string;
+  updated_at: string;
 }
