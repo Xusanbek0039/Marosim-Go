@@ -8,7 +8,7 @@
  */
 import type { EndpointDoc } from "@/lib/api/types";
 
-export type SnippetLanguage = "bash" | "javascript" | "python" | "json";
+export type SnippetLanguage = "bash" | "javascript" | "python" | "json" | "kotlin" | "swift" | "dart";
 
 export interface RequestSpec {
   method: string;
@@ -87,3 +87,67 @@ export function pythonSnippet(spec: RequestSpec): string {
 }
 
 export const prettyJson = (value: unknown) => (value === undefined || value === null ? "" : json(value));
+
+// ----------------------------------------------------------------- mobile
+const pathParams = (spec: RequestSpec) => [...spec.url.matchAll(/<(\w+)>/g)].map((m) => m[1]);
+const camel = (name: string) => name.replace(/_(\w)/g, (_, c: string) => c.toUpperCase());
+const authHeaders = (spec: RequestSpec) => Object.entries(spec.headers).filter(([k]) => k !== "Content-Type");
+
+/** Kotlin + Retrofit 2 interface method (kotlinx / Moshi converter; body as a Map for brevity). */
+export function kotlinSnippet(spec: RequestSpec, endpoint: EndpointDoc): string {
+  const path = new URL(spec.url.replace(/<(\w+)>/g, "{$1}")).pathname.replace(/^\//, "");
+  const fn = camel(endpoint.id);
+  const params = [
+    ...authHeaders(spec).map(([k, v]) => `    @Header("${k}") ${camel(k.replace(/-/g, "_").toLowerCase())}: String, // ${v}`),
+    ...pathParams(spec).map((p) => `    @Path("${p}") ${camel(p)}: String,`),
+    ...(spec.body !== undefined ? ["    @Body body: Map<String, @JvmSuppressWildcards Any?>,"] : []),
+  ];
+  return [
+    "interface MarosimApi {",
+    `    @${spec.method}("${path}")`,
+    `    suspend fun ${fn}(`,
+    ...params.map((p) => `    ${p}`),
+    "    ): Response<ResponseBody>",
+    "}",
+    "",
+    `// Retrofit.Builder().baseUrl("${new URL(spec.url.replace(/<(\w+)>/g, "x")).origin}/")`,
+    ...(spec.body !== undefined ? ["// body:", ...json(spec.body).split("\n").map((l) => `// ${l}`)] : []),
+  ].join("\n");
+}
+
+/** Swift URLSession (async/await). */
+export function swiftSnippet(spec: RequestSpec): string {
+  const lines = [
+    "import Foundation",
+    "",
+    `var request = URLRequest(url: URL(string: "${spec.url}")!)`,
+    `request.httpMethod = "${spec.method}"`,
+    ...Object.entries(spec.headers).map(([k, v]) => `request.setValue("${v}", forHTTPHeaderField: "${k}")`),
+  ];
+  if (spec.body !== undefined) {
+    lines.push(`request.httpBody = """`, ...json(spec.body).split("\n"), `""".data(using: .utf8)`);
+  }
+  lines.push(
+    "",
+    "let (data, response) = try await URLSession.shared.data(for: request)",
+    "let status = (response as? HTTPURLResponse)?.statusCode ?? 0",
+    'print(status, String(data: data, encoding: .utf8) ?? "")',
+  );
+  return lines.join("\n");
+}
+
+/** Dart + Dio. */
+export function dartSnippet(spec: RequestSpec): string {
+  const headers = Object.keys(spec.headers).length ? `, headers: ${json(spec.headers).replace(/\n/g, "\n  ")}` : "";
+  return [
+    "import 'package:dio/dio.dart';",
+    "",
+    "final dio = Dio();",
+    "final response = await dio.request(",
+    `  '${spec.url}',`,
+    `  options: Options(method: '${spec.method}'${headers}),`,
+    ...(spec.body !== undefined ? [`  data: ${json(spec.body).replace(/\n/g, "\n  ")},`] : []),
+    ");",
+    "print('${response.statusCode} ${response.data}');",
+  ].join("\n");
+}

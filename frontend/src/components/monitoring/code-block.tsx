@@ -14,7 +14,11 @@ const KEYWORDS: Record<SnippetLanguage, string[]> = {
   javascript: ["const", "await", "async", "return", "null", "true", "false", "new", "if", "else"],
   python: ["import", "from", "print", "None", "True", "False", "def", "return", "if", "else"],
   json: ["true", "false", "null"],
+  kotlin: ["interface", "suspend", "fun", "val", "var", "null", "true", "false", "return"],
+  swift: ["import", "var", "let", "try", "await", "as", "nil", "true", "false"],
+  dart: ["import", "final", "await", "const", "null", "true", "false"],
 };
+const SLASH_COMMENTS: SnippetLanguage[] = ["javascript", "kotlin", "swift", "dart"];
 
 const TOKEN_CLASS = {
   comment: "text-slate-400 italic dark:text-slate-500",
@@ -30,7 +34,7 @@ type TokenKind = keyof typeof TOKEN_CLASS;
 
 /** Tiny single-pass highlighter — enough for generated snippets, no runtime dependency. */
 function tokenize(code: string, lang: SnippetLanguage): { kind: TokenKind; text: string }[] {
-  const comment = lang === "javascript" ? String.raw`\/\/[^\n]*` : lang === "json" ? "(?!)" : String.raw`#[^\n]*`;
+  const comment = SLASH_COMMENTS.includes(lang) ? String.raw`\/\/[^\n]*` : lang === "json" ? "(?!)" : String.raw`#[^\n]*`;
   const keywords = KEYWORDS[lang].join("|");
   const re = new RegExp(
     [
