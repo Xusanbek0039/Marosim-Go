@@ -24,7 +24,7 @@ export function useCan() {
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { email: string; password: string }) =>
+    mutationFn: (body: { phone_number: string; password: string }) =>
       api.post<{ user: Me }>("/auth/login/", body, { noRefresh: true }),
     onSuccess: ({ user }) => {
       qc.clear();

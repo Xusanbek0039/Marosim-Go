@@ -16,6 +16,13 @@ export const formatDateTime = (iso?: string | null) => {
 };
 export const formatNumber = (n: number) => numberFmt.format(Math.round(n));
 
+/** +998901234567 -> "+998 90 123 45 67" (other numbers are shown as stored). */
+export function formatPhone(e164?: string | null) {
+  if (!e164) return "—";
+  const m = /^\+998(\d{2})(\d{3})(\d{2})(\d{2})$/.exec(e164);
+  return m ? `+998 ${m[1]} ${m[2]} ${m[3]} ${m[4]}` : e164;
+}
+
 export const ROLE_LABELS: Record<Role, string> = {
   SUPER_ADMIN: "Super Admin",
   ADMIN: "Admin",

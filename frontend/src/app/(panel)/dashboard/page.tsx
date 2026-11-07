@@ -11,7 +11,7 @@ import { RequirePermission } from "@/components/layout/require-permission";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCan } from "@/features/auth/hooks";
 import { useDashboardOverview } from "@/features/resources";
-import { formatDate, formatNumber } from "@/lib/format";
+import { formatDate, formatNumber, formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { listContainer, spring, stagger } from "@/motion/tokens";
 
@@ -147,7 +147,7 @@ function DashboardContent() {
                   <UserAvatar id={p.id} first={p.first_name} last={p.last_name} src={p.profile_picture} />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-sm font-semibold">{p.full_name}</span>
-                    <span className="truncate text-xs text-muted-foreground">{p.email}</span>
+                    <span className="truncate text-xs text-muted-foreground tabular-nums">{formatPhone(p.phone_number)}</span>
                   </div>
                   <span className="hidden sm:inline-flex">
                     <RoleBadge role={p.role} />

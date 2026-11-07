@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { EyeIcon, EyeOffIcon, Loader2Icon, LockKeyholeIcon, MailIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, Loader2Icon, LockKeyholeIcon, PhoneIcon } from "lucide-react";
 import { motion, useAnimationControls } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -16,10 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { isPanelRole, useLogin, useLogout } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api/client";
+import { phoneSchema } from "@/lib/phone";
 import { fadeUp, listContainer, shake } from "@/motion/tokens";
 
 const schema = z.object({
-  email: z.string().trim().min(1, "Emailni kiriting").email("Email noto'g'ri"),
+  phone_number: phoneSchema,
   password: z.string().min(1, "Parolni kiriting"),
 });
 type Values = z.infer<typeof schema>;
@@ -39,7 +40,7 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: "", password: "" } });
+  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { phone_number: "", password: "" } });
   const { errors } = form.formState;
 
   const onInvalid = () => controls.start(shake);
@@ -99,18 +100,19 @@ export function LoginForm() {
           </motion.div>
 
           <motion.div variants={fadeUp}>
-            <Field label="Email" htmlFor="email" error={errors.email?.message}>
+            <Field label="Telefon raqam" htmlFor="phone_number" error={errors.phone_number?.message}>
               <div className="relative">
-                <MailIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
+                <PhoneIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  id="email"
-                  type="email"
+                  id="phone_number"
+                  type="tel"
+                  inputMode="tel"
                   autoComplete="username"
                   autoFocus
-                  placeholder="admin@marosimgo.uz"
-                  className="pl-10"
-                  aria-invalid={Boolean(errors.email)}
-                  {...form.register("email")}
+                  placeholder="+998 90 123 45 67"
+                  className="pl-10 tabular-nums"
+                  aria-invalid={Boolean(errors.phone_number)}
+                  {...form.register("phone_number")}
                 />
               </div>
             </Field>

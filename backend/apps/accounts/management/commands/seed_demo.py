@@ -85,7 +85,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Demo data ready ({created} new accounts). Login: {demo_phone(1)}…, "
+                f"Demo data ready ({created} new accounts). Login: {demo_phone(1)}.., "
                 f"admins {demo_phone(101)} / {demo_phone(102)}. Password: {password}"
             )
         )

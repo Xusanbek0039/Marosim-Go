@@ -25,7 +25,7 @@ import { StudioFormDialog } from "@/features/studios/studio-form-dialog";
 import { STATUS_FILTER, useListState } from "@/features/use-list-state";
 import { ApiError } from "@/lib/api/client";
 import type { Studio } from "@/lib/api/types";
-import { avatarGradient, formatDate } from "@/lib/format";
+import { avatarGradient, formatDate, formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { listContainer, stagger } from "@/motion/tokens";
 
@@ -244,7 +244,7 @@ function StudiosContent() {
               {[
                 ["Holat", <StatusBadge key="s" active={viewing.is_active} />],
                 ["Mas'ul shaxs", viewing.responsible_user.full_name],
-                ["Mas'ul email", viewing.responsible_user.email],
+                ["Mas'ul telefon", formatPhone(viewing.responsible_user.phone_number)],
                 ["Mas'ul JSHSHIR", viewing.responsible_user.pinfl_masked ?? "—"],
                 ["Yaratilgan", formatDate(viewing.created_at)],
                 ["Yangilangan", formatDate(viewing.updated_at)],

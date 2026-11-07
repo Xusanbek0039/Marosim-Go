@@ -26,7 +26,7 @@ import { adminsResource } from "@/features/resources";
 import { STATUS_FILTER, useListState } from "@/features/use-list-state";
 import { ApiError } from "@/lib/api/client";
 import type { Admin, PermissionCode } from "@/lib/api/types";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatPhone } from "@/lib/format";
 import { listContainer, stagger } from "@/motion/tokens";
 
 const ORDERING = [
@@ -142,7 +142,7 @@ function AdminsContent() {
         <ListToolbar
           search={list.search}
           onSearch={list.setSearch}
-          placeholder="Ism yoki email bo'yicha qidirish"
+          placeholder="Ism, telefon yoki email bo'yicha qidirish"
           filters={[STATUS_FILTER]}
           values={list.filters}
           onFilter={list.setFilter}
@@ -186,7 +186,7 @@ function AdminsContent() {
                     />
                     <span className="flex min-w-0 flex-col">
                       <span className="truncate font-bold">{admin.full_name}</span>
-                      <span className="truncate text-xs text-muted-foreground">{admin.email}</span>
+                      <span className="truncate text-xs text-muted-foreground tabular-nums">{formatPhone(admin.phone_number)}</span>
                     </span>
                   </button>
                   <DropdownMenu>

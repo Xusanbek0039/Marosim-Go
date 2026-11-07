@@ -35,7 +35,7 @@ import { usersResource } from "@/features/resources";
 import { STATUS_FILTER, useListState } from "@/features/use-list-state";
 import { ApiError } from "@/lib/api/client";
 import type { ManagedUser } from "@/lib/api/types";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatPhone } from "@/lib/format";
 import { spring } from "@/motion/tokens";
 
 const ORDERING = [
@@ -115,7 +115,7 @@ function UsersContent() {
         <ListToolbar
           search={list.search}
           onSearch={list.setSearch}
-          placeholder="Ism, email yoki manzil bo'yicha qidirish"
+          placeholder="Ism, telefon, email yoki manzil bo'yicha qidirish"
           filters={[
             STATUS_FILTER,
             {
@@ -181,7 +181,7 @@ function UsersContent() {
                           <UserAvatar id={user.id} first={user.first_name} last={user.last_name} src={user.profile_picture} />
                           <div className="flex min-w-0 flex-col">
                             <span className="truncate font-semibold">{user.full_name}</span>
-                            <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                            <span className="truncate text-xs text-muted-foreground tabular-nums">{formatPhone(user.phone_number)}</span>
                           </div>
                         </div>
                       </td>

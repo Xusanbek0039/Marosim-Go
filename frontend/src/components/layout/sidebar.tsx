@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMe } from "@/features/auth/hooks";
+import { formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { duration, spring } from "@/motion/tokens";
 
@@ -99,7 +100,7 @@ function ProfileChip({ collapsed }: { collapsed: boolean }) {
       {!collapsed && (
         <span className="flex min-w-0 flex-col">
           <span className="truncate text-sm font-bold">{me.full_name}</span>
-          <span className="truncate text-xs text-muted-foreground">{me.email}</span>
+          <span className="truncate text-xs text-muted-foreground tabular-nums">{formatPhone(me.phone_number)}</span>
         </span>
       )}
     </Link>

@@ -14,7 +14,10 @@ export type PermissionCode =
 
 export interface Me {
   id: string;
-  email: string;
+  /** E.164 login identifier; null only for legacy accounts that were never assigned one. */
+  phone_number: string | null;
+  is_phone_verified: boolean;
+  email: string | null;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -29,7 +32,8 @@ export interface Me {
 
 export interface UserSummary {
   id: string;
-  email: string;
+  phone_number: string | null;
+  email: string | null;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -41,6 +45,7 @@ export interface UserSummary {
 }
 
 export interface ManagedUser extends UserSummary {
+  is_phone_verified: boolean;
   address: string;
   last_login: string | null;
   updated_at: string;

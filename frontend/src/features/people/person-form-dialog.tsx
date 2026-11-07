@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { adminsResource, usersResource } from "@/features/resources";
 import { ApiError } from "@/lib/api/client";
 import type { Admin, ManagedUser, PermissionCode } from "@/lib/api/types";
+import { PHONE_HINT, optionalPhoneSchema, phoneSchema } from "@/lib/phone";
 import { shake } from "@/motion/tokens";
 
 import { PermissionsEditor } from "./permissions-editor";
@@ -33,7 +34,8 @@ function buildSchema(mode: "create" | "edit") {
     .object({
       first_name: z.string().trim().min(1, "Ismni kiriting").max(100),
       last_name: z.string().trim().min(1, "Familiyani kiriting").max(100),
-      email: z.string().trim().min(1, "Emailni kiriting").email("Email noto'g'ri"),
+      phone_number: mode === "create" ? phoneSchema : optionalPhoneSchema,
+      email: z.union([z.literal(""), z.string().trim().email("Email noto'g'ri")]),
       pinfl,
       password: z.string().max(128),
       address: z.string().trim().max(255),
@@ -80,7 +82,8 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
         ? {
             first_name: person.first_name,
             last_name: person.last_name,
-            email: person.email,
+            phone_number: person.phone_number ?? "",
+            email: person.email ?? "",
             pinfl: "",
             password: "",
             address: person.address ?? "",
@@ -105,6 +108,7 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
       };
       if (kind === "user") payload.role = values.role;
       if (kind === "admin") payload.permissions = values.permissions;
+      if (values.phone_number && values.phone_number !== person?.phone_number) payload.phone_number = values.phone_number;
       if (values.pinfl) payload.pinfl = values.pinfl;
       if (values.password) payload.password = values.password;
       if (values.profile_picture !== undefined) payload.profile_picture = values.profile_picture;
@@ -171,7 +175,30 @@ export function PersonFormDialog({ kind, open, onOpenChange, person }: PersonFor
           <Field label="Familiya" htmlFor="last_name" error={errors.last_name?.message}>
             <Input id="last_name" aria-invalid={Boolean(errors.last_name)} {...form.register("last_name")} />
           </Field>
-          <Field label="Email (login)" htmlFor="email" error={errors.email?.message}>
+          <Field
+            label="Telefon raqam (login)"
+            htmlFor="phone_number"
+            error={errors.phone_number?.message}
+            hint={
+              mode === "edit"
+                ? person?.phone_number
+                  ? "O'zgarsa barcha sessiyalar yopiladi va raqam tasdiqlanmagan deb belgilanadi"
+                  : "Bu hisobda telefon yo'q — telefonsiz tizimga kira olmaydi"
+                : PHONE_HINT
+            }
+          >
+            <Input
+              id="phone_number"
+              type="tel"
+              inputMode="tel"
+              autoComplete="off"
+              placeholder="+998 90 123 45 67"
+              className="tabular-nums"
+              aria-invalid={Boolean(errors.phone_number)}
+              {...form.register("phone_number")}
+            />
+          </Field>
+          <Field label="Email (ixtiyoriy)" htmlFor="email" error={errors.email?.message}>
             <Input id="email" type="email" autoComplete="off" aria-invalid={Boolean(errors.email)} {...form.register("email")} />
           </Field>
           <Field
@@ -271,6 +298,7 @@ function blank(kind: PersonKind): FormValues {
   return {
     first_name: "",
     last_name: "",
+    phone_number: "",
     email: "",
     pinfl: "",
     password: "",

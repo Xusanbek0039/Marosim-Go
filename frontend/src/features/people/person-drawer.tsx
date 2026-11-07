@@ -12,7 +12,7 @@ import { useCan, useMe } from "@/features/auth/hooks";
 import { useRevealPinfl } from "@/features/resources";
 import { ApiError } from "@/lib/api/client";
 import type { Admin, ManagedUser } from "@/lib/api/types";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, formatPhone } from "@/lib/format";
 
 import type { PersonKind } from "./person-form-dialog";
 
@@ -26,6 +26,20 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 const REVEAL_SECONDS = 20;
+
+function PhoneVerifiedBadge({ verified }: { verified: boolean }) {
+  return (
+    <span
+      className={
+        verified
+          ? "rounded-full bg-emerald-500/14 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300"
+          : "rounded-full bg-amber-500/14 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:text-amber-300"
+      }
+    >
+      {verified ? "Tasdiqlangan" : "Tasdiqlanmagan"}
+    </span>
+  );
+}
 
 export function PersonDrawer({
   kind,
@@ -104,7 +118,13 @@ export function PersonDrawer({
       </div>
 
       <div className="rounded-2xl border border-glass-border bg-muted/40 px-4">
-        <Row label="Email">{person.email}</Row>
+        <Row label="Telefon">
+          <span className="inline-flex items-center gap-2 tabular-nums">
+            {formatPhone(person.phone_number)}
+            {person.phone_number && <PhoneVerifiedBadge verified={person.is_phone_verified} />}
+          </span>
+        </Row>
+        <Row label="Email">{person.email || "—"}</Row>
         <Row label="JSHSHIR">
           <span className="inline-flex items-center gap-2 tabular-nums tracking-wider">
             {plain ?? person.pinfl_masked ?? "—"}

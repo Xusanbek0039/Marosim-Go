@@ -13,7 +13,7 @@ import { PageTransition } from "@/components/motion/page-transition";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useLogout, useMe } from "@/features/auth/hooks";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMotionPreference } from "@/motion/preference";
 import { listContainer, spring, stagger } from "@/motion/tokens";
@@ -61,7 +61,8 @@ export default function SettingsPage() {
           </div>
           <dl className="rounded-2xl border border-glass-border bg-muted/40 px-4 text-sm">
             {[
-              ["Email", me.email],
+              ["Telefon", formatPhone(me.phone_number)],
+              ["Email", me.email || "—"],
               ["JSHSHIR", me.pinfl_masked ?? "—"],
               ["Oxirgi kirish", formatDateTime(me.last_login)],
               ["Hisob yaratilgan", formatDate(me.created_at)],
