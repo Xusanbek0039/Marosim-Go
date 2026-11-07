@@ -1,9 +1,10 @@
 "use client";
 
-import { ChevronsLeftIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronsLeftIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -12,71 +13,141 @@ import { formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { duration, spring } from "@/motion/tokens";
 
-import { NAV_ITEMS, canSee } from "./nav";
+import { NAV_SECTIONS, type NavItem, canSee, isActive } from "./nav";
 
 export const SIDEBAR_WIDTH = { expanded: 272, collapsed: 84 } as const;
+
+function NavLink({
+  item,
+  collapsed,
+  active,
+  onNavigate,
+  layoutGroup,
+  compact,
+}: {
+  item: NavItem;
+  collapsed: boolean;
+  active: boolean;
+  onNavigate?: () => void;
+  layoutGroup: string;
+  compact?: boolean;
+}) {
+  const Icon = item.icon;
+  const link = (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "group relative flex shrink-0 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold outline-none transition-colors focus-visible:ring-4 focus-visible:ring-brand/30",
+        compact ? "h-10" : "h-12",
+        collapsed && "justify-center px-0",
+        active ? "text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      )}
+    >
+      {active && (
+        <motion.span
+          layoutId={`nav-active-${layoutGroup}`}
+          className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 shadow-[0_10px_30px_-12px_rgb(6_182_212/0.75)]"
+          transition={spring.sidebar}
+          aria-hidden
+        />
+      )}
+      <motion.span className="relative z-10 inline-flex" whileHover={{ scale: 1.12, rotate: -4 }} transition={spring.pop}>
+        <Icon className={compact ? "size-[18px]" : "size-5"} aria-hidden />
+      </motion.span>
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <motion.span
+            className="relative z-10 whitespace-nowrap"
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0, transition: { delay: 0.06, duration: duration.base } }}
+            exit={{ opacity: 0, x: -6, transition: { duration: duration.fast } }}
+          >
+            {item.label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </Link>
+  );
+  return collapsed ? (
+    <Tooltip>
+      <TooltipTrigger asChild>{link}</TooltipTrigger>
+      <TooltipContent side="right">{item.label}</TooltipContent>
+    </Tooltip>
+  ) : (
+    link
+  );
+}
 
 function NavLinks({ collapsed, onNavigate, layoutGroup }: { collapsed: boolean; onNavigate?: () => void; layoutGroup: string }) {
   const pathname = usePathname();
   const { data: me } = useMe();
-  const items = NAV_ITEMS.filter((item) => canSee(me, item));
+  const [closed, setClosed] = useState<Set<string>>(new Set());
+  const sections = NAV_SECTIONS.map((s) => ({ ...s, items: s.items.filter((item) => canSee(me, item)) })).filter(
+    (s) => s.items.length > 0,
+  );
 
   return (
-    <nav aria-label="Asosiy menyu" className="flex flex-col gap-1.5">
-      {!collapsed && (
-        <p className="px-3.5 pb-1 text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase">Boshqaruv</p>
-      )}
-      {items.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        const Icon = item.icon;
-        const link = (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "group relative flex h-12 items-center gap-3 rounded-2xl px-3.5 text-sm font-semibold outline-none transition-colors focus-visible:ring-4 focus-visible:ring-brand/30",
-              collapsed && "justify-center px-0",
-              active ? "text-white" : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            {active && (
-              <motion.span
-                layoutId={`nav-active-${layoutGroup}`}
-                className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 shadow-[0_10px_30px_-12px_rgb(6_182_212/0.75)]"
-                transition={spring.sidebar}
-                aria-hidden
-              />
-            )}
-            <motion.span
-              className="relative z-10 inline-flex"
-              whileHover={{ scale: 1.12, rotate: -4 }}
-              transition={spring.pop}
-            >
-              <Icon className="size-5" aria-hidden />
-            </motion.span>
-            <AnimatePresence initial={false}>
-              {!collapsed && (
-                <motion.span
-                  className="relative z-10 whitespace-nowrap"
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0, transition: { delay: 0.06, duration: duration.base } }}
-                  exit={{ opacity: 0, x: -6, transition: { duration: duration.fast } }}
+    <nav aria-label="Asosiy menyu" className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
+      {sections.map((section) => {
+        const hasActive = section.items.some((item) => isActive(pathname, item));
+        // A collapsible group stays open while one of its pages is shown.
+        const open = !section.collapsible || collapsed || hasActive || !closed.has(section.key);
+        const toggle = () =>
+          setClosed((prev) => {
+            const next = new Set(prev);
+            if (next.has(section.key)) next.delete(section.key);
+            else next.add(section.key);
+            return next;
+          });
+        return (
+          <div key={section.key} className="flex flex-col gap-1.5">
+            {!collapsed &&
+              (section.collapsible ? (
+                <button
+                  type="button"
+                  onClick={toggle}
+                  aria-expanded={open}
+                  disabled={hasActive}
+                  className="flex items-center justify-between rounded-lg px-3.5 pb-1 text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-brand/25 disabled:cursor-default disabled:hover:text-muted-foreground"
                 >
-                  {item.label}
-                </motion.span>
+                  {section.title}
+                  <motion.span animate={{ rotate: open ? 0 : -90 }} transition={spring.sidebar} className="inline-flex">
+                    <ChevronDownIcon className="size-3.5" aria-hidden />
+                  </motion.span>
+                </button>
+              ) : (
+                <p className="px-3.5 pb-1 text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase">
+                  {section.title}
+                </p>
+              ))}
+            {collapsed && section.collapsible && <span className="mx-auto h-px w-8 bg-border" aria-hidden />}
+            <AnimatePresence initial={false}>
+              {open && (
+                <motion.div
+                  key="items"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={spring.sidebar}
+                  className="flex flex-col gap-1.5 overflow-hidden"
+                >
+                  {section.items.map((item) => (
+                    <NavLink
+                      key={item.href}
+                      item={item}
+                      collapsed={collapsed}
+                      active={isActive(pathname, item)}
+                      onNavigate={onNavigate}
+                      layoutGroup={layoutGroup}
+                      compact={section.collapsible}
+                    />
+                  ))}
+                </motion.div>
               )}
             </AnimatePresence>
-          </Link>
-        );
-        return collapsed ? (
-          <Tooltip key={item.href}>
-            <TooltipTrigger asChild>{link}</TooltipTrigger>
-            <TooltipContent side="right">{item.label}</TooltipContent>
-          </Tooltip>
-        ) : (
-          link
+          </div>
         );
       })}
     </nav>
