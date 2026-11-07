@@ -1,0 +1,229 @@
+"""The only module that talks to Google. Everything above it uses ``GoogleGateway``'s small API,
+so unit tests substitute a fake (``services.set_gateway``) and never hit the network.
+
+Errors are normalized to ``GoogleError(code)`` with stable, non-secret codes.
+"""
+
+import os
+from dataclasses import dataclass, field
+
+from django.conf import settings
+
+from .client_config import OAuthClientConfig
+
+DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file"
+REVOKE_URL = "https://oauth2.googleapis.com/revoke"
+TIMEOUT = 15
+
+# Google may return scopes in a different order/form than requested (or fewer, with granular
+# consent). We check the granted set ourselves instead of letting oauthlib raise.
+os.environ.setdefault("OAUTHLIB_RELAX_TOKEN_SCOPE", "1")
+
+
+class GoogleError(Exception):
+    def __init__(self, code: str, status: int | None = None):
+        super().__init__(code)
+        self.code = code
+        self.status = status
+
+
+class GoogleAuthRevoked(GoogleError):
+    """Refresh token expired/revoked (``invalid_grant``) — the owner must reconnect."""
+
+    def __init__(self):
+        super().__init__("invalid_grant", 400)
+
+
+@dataclass
+class TokenGrant:
+    refresh_token: str | None = field(repr=False)
+    access_token: str = field(repr=False)
+    scopes: list[str]
+    email: str
+
+
+@dataclass
+class AccountInfo:
+    email: str
+    display_name: str = ""
+    quota_limit: int | None = None
+    quota_usage: int | None = None
+
+
+_DRIVE_REASONS = {
+    "storageQuotaExceeded": "storage_quota_exceeded",
+    "userRateLimitExceeded": "rate_limited",
+    "rateLimitExceeded": "rate_limited",
+    "dailyLimitExceeded": "quota_exceeded",
+    "insufficientPermissions": "insufficient_permissions",
+    "insufficientFilePermissions": "insufficient_permissions",
+    "accessNotConfigured": "drive_api_disabled",
+    "notFound": "not_found",
+    "authError": "auth_error",
+}
+
+
+def _drive_error(exc) -> GoogleError:
+    status = getattr(getattr(exc, "resp", None), "status", None)
+    reason = ""
+    try:
+        details = exc.error_details or []
+        reason = details[0].get("reason", "") if details else ""
+    except (AttributeError, IndexError, TypeError):
+        reason = ""
+    code = _DRIVE_REASONS.get(reason)
+    if code is None:
+        code = {401: "auth_error", 403: "forbidden", 404: "not_found", 429: "rate_limited"}.get(status, "drive_error")
+        if status and status >= 500:
+            code = "google_unavailable"
+    return GoogleError(code, status)
+
+
+class GoogleGateway:
+    """Real implementation (google-auth-oauthlib + google-api-python-client)."""
+
+    def _flow(self, config: OAuthClientConfig, code_verifier: str):
+        from google_auth_oauthlib.flow import Flow
+
+        return Flow.from_client_config(
+            config.as_google_client_config(),
+            scopes=settings.GOOGLE_OAUTH_SCOPES,
+            redirect_uri=config.redirect_uri,
+            code_verifier=code_verifier,
+            autogenerate_code_verifier=False,
+        )
+
+    def authorization_url(self, config: OAuthClientConfig, state: str, code_verifier: str) -> str:
+        url, _ = self._flow(config, code_verifier).authorization_url(
+            state=state,
+            access_type="offline",  # → refresh token
+            prompt="consent",  # → a refresh token even if the app was approved before
+            include_granted_scopes="true",
+        )
+        return url
+
+    def exchange_code(self, config: OAuthClientConfig, code: str, code_verifier: str) -> TokenGrant:
+        from google.auth.transport.requests import Request
+        from google.oauth2 import id_token
+
+        flow = self._flow(config, code_verifier)
+        try:
+            token = flow.fetch_token(code=code)
+        except Exception as exc:  # noqa: BLE001 - oauthlib raises many types; never echo their text
+            raise GoogleError("exchange_failed") from exc
+        scope = token.get("scope") or []
+        scopes = scope.split() if isinstance(scope, str) else list(scope)
+        email = ""
+        if token.get("id_token"):
+            try:
+                claims = id_token.verify_oauth2_token(token["id_token"], Request(), audience=config.client_id)
+                email = claims.get("email", "") if claims.get("email_verified", True) else ""
+            except ValueError as exc:
+                raise GoogleError("id_token_invalid") from exc
+        return TokenGrant(
+            refresh_token=token.get("refresh_token"),
+            access_token=token.get("access_token", ""),
+            scopes=scopes,
+            email=email,
+        )
+
+    def credentials(self, config: OAuthClientConfig, refresh_token: str, scopes: list[str]):
+        """Fresh short-lived access credentials; only ever held in memory."""
+        from google.auth.exceptions import RefreshError, TransportError
+        from google.auth.transport.requests import Request
+        from google.oauth2.credentials import Credentials
+
+        creds = Credentials(
+            token=None,
+            refresh_token=refresh_token,
+            client_id=config.client_id,
+            client_secret=config.client_secret,
+            token_uri=config.token_uri,
+            scopes=scopes or settings.GOOGLE_OAUTH_SCOPES,
+        )
+        try:
+            creds.refresh(Request())
+        except RefreshError as exc:
+            if "invalid_grant" in str(exc) or "invalid_client" in str(exc):
+                raise GoogleAuthRevoked() from exc
+            raise GoogleError("refresh_failed") from exc
+        except TransportError as exc:
+            raise GoogleError("network_error") from exc
+        return creds
+
+    def drive(self, creds):
+        from googleapiclient.discovery import build
+
+        return build("drive", "v3", credentials=creds, cache_discovery=False)
+
+    def account_info(self, creds) -> AccountInfo:
+        from googleapiclient.errors import HttpError
+
+        try:
+            about = self.drive(creds).about().get(fields="user(emailAddress,displayName),storageQuota").execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+        quota = about.get("storageQuota") or {}
+        user = about.get("user") or {}
+        return AccountInfo(
+            email=user.get("emailAddress", ""),
+            display_name=user.get("displayName", ""),
+            quota_limit=int(quota["limit"]) if quota.get("limit") else None,
+            quota_usage=int(quota["usage"]) if quota.get("usage") else None,
+        )
+
+    def revoke(self, token: str) -> None:
+        import requests
+
+        try:
+            requests.post(REVOKE_URL, data={"token": token}, timeout=TIMEOUT)
+        except requests.RequestException:
+            pass  # best effort: we drop the token locally regardless
+
+    # --- used by the self-test command (real Drive, drive.file semantics) ---------------
+    def create_folder(self, creds, name: str, parent_id: str | None) -> dict:
+        from googleapiclient.errors import HttpError
+
+        body = {"name": name, "mimeType": "application/vnd.google-apps.folder"}
+        if parent_id:
+            body["parents"] = [parent_id]
+        try:
+            return self.drive(creds).files().create(body=body, fields="id,name,parents").execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+
+    def create_text_file(self, creds, name: str, parent_id: str, content: bytes) -> dict:
+        from googleapiclient.errors import HttpError
+        from googleapiclient.http import MediaInMemoryUpload
+
+        media = MediaInMemoryUpload(content, mimetype="text/plain", resumable=False)
+        try:
+            return (
+                self.drive(creds)
+                .files()
+                .create(body={"name": name, "parents": [parent_id]}, media_body=media, fields="id,name,parents,size")
+                .execute()
+            )
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+
+    def get_file(self, creds, file_id: str) -> dict:
+        from googleapiclient.errors import HttpError
+
+        try:
+            return (
+                self.drive(creds)
+                .files()
+                .get(fileId=file_id, fields="id,name,mimeType,parents,capabilities(canAddChildren),trashed")
+                .execute()
+            )
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+
+    def delete_file(self, creds, file_id: str) -> None:
+        from googleapiclient.errors import HttpError
+
+        try:
+            self.drive(creds).files().delete(fileId=file_id).execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc

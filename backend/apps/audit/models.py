@@ -18,6 +18,9 @@ class AuditAction(models.TextChoices):
     LOGOUT = "LOGOUT", "Tizimdan chiqdi"
     TOKEN_REUSE = "TOKEN_REUSE", "Refresh token qayta ishlatildi"
     PINFL_REVEAL = "PINFL_REVEAL", "JSHSHIR ko'rildi"
+    STORAGE_CONNECT = "STORAGE_CONNECT", "Google Drive ulandi"
+    STORAGE_CONNECT_FAILED = "STORAGE_CONNECT_FAILED", "Google Drive ulanmadi"
+    STORAGE_DISCONNECT = "STORAGE_DISCONNECT", "Google Drive uzildi"
 
 
 class AuditLog(models.Model):
