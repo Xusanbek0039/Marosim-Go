@@ -51,6 +51,24 @@ class Command(BaseCommand):
         for e in conditional:
             lines.append(f"* `{e['method']} {e['path']}`")
             lines += [f"  * {_cell(c)}" for c in e["conditions"]]
+
+        from apps.devcenter.planned import PLANNED_ENDPOINTS
+
+        lines += [
+            "",
+            "## Rejalashtirilgan (PLANNED — hali ishlamaydi)",
+            "",
+            "> `apps/devcenter/planned.py`. Yuqoridagi jadval — faqat haqiqatda ishlaydigan endpointlar.",
+            "> CEREMONY_OWNER / CEREMONY_VIEWER — global rol emas, marosimga xos huquq.",
+            "",
+            "| Bosqich | Metod | Yo'l | Tavsif | Kim | Shart |",
+            "|---|---|---|---|---|---|",
+        ]
+        for p in PLANNED_ENDPOINTS:
+            lines.append(
+                f"| {p.phase} | {p.method} | `{p.path}` | {_cell(p.summary)} | {', '.join(p.roles)} "
+                f"| {_cell(p.condition) or '—'} |"
+            )
         Path(output).write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
         self.stdout.write(self.style.SUCCESS(f"{len(endpoints)} endpoints -> {output}"))
 

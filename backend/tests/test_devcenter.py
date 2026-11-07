@@ -5,6 +5,7 @@ import pytest
 from apps.accounts.access import PUBLIC, ROLE_ORDER
 from apps.accounts.models import Role
 from apps.devcenter.mobile import MOBILE_APPS
+from apps.devcenter.planned import CEREMONY_OWNER, CEREMONY_VIEWER, PLANNED_ENDPOINTS
 from apps.monitoring import catalog, contract
 
 BASE = "/api/v1/devcenter"
@@ -126,3 +127,23 @@ def test_changelog_api_newest_first(super_admin, client_for):
     data = client_for(super_admin).get(f"{BASE}/changelog/").data
     revisions = [e["revision"] for e in data["results"]]
     assert revisions == sorted(revisions, reverse=True) and data["count"] == len(revisions)
+
+
+def _route(path: str) -> str:
+    import re
+
+    return re.sub(r"\{[^}]+\}", "{}", path)
+
+
+def test_planned_endpoints_are_not_live_and_use_known_roles():
+    """A shipped endpoint must leave the planned list; planned and live never overlap."""
+    live = {(e["method"], _route(e["path"])) for e in catalog.build()}
+    known_roles = set(ROLE_ORDER) | {CEREMONY_OWNER, CEREMONY_VIEWER}
+    seen = set()
+    for p in PLANNED_ENDPOINTS:
+        key = (p.method, _route(p.path))
+        assert key not in live, f"{p.method} {p.path} is live — remove it from apps/devcenter/planned.py"
+        assert key not in seen, f"duplicate planned entry {key}"
+        seen.add(key)
+        assert p.path.startswith("/api/v1/") and p.path.endswith("/")
+        assert set(p.roles) <= known_roles and p.roles
