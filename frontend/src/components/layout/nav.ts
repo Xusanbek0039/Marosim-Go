@@ -1,5 +1,6 @@
 import {
   ActivityIcon,
+  HardDriveIcon,
   LayoutDashboardIcon,
   type LucideIcon,
   Settings2Icon,
@@ -24,6 +25,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/admins", label: "Adminlar", icon: ShieldCheckIcon, requires: "super" },
   { href: "/studios", label: "Studiyalar", icon: VideoIcon, requires: "studios.view" },
   { href: "/monitoring", label: "API Monitoring", icon: ActivityIcon, requires: "super" },
+  { href: "/storage", label: "Google Drive", icon: HardDriveIcon, requires: "super" },
   { href: "/settings", label: "Sozlamalar", icon: Settings2Icon },
 ];
 

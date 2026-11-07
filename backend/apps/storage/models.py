@@ -60,10 +60,11 @@ class StorageCredential(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __repr__(self) -> str:  # never let the ciphertext slip into tracebacks/logs either
+    def __str__(self) -> str:  # never let the ciphertext slip into tracebacks/logs either
         return f"<StorageCredential connection={self.connection_id}>"
 
-    __str__ = __repr__
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class OAuthState(models.Model):

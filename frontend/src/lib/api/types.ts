@@ -206,3 +206,43 @@ export interface HealthProbe {
   latency_ms: number | null;
   checked_at: string;
 }
+
+// ------------------------------------------------------------------ storage
+export type StorageStatus = "DISCONNECTED" | "CONNECTED" | "RECONNECT_REQUIRED" | "ERROR";
+
+export interface StorageConnection {
+  provider: "GOOGLE_DRIVE";
+  status: StorageStatus;
+  account_email: string;
+  root_folder_id: string;
+  root_folder_name: string;
+  scopes: string[];
+  connected_by: string | null;
+  connected_at: string | null;
+  last_checked_at: string | null;
+  last_success_at: string | null;
+  last_error_code: string;
+}
+
+export interface GoogleDriveStatus {
+  connection: StorageConnection;
+  has_credential: boolean;
+  configuration: {
+    configured: boolean;
+    issues: { code: string; message: string }[];
+    source: "file" | "env" | null;
+    project_id: string;
+    client_id_hint: string;
+    redirect_uri: string;
+    scopes: string[];
+  };
+  picker: { app_id: string; ready: boolean };
+}
+
+export interface GoogleDriveTest {
+  ok: boolean;
+  account_email: string;
+  quota_limit: number | null;
+  quota_usage: number | null;
+  connection: StorageConnection;
+}

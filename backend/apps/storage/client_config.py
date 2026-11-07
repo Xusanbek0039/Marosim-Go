@@ -37,7 +37,10 @@ class OAuthClientConfig:
     source: str = "env"
 
     def __repr__(self) -> str:
-        return f"OAuthClientConfig(client_id={self.masked_client_id!r}, source={self.source!r}, project={self.project_id!r})"
+        return (
+            f"OAuthClientConfig(client_id={self.masked_client_id!r}, source={self.source!r}, "
+            f"project={self.project_id!r})"
+        )
 
     @property
     def masked_client_id(self) -> str:

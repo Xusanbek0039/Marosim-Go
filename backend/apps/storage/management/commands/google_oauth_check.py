@@ -3,6 +3,7 @@
 python manage.py google_oauth_check
 """
 
+import shutil
 import subprocess  # noqa: S404 - fixed git argv, no shell
 from pathlib import Path
 
@@ -38,9 +39,11 @@ class Command(BaseCommand):
 
     def _ignored(self, path: Path) -> str:
         try:
-            result = subprocess.run(  # noqa: S603, S607
-                ["git", "check-ignore", "-q", str(path)], cwd=settings.BASE_DIR, capture_output=True, timeout=10
-            )
+            git = shutil.which("git")
+            if git is None:
+                return "unknown (git not available)"
+            argv = [git, "check-ignore", "-q", str(path)]
+            result = subprocess.run(argv, cwd=settings.BASE_DIR, capture_output=True, timeout=10)  # noqa: S603
         except (OSError, subprocess.SubprocessError):
             return "unknown (git not available)"
         return self.style.SUCCESS("yes") if result.returncode == 0 else self.style.ERROR("NO — never commit this file!")
