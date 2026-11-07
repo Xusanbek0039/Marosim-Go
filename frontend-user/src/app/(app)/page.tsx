@@ -36,7 +36,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-bold">{invitation.ceremony_title}</p>
         <p className="text-sm text-muted-foreground">
-          {invitation.studio_name} · {formatEventDate(invitation.event_date)} · siz: <b>{PARTICIPANT_LABELS[invitation.participant_type]}</b>
+          {invitation.studio_name} · {formatEventDate(invitation.event_date)} · siz: <b>{invitation.participant_type ? PARTICIPANT_LABELS[invitation.participant_type] : "Ko'ruvchi"}</b>
         </p>
       </div>
       <div className="flex gap-2">
