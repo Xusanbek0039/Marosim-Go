@@ -119,9 +119,7 @@ def overview(window: str = DEFAULT_WINDOW, catalog_size: int = 0) -> dict:
         .order_by("-count")[:8]
     )
     statuses = qs.values("status_code").annotate(count=Count("id")).order_by("-count")[:10]
-    categories = (
-        qs.exclude(error_category="").values("error_category").annotate(count=Count("id")).order_by("-count")
-    )
+    categories = qs.exclude(error_category="").values("error_category").annotate(count=Count("id")).order_by("-count")
     audit = AuditLog.objects.filter(created_at__gte=start, created_at__lte=end)
     security = audit.aggregate(
         logins=Count("id", filter=Q(action=AuditAction.LOGIN)),

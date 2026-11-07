@@ -137,7 +137,9 @@ def test_register_cannot_escalate_role_or_flags():
 def test_register_is_rate_limited(monkeypatch):
     from rest_framework.throttling import ScopedRateThrottle
 
-    monkeypatch.setattr(ScopedRateThrottle, "THROTTLE_RATES", {**ScopedRateThrottle.THROTTLE_RATES, "register": "2/hour"})
+    monkeypatch.setattr(
+        ScopedRateThrottle, "THROTTLE_RATES", {**ScopedRateThrottle.THROTTLE_RATES, "register": "2/hour"}
+    )
     codes = [register(phone_number=f"+99890123450{i}").status_code for i in range(3)]
     assert codes == [201, 201, 429]
 

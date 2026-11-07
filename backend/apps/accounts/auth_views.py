@@ -193,7 +193,9 @@ class RefreshView(PublicAuthView):
 
     @extend_schema(
         summary="Tokenni yangilash (rotation)",
-        description="Refresh token bir martalik. Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi.",
+        description=(
+            "Refresh token bir martalik. Ishlatilgan refresh tokenni qayta yuborish barcha sessiyalarni bekor qiladi."
+        ),
         parameters=[X_CLIENT],
         request=RefreshSerializer,
         responses={200: TokenPairSerializer},

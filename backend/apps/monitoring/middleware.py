@@ -19,7 +19,7 @@ logger = logging.getLogger("apps.monitoring")
 
 REQUEST_ID_HEADER = "X-Request-ID"
 # 9+ digit runs = phone numbers, PINFLs or other identifiers someone put in a URL.
-_LONG_DIGITS = re.compile(r"(?<![0-9a-fA-F])(?:%2B|\+)?\d{9,}(?![0-9a-fA-F])")
+_LONG_DIGITS = re.compile(r"(?<![0-9a-fA-F-])(?:%2B|\+)?\d{9,}(?![0-9a-fA-F-])")  # "-": UUID segments
 _NAMED_GROUP = re.compile(r"\(\?P<(\w+)>[^)]*\)")
 _CONVERTER = re.compile(r"<(?:\w+:)?(\w+)>")
 
