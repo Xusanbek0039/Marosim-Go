@@ -57,3 +57,36 @@ class IsClientUser(BasePermission):
         from apps.accounts.access import Grant
 
         return Grant(frozenset({Role.USER.value}))
+
+
+def _ceremony_of(obj):
+    from .models import Ceremony
+
+    return obj if isinstance(obj, Ceremony) else obj.ceremony
+
+
+class IsCeremonyMember(IsClientUser):
+    """USER role gate + ACCEPTED owner or viewer of the object's ceremony (re-checked per request).
+
+    Views must still scope ``get_queryset`` with ``ownership.accessible_ceremonies`` so foreign
+    ceremonies are 404; this object check is defense in depth and covers media sub-resources.
+    Docs: ``access_grant`` describes the role gate; the ceremony condition goes in ``access_notes``.
+    """
+
+    message = "Bu marosimga kirish huquqingiz yo'q."
+
+    def has_object_permission(self, request, view, obj):
+        from . import ownership
+
+        return ownership.can_view(request.user, _ceremony_of(obj))
+
+
+class IsCeremonyOwner(IsClientUser):
+    """USER role gate + ACCEPTED ownership of the object's ceremony."""
+
+    message = "Bu amal faqat marosim egalari uchun."
+
+    def has_object_permission(self, request, view, obj):
+        from . import ownership
+
+        return ownership.is_owner(request.user, _ceremony_of(obj))
