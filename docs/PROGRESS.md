@@ -1,5 +1,31 @@
 # Progress
 
+## 2026-11-07 — Studios & Ceremonies API + studiya va foydalanuvchi web ilovalari ✅
+
+**Backend (`apps/ceremonies`, `apps/studios`)**
+* `Studio.description`; `StudioMembership` rollari OWNER / MANAGER / UPLOADER. Data migration: har bir
+  studiyaning mas'ul shaxsi OWNER a'zo bo'ldi (dev DB: 4/4). Panelda egasi almashsa a'zolik sinxronlanadi.
+* `Ceremony` (DRAFT → READY → ARCHIVED; UPLOADING/PROCESSING — media pipeline uchun) va
+  `CeremonyParticipant` (BRIDE / GROOM / OTHER; INVITED → ACTIVE / DECLINED / REVOKED).
+* Telefon orqali taklif: javob raqam ro'yxatdan o'tganmi-yo'qligini bildirmaydi; ism faqat qabul qilingach
+  ko'rinadi; marosim faqat taklif egasi o'zi qabul qilganda ochiladi. Bitta kelin/kuyov — DB constraint.
+* `CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE` — production'da yoqiq (OTP kelguncha qabul qilish faqat
+  tasdiqlangan telefon bilan), DEBUG'da o'chiq.
+* Endpointlar: `/studios/me/`, `/studios/me/ceremonies/`, `/ceremonies/` (CRUD, ADMIN kira olmaydi),
+  `/ceremonies/{id}/participants/` (+DELETE), `/me/ceremonies/`, `/me/invitations/` (+accept/decline).
+* Kontrakt: `access_grant` / `access_notes`, OWNERSHIP_TESTS ro'yxatga olindi, `api_contract --write`.
+
+**Frontend**
+* `frontend-studio/` (port 3001): marosimlar ro'yxati/filtr, yaratish, tahrirlash, holat, ishtirokchi taklifi.
+* `frontend-user/` (port 3002): ro'yxatdan o'tish, takliflarni qabul/rad, mening marosimlarim, profil.
+* Har ilova o'z cookie prefiksi bilan (`mgs_` / `mgu_`): localhost'da bitta brauzerda admin, studiya va
+  foydalanuvchi sessiyalari bir-biriga aralashmaydi; boshqa ilova cookie'lari backend'ga yuborilmaydi.
+
+**Testlar**: backend to'liq to'plam yashil (ceremonies: 27 yangi test). Jonli E2E (bitta brauzer):
+studiya marosim yaratdi → kelinni taklif qildi → kelin qabul qildi → ikkala sessiya saqlandi.
+
+**Keyingi**: media upload (Phase C) va `/me/ceremonies/{id}/media/`.
+
 ## 2026-11-07 — API Developer Center: Phase 3 (backend) + Phase 4 (UI) ✅
 
 **Phase 3 — backend** (`apps/devcenter`, faqat SUPER_ADMIN, faqat o'qish, SSRF yuzasi yo'q)

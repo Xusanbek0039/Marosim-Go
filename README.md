@@ -88,6 +88,18 @@ login bloklash va throttling uchun umumiy kesh ham kerak: `CACHE_URL=redis://loc
 
 ---
 
+## Ilovalar
+
+| Ilova | Kim uchun | Port | Ishga tushirish |
+|---|---|---|---|
+| `frontend/` | Super Admin, Admin | 3000 | `cd frontend && npm install && npm run dev` |
+| `frontend-studio/` | Studiya (OWNER / MANAGER / UPLOADER) | 3001 | `cd frontend-studio && npm install && npm run dev` |
+| `frontend-user/` | Kelin-kuyov va mehmonlar | 3002 | `cd frontend-user && npm install && npm run dev` |
+
+Uchalasi ham `/api/v1` ni server tomonda Django'ga proxy qiladi (`BACKEND_URL`, standart `http://127.0.0.1:8000`).
+Studiya va foydalanuvchi ilovalari auth cookie'larini o'z prefiksi bilan saqlaydi (`mgs_*`, `mgu_*`), shuning uchun
+bitta brauzerda bir vaqtda uch xil rol bilan kirish mumkin. Studiya hisoblari faqat panel orqali yaratiladi.
+
 ## Google Drive storage
 
 Media fayllar platforma egasining **shaxsiy Google Drive**'iga OAuth 2.0 orqali saqlanadi
