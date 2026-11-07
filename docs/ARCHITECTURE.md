@@ -1,7 +1,18 @@
 # MarosimGo — Arxitektura rejasi (1-bosqich)
 
-> Holat: **loyiha qoralamasi, tasdiqlanishi kutilmoqda.** Implementatsiya preview tasdiqlangandan keyin boshlanadi.
-> Vizual konsept: **C — “Liquid Control”**.
+> Holat: **1-bosqich amalga oshirildi** (2026-11-07). Vizual konsept: **C — “Liquid Control”**.
+> Ishga tushirish va tekshiruv komandalari — [README](../README.md).
+
+## Qabul qilingan qarorlar (tasdiqlangan)
+
+| Mavzu | Qaror |
+|---|---|
+| Ma'lumotlar bazasi | Hozircha SQLite; `DATABASE_URL` orqali PostgreSQL'ga kod o'zgarmasdan o'tiladi |
+| Referens video | Berilmadi — animatsiyalar shu hujjatdagi motion tokenlar asosida |
+| To'liq JSHSHIR | `GET /users/{id}/pinfl/` (va `/admins/{id}/pinfl/`) — ruxsat + audit + throttle |
+| Admin ruxsatlari | Super Admin har bir ADMIN'ga granular ruxsat beradi (`permissions_catalog.py`) |
+| Brauzer ↔ API | Next.js route handler `/api/v1/*` va `/media/*` ni Django'ga uzatadi (same-origin cookie) |
+| Sahifa himoyasi | `src/proxy.ts` `mg_session` belgisini tekshiradi; haqiqiy tekshiruv har doim Django'da |
 
 ---
 
@@ -128,14 +139,19 @@ Marosim-Go/
 | POST | `/auth/refresh/` | refresh egasi | rotatsiya + eski refresh blacklist |
 | POST | `/auth/logout/` | login qilgan | refresh blacklist + cookie tozalash |
 | GET | `/auth/me/` | login qilgan | joriy profil |
-| GET/POST | `/users/` | SUPER_ADMIN | `USER` va `STUDIO` rollari |
-| GET/PATCH/DELETE | `/users/{id}/` | SUPER_ADMIN | DELETE = soft delete |
-| GET | `/users/{id}/pinfl/` | SUPER_ADMIN | **taklif:** to‘liq JSHSHIR, audit qilinadi |
+| GET/POST | `/users/` | SUPER_ADMIN yoki ruxsatli ADMIN | `USER` va `STUDIO` rollari |
+| GET/PATCH/DELETE | `/users/{id}/` | SUPER_ADMIN yoki ruxsatli ADMIN | DELETE = soft delete |
+| GET | `/users/{id}/pinfl/` | `users.view_pinfl` | to‘liq JSHSHIR, audit qilinadi, 20/soat |
+| GET | `/admins/permissions/` | SUPER_ADMIN | adminlarga beriladigan ruxsatlar katalogi |
+| GET | `/auth/csrf/` | hamma | web panel uchun CSRF cookie |
 | GET/POST | `/admins/` | SUPER_ADMIN | `ADMIN` roli |
 | GET/PATCH/DELETE | `/admins/{id}/` | SUPER_ADMIN | |
-| GET/POST | `/studios/` | SUPER_ADMIN | `multipart/form-data` (rasm) |
-| GET/PATCH/DELETE | `/studios/{id}/` | SUPER_ADMIN | |
-| GET | `/dashboard/overview/` | SUPER_ADMIN | hisoblagichlar + oxirgi 5 profil |
+| GET/POST | `/studios/` | SUPER_ADMIN yoki ruxsatli ADMIN | `multipart/form-data` (rasm) |
+| GET/PATCH/DELETE | `/studios/{id}/` | SUPER_ADMIN yoki ruxsatli ADMIN | |
+| GET | `/dashboard/overview/` | `dashboard.view` | hisoblagichlar + oxirgi 6 profil |
+
+**Admin ruxsatlari** (`PATCH /admins/{id}/ {"permissions": [...]}`): `dashboard.view`, `users.view|create|update|delete|view_pinfl`,
+`studios.view|create|update|delete`. Ruxsatlar har so‘rovda bazadan o‘qiladi — o‘zgarish darhol kuchga kiradi.
 
 **O‘chirish strategiyasi:**
 - `PATCH {is_active:false}` — **deactivate** (qaytariladigan, sessiyalar bekor qilinadi).
