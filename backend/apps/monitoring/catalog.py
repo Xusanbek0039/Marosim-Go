@@ -131,8 +131,8 @@ def _success_response(op: dict, components: dict):
 
 
 # ------------------------------------------------------------------- catalog
-def build() -> list[dict]:
-    schema = get_schema()
+def build(schema: dict | None = None) -> list[dict]:
+    schema = schema or get_schema()
     components = schema.get("components", {}).get("schemas", {})
     endpoints = []
     for path, item in schema.get("paths", {}).items():
@@ -141,6 +141,8 @@ def build() -> list[dict]:
             if not op:
                 continue
             access = op.get("x-access") or {"auth_required": True, "roles": [], "permission": None, "label": ""}
+            policy = op.get("x-access-policy") or {}
+            docs = op.get("x-documentation") or {"status": "MISSING", "missing": ["x-documentation"]}
             request_example, content_type = _request_example(op, components)
             success_status, response_example = _success_response(op, components)
             endpoints.append(
@@ -156,6 +158,19 @@ def build() -> list[dict]:
                     "roles": access["roles"],
                     "permission": access["permission"],
                     "access_label": access["label"],
+                    # Role metadata (apps.accounts.access) — derived from the real permission classes.
+                    "allowed_roles": op.get("x-allowed-roles", []),
+                    "auth_type": op.get("x-auth-type", "UNKNOWN"),
+                    "required_permissions": op.get("x-required-permissions", []),
+                    "role_requirements": policy.get("role_requirements", {}),
+                    "ownership_scope": op.get("x-ownership-scope"),
+                    "conditions": op.get("x-access-conditions", []),
+                    "permission_classes": policy.get("permission_classes", []),
+                    "access_status": op.get("x-access-status", "REVIEW_REQUIRED"),
+                    "review_reasons": policy.get("review_reasons", []),
+                    "documentation_status": docs["status"],
+                    "documentation_missing": docs["missing"],
+                    "api_version": op.get("x-api-version", ""),
                     "parameters": [
                         {
                             "name": p.get("name"),
