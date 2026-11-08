@@ -1,7 +1,7 @@
 /**
  * Browser API client.
  *
- * - Same-origin only: `/api/v1/*` is proxied to Django by a Next.js route handler,
+ * - Same-origin only: `/api/v1/*` is served by Django itself (static export) or rewritten to it (dev),
  *   so the httpOnly auth cookies are first-party and never readable by JS.
  * - Unsafe methods send the Django CSRF token (double-submit cookie).
  * - A 401 triggers exactly one refresh (shared by concurrent requests), then a retry.

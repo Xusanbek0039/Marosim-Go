@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { isPanelRole, useLogout, useMe } from "@/features/auth/hooks";
+import { isPanelRole, panelAudienceMessage, useLogout, useMe } from "@/features/auth/hooks";
 import { ApiError, setSessionExpiredHandler } from "@/lib/api/client";
 import { ROLE_LABELS } from "@/lib/format";
 import { ease, overlayVariants } from "@/motion/tokens";
@@ -77,7 +77,7 @@ function Forbidden({ onLogout }: { onLogout: () => void }) {
         <ShieldAlertIcon className="size-12 text-amber-500" aria-hidden />
         <h1 className="text-xl font-extrabold">Panelga kirish taqiqlangan</h1>
         <p className="text-sm text-muted-foreground">
-          Bu panel faqat administratorlar uchun. Hisobingiz bilan MarosimGo mobil ilovasidan foydalaning.
+          {panelAudienceMessage}
         </p>
         <Button onClick={onLogout}>
           <LogOutIcon /> Chiqish

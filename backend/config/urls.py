@@ -4,6 +4,8 @@ from django.views.generic import RedirectView
 from django.views.static import serve
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from config.panel import serve_panel
+
 urlpatterns = [
     path("api/v1/", include("config.api_v1")),
     path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema"),
@@ -15,3 +17,7 @@ if settings.SERVE_MEDIA:
     urlpatterns += [
         re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     ]
+
+if settings.SERVE_PANEL:
+    # Last: everything that is not the API / media / static is the Super Admin panel (static export).
+    urlpatterns += [re_path(r"^(?!api/|media/|static/)(?P<path>.*)$", serve_panel, name="panel")]

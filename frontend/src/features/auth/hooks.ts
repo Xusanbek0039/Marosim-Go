@@ -41,4 +41,21 @@ export function useLogout() {
   });
 }
 
-export const isPanelRole = (role?: string) => role === "SUPER_ADMIN" || role === "ADMIN";
+/**
+ * Which roles this build of the panel admits (NEXT_PUBLIC_PANEL_AUDIENCE, fixed at build time):
+ * - "super_admin" — api.marosimgo.uz (served by Django together with the API)
+ * - "admin"       — admin.marosimgo.uz
+ * - unset         — both (local development)
+ * Django still authorizes every API call; this only keeps each panel on its own domain.
+ */
+const AUDIENCE = process.env.NEXT_PUBLIC_PANEL_AUDIENCE;
+
+export const isPanelRole = (role?: string) =>
+  AUDIENCE === "super_admin" ? role === "SUPER_ADMIN" : AUDIENCE === "admin" ? role === "ADMIN" : role === "SUPER_ADMIN" || role === "ADMIN";
+
+export const panelAudienceMessage =
+  AUDIENCE === "super_admin"
+    ? "Bu panel faqat Super Admin uchun. Adminlar admin.marosimgo.uz orqali kiradi."
+    : AUDIENCE === "admin"
+      ? "Bu panel faqat adminlar uchun. Super Admin api.marosimgo.uz orqali kiradi."
+      : "Bu panel faqat administratorlar uchun.";

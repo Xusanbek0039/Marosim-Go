@@ -15,7 +15,7 @@ import { PhoneInput } from "@/components/common/phone-input";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { isPanelRole, useLogin, useLogout } from "@/features/auth/hooks";
+import { isPanelRole, panelAudienceMessage, useLogin, useLogout } from "@/features/auth/hooks";
 import { ApiError } from "@/lib/api/client";
 import { phoneSchema } from "@/lib/phone";
 import { fadeUp, listContainer, shake } from "@/motion/tokens";
@@ -52,7 +52,7 @@ export function LoginForm() {
       onSuccess: ({ user }) => {
         if (!isPanelRole(user.role)) {
           logout.mutate();
-          setFormError("Bu panel faqat administratorlar uchun.");
+          setFormError(panelAudienceMessage);
           controls.start(shake);
           return;
         }
