@@ -245,3 +245,127 @@ class VenueMembership(BaseModel):
     @property
     def capabilities(self) -> frozenset[str]:
         return CAPABILITIES.get(self.role, frozenset()) if self.is_active else frozenset()
+
+
+# --------------------------------------------------------------------- schedule
+# User decision 2026-11-08: a hall's day is split into fixed *sessions* (smenalar) defined by the
+# venue (default: Nahor / Kunduzgi / Kechki). A booking takes one session on one calendar date
+# (Asia/Tashkent), so availability is a simple "is this (session, date) taken?" question.
+
+
+class HallSession(BaseModel):
+    """A recurring time slot of a hall (e.g. "Kechki" 18:00–23:00). Deactivated, never deleted."""
+
+    hall = models.ForeignKey(VenueHall, on_delete=models.CASCADE, related_name="sessions")
+    name = models.CharField(max_length=50)
+    starts_at = models.TimeField()
+    ends_at = models.TimeField()
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["starts_at", "created_at"]
+        indexes = [models.Index(fields=["hall", "is_active"])]
+        constraints = [
+            models.CheckConstraint(condition=Q(ends_at__gt=F("starts_at")), name="venues_session_time_order"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.hall} · {self.name}"
+
+
+#: Created for every new hall (and back-filled for existing ones by migration 0002).
+DEFAULT_SESSIONS = (
+    ("Nahor", "06:00", "10:00"),
+    ("Kunduzgi", "12:00", "16:00"),
+    ("Kechki", "18:00", "23:00"),
+)
+
+
+class BookingEventType(models.TextChoices):
+    WEDDING = "WEDDING", "Nikoh to'yi"
+    NAHOR = "NAHOR", "Nahorgi osh"
+    ENGAGEMENT = "ENGAGEMENT", "Fotiha / unashtiruv"
+    SUNNAT = "SUNNAT", "Sunnat to'yi"
+    BESHIK = "BESHIK", "Beshik to'yi"
+    BIRTHDAY = "BIRTHDAY", "Tug'ilgan kun"
+    ANNIVERSARY = "ANNIVERSARY", "Yubiley"
+    CORPORATE = "CORPORATE", "Korporativ"
+    OTHER = "OTHER", "Boshqa"
+
+
+class BookingStatus(models.TextChoices):
+    REQUESTED = "REQUESTED", "So'rov yuborilgan"
+    CONFIRMED = "CONFIRMED", "Tasdiqlangan"
+    BLOCKED = "BLOCKED", "Yopiq (to'yxona)"
+    REJECTED = "REJECTED", "Rad etilgan"
+    CANCELLED = "CANCELLED", "Bekor qilingan"
+
+
+#: Statuses that take the slot. REQUESTED does not: several couples may ask for the same evening,
+#: the venue confirms one and the others are rejected automatically.
+OCCUPYING_STATUSES = (BookingStatus.CONFIRMED, BookingStatus.BLOCKED)
+OPEN_STATUSES = (BookingStatus.REQUESTED, *OCCUPYING_STATUSES)
+
+
+class BookingSource(models.TextChoices):
+    USER = "USER", "Foydalanuvchi so'rovi"
+    VENUE = "VENUE", "To'yxona kiritgan"
+
+
+class HallBooking(BaseModel):
+    """One session of one hall on one date — a couple's request, a confirmed event or a closed slot."""
+
+    hall = models.ForeignKey(VenueHall, on_delete=models.PROTECT, related_name="bookings")
+    session = models.ForeignKey(HallSession, on_delete=models.PROTECT, related_name="bookings")
+    date = models.DateField()
+    status = models.CharField(max_length=12, choices=BookingStatus.choices)
+    source = models.CharField(max_length=8, choices=BookingSource.choices)
+    event_type = models.CharField(max_length=20, choices=BookingEventType.choices, default=BookingEventType.WEDDING)
+    guest_count = models.PositiveIntegerField(null=True, blank=True)
+    #: The couple's account (USER source). Venue-entered events have only the contact fields.
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="hall_bookings"
+    )
+    contact_name = models.CharField(max_length=150, blank=True)
+    contact_phone = models.CharField(max_length=16, blank=True)
+    #: Written by the requester, visible to the venue.
+    note = models.CharField(max_length=1000, blank=True)
+    #: Venue-internal; never shown to the requester.
+    venue_note = models.CharField(max_length=1000, blank=True)
+    #: Server-side quote at request time (hall price → venue price); later price changes don't move it.
+    quoted_price = models.DecimalField(**MONEY, null=True, blank=True)
+    currency = models.CharField(max_length=3, choices=Currency.choices, default=Currency.UZS)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["date", "session__starts_at"]
+        indexes = [
+            models.Index(fields=["hall", "date"]),
+            models.Index(fields=["date", "status"]),
+            models.Index(fields=["requester", "status"]),
+        ]
+        constraints = [
+            # The double-booking guard: one occupying booking per (session, date), enforced by the DB.
+            models.UniqueConstraint(
+                fields=["session", "date"],
+                condition=Q(status__in=["CONFIRMED", "BLOCKED"]),
+                name="venues_booking_one_per_slot",
+            ),
+            models.UniqueConstraint(
+                fields=["session", "date", "requester"],
+                condition=Q(status="REQUESTED"),
+                name="venues_booking_one_request_per_user_slot",
+            ),
+            models.CheckConstraint(
+                condition=Q(status__in=[s.value for s in BookingStatus]), name="venues_booking_status_valid"
+            ),
+            models.CheckConstraint(
+                condition=Q(guest_count__isnull=True) | Q(guest_count__gte=1), name="venues_booking_guests_positive"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.hall} · {self.date} · {self.session.name} ({self.status})"
