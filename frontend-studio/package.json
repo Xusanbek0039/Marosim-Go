@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
+    "build:panel": "node scripts/build-panel.mjs",
     "start": "next start -p 3001",
     "lint": "eslint"
   },
