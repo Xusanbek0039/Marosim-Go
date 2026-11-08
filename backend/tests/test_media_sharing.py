@@ -25,6 +25,8 @@ from apps.storage import vault
 from apps.storage.google import MediaStream
 from apps.storage.models import ConnectionStatus, StorageCredential
 
+from .conftest import subscribe
+
 # ``world`` / ``wedding`` are pytest fixtures: imported so this module can use them.
 from .test_ceremony_invitations import INV, MY, answer, owner_invite, wedding, world  # noqa: F401
 from .test_media_upload import FakeDrive
@@ -199,6 +201,7 @@ def test_expired_access_does_not_count_against_quota(wedding):
 def test_owner_and_viewer_list_only_ready_media_without_drive_ids(gallery):
     w, c = gallery, gallery["ceremony"]
     share_with_guest(w)
+    subscribe(w["users"]["bride"])  # originals + download need a running subscription (2026-11-08)
     for who, can_download in (("bride", True), ("guest", False)):
         res = w["c"][who].get(media_url(c))
         assert res.status_code == 200
@@ -221,22 +224,23 @@ def test_strangers_studio_and_other_ceremonies_get_404(gallery, client_for, make
 @pytest.mark.django_db
 def test_stream_supports_ranges_inline(gallery, drive):
     w, c = gallery, gallery["ceremony"]
-    share_with_guest(w)
-    res = w["c"]["guest"].get(media_url(c, w["video"], "stream"), HTTP_RANGE="bytes=0-99")
+    subscribe(w["users"]["bride"])
+    res = w["c"]["bride"].get(media_url(c, w["video"], "stream"), HTTP_RANGE="bytes=0-99")
     assert res.status_code == 206
     assert b"".join(res.streaming_content) == PHOTO[:100]
     assert res["Content-Range"] == f"bytes 0-99/{len(PHOTO)}" and res["Accept-Ranges"] == "bytes"
     assert res["Content-Disposition"].startswith("inline;") and "to'y" not in res["Content-Disposition"]
     assert res["Cache-Control"] == "no-store"  # every /api/ response (core middleware)
 
-    full = w["c"]["guest"].get(media_url(c, w["photo"], "stream"), HTTP_ACCEPT="image/avif,image/webp,*/*")
+    full = w["c"]["bride"].get(media_url(c, w["photo"], "stream"), HTTP_ACCEPT="image/avif,image/webp,*/*")
     assert full.status_code == 200 and b"".join(full.streaming_content) == PHOTO
-    assert w["c"]["guest"].get(media_url(c, w["photo"], "stream"), HTTP_RANGE=f"bytes={10**9}-").status_code == 416
+    assert w["c"]["bride"].get(media_url(c, w["photo"], "stream"), HTTP_RANGE=f"bytes={10**9}-").status_code == 416
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("raw", ["bytes=0-10,20-30", "items=0-5", "bytes=9-1", "bytes=-", "bytes=abc"])
 def test_unsafe_ranges_are_not_forwarded(gallery, drive, raw):
+    subscribe(gallery["users"]["bride"])
     gallery["c"]["bride"].get(media_url(gallery["ceremony"], gallery["photo"], "stream"), HTTP_RANGE=raw)
     assert drive.ranges[-1] is None
 
@@ -247,6 +251,7 @@ def test_only_owners_download_and_downloads_are_audited(gallery):
     share_with_guest(w)
     denied = w["c"]["guest"].get(media_url(c, w["photo"], "download"))
     assert denied.status_code == 403
+    subscribe(w["users"]["bride"])
     res = w["c"]["bride"].get(media_url(c, w["photo"], "download"))
     assert res.status_code == 200 and b"".join(res.streaming_content) == PHOTO
     assert res["Content-Disposition"].startswith("attachment;")
@@ -257,6 +262,7 @@ def test_only_owners_download_and_downloads_are_audited(gallery):
 def test_thumbnails_are_cached(gallery, drive):
     w, c = gallery, gallery["ceremony"]
     url = media_url(c, w["photo"], "thumbnail")
+    subscribe(w["users"]["bride"])  # raw preview: no logo for a subscribed owner
     for _ in range(3):
         res = w["c"]["bride"].get(url, {"size": 240}, HTTP_ACCEPT="image/*")
         assert res.status_code == 200 and res.content == b"\x89PNG-thumb-240" and res["Content-Type"] == "image/png"

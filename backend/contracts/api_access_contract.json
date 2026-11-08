@@ -181,6 +181,111 @@
       "operation_id": "admin_storage_google_status_retrieve",
       "schema_fingerprint": "c1149b7a9d005d5e"
     },
+    "GET /api/v1/admin/subscription-plans/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.view"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscription_plans_list",
+      "schema_fingerprint": "5cf4a941b02ca72d"
+    },
+    "GET /api/v1/admin/subscription-settings/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.view"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscription_settings_retrieve",
+      "schema_fingerprint": "e5a78ace2cd14cdc"
+    },
+    "GET /api/v1/admin/subscriptions/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.view"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_list",
+      "schema_fingerprint": "1024edd54266d9ef"
+    },
+    "GET /api/v1/admin/subscriptions/summary/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.view"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_summary_retrieve",
+      "schema_fingerprint": "f7784642feada87b"
+    },
+    "GET /api/v1/admin/subscriptions/{id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.view"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_retrieve",
+      "schema_fingerprint": "a145ad42b7a3c6fb"
+    },
     "GET /api/v1/admin/venues/": {
       "allowed_roles": [
         "ADMIN",
@@ -235,7 +340,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_list",
-      "schema_fingerprint": "5910883b60bd0bbb"
+      "schema_fingerprint": "7569d25d767d10fb"
     },
     "GET /api/v1/admins/permissions/": {
       "allowed_roles": [
@@ -263,7 +368,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_retrieve",
-      "schema_fingerprint": "62b3510610e1e20c"
+      "schema_fingerprint": "ee8887a938b0c639"
     },
     "GET /api/v1/admins/{id}/pinfl/": {
       "allowed_roles": [
@@ -542,7 +647,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_media_list",
-      "schema_fingerprint": "026dd264d87491c6"
+      "schema_fingerprint": "a571965927c2864d"
     },
     "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/": {
       "allowed_roles": [
@@ -553,7 +658,7 @@
       "role_requirements": {},
       "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
       "conditions": [
-        "Faqat marosim EGASI; ko'ruvchi — 403",
+        "Faqat obunasi faol marosim EGASI; ko'ruvchi — 403, obunasiz ega — 403 subscription_required",
         "Har bir yuklab olish audit qilinadi"
       ],
       "access_status": "DERIVED",
@@ -571,7 +676,8 @@
       "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
       "conditions": [
         "HTTP Range qo'llab-quvvatlanadi (video uchun)",
-        "Content-Disposition: inline"
+        "Content-Disposition: inline",
+        "Obunasi faol ega — original; boshqalar — logoli nusxa (video tayyor bo'lmasa 409 watermark_pending)"
       ],
       "access_status": "DERIVED",
       "deprecated": false,
@@ -586,7 +692,9 @@
       "required_permissions": [],
       "role_requirements": {},
       "ownership_scope": "Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi.",
-      "conditions": [],
+      "conditions": [
+        "Obunasi faol ega bo'lmasa — MarosimGo logosi bilan"
+      ],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_media_thumbnail_retrieve",
@@ -639,7 +747,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_members_retrieve",
-      "schema_fingerprint": "561ca895ffee2ddb"
+      "schema_fingerprint": "511c06caec419027"
     },
     "GET /api/v1/me/ceremonies/{id}/owner-requests/": {
       "allowed_roles": [
@@ -684,6 +792,34 @@
       "deprecated": false,
       "operation_id": "me_invitations_retrieve",
       "schema_fingerprint": "dbe5ecb4f45df2e6"
+    },
+    "GET /api/v1/me/subscriptions/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z obunalari; boshqasiniki 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_subscriptions_list",
+      "schema_fingerprint": "528489f6d3df9e63"
+    },
+    "GET /api/v1/me/subscriptions/status/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_subscriptions_status_retrieve",
+      "schema_fingerprint": "fde4c8953b606980"
     },
     "GET /api/v1/me/venue-bookings/": {
       "allowed_roles": [
@@ -824,6 +960,20 @@
       "deprecated": false,
       "operation_id": "studios_retrieve",
       "schema_fingerprint": "03d01b3d0df61518"
+    },
+    "GET /api/v1/subscriptions/plans/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "subscriptions_plans_list",
+      "schema_fingerprint": "5b1dae90b2d7ced5"
     },
     "GET /api/v1/users/": {
       "allowed_roles": [
@@ -1074,6 +1224,50 @@
       "operation_id": "venues_availability_retrieve",
       "schema_fingerprint": "7e71e763fd48b169"
     },
+    "PATCH /api/v1/admin/subscription-plans/{id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.plans"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.plans"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [
+        "Yangi narx faqat keyingi so'rovlarga ta'sir qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscription_plans_partial_update",
+      "schema_fingerprint": "57ed2b56445ff668"
+    },
+    "PATCH /api/v1/admin/subscription-settings/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.plans"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.plans"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscription_settings_partial_update",
+      "schema_fingerprint": "7c436178610244f1"
+    },
     "PATCH /api/v1/admin/venues/{id}/": {
       "allowed_roles": [
         "ADMIN",
@@ -1130,7 +1324,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_partial_update",
-      "schema_fingerprint": "c27e925f2da951ad"
+      "schema_fingerprint": "33c1874f3341d8d2"
     },
     "PATCH /api/v1/auth/me/": {
       "allowed_roles": [
@@ -1327,6 +1521,111 @@
       "operation_id": "admin_storage_google_test_create",
       "schema_fingerprint": "d68ddf329393e7e4"
     },
+    "POST /api/v1/admin/subscription-plans/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.plans"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.plans"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscription_plans_create",
+      "schema_fingerprint": "4c27f9062652c5d4"
+    },
+    "POST /api/v1/admin/subscriptions/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.create"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.create"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_create",
+      "schema_fingerprint": "f7317bf5f85b2bd1"
+    },
+    "POST /api/v1/admin/subscriptions/{id}/approve/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.update"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.update"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_approve_create",
+      "schema_fingerprint": "241e916995147b09"
+    },
+    "POST /api/v1/admin/subscriptions/{id}/cancel/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.update"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.update"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_cancel_create",
+      "schema_fingerprint": "8a11a7645d5aa44d"
+    },
+    "POST /api/v1/admin/subscriptions/{id}/reject/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "subscriptions.update"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "subscriptions.update"
+        ]
+      },
+      "ownership_scope": "Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_subscriptions_reject_create",
+      "schema_fingerprint": "8a11a7645d5aa44d"
+    },
     "POST /api/v1/admin/venues/": {
       "allowed_roles": [
         "ADMIN",
@@ -1404,7 +1703,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_create",
-      "schema_fingerprint": "17fdd4decc465285"
+      "schema_fingerprint": "ab0424acf7b1a756"
     },
     "POST /api/v1/admins/{id}/verify-phone/": {
       "allowed_roles": [
@@ -1749,6 +2048,36 @@
       "deprecated": false,
       "operation_id": "me_invitations_decline_create",
       "schema_fingerprint": "478a59a6830ee2bf"
+    },
+    "POST /api/v1/me/subscriptions/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Bir vaqtda bitta kutilayotgan so'rov."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_subscriptions_create",
+      "schema_fingerprint": "3fab0d21cc2cbd9c"
+    },
+    "POST /api/v1/me/subscriptions/{id}/cancel/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z obunalari; boshqasiniki 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_subscriptions_cancel_create",
+      "schema_fingerprint": "60ca8e112aa384cc"
     },
     "POST /api/v1/me/venue-bookings/": {
       "allowed_roles": [

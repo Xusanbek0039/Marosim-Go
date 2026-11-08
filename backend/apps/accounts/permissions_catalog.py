@@ -30,6 +30,12 @@ ADMIN_PERMISSIONS: tuple[PermissionDef, ...] = (
     PermissionDef("venues.update", "venues", "To'yxonani tahrirlash (zallar, rasmlar, bloklash)"),
     PermissionDef("venues.delete", "venues", "To'yxonani o'chirish"),
     PermissionDef("venues.publish", "venues", "Ommaga chiqarishni tasdiqlash / rad etish / to'xtatish"),
+    PermissionDef("subscriptions.view", "subscriptions", "Obunalar va to'lovlarni ko'rish"),
+    PermissionDef("subscriptions.create", "subscriptions", "Foydalanuvchiga obuna berish (to'lov qayd etib)"),
+    PermissionDef("subscriptions.update", "subscriptions", "Obuna so'rovini tasdiqlash / rad etish / bekor qilish"),
+    PermissionDef(
+        "subscriptions.plans", "subscriptions", "Obuna narxlari, limitlar va to'lov ma'lumotlarini boshqarish"
+    ),
 )
 
 ALL_CODES: tuple[str, ...] = tuple(p.code for p in ADMIN_PERMISSIONS)
@@ -40,6 +46,7 @@ MODULE_LABELS = {
     "users": "Foydalanuvchilar",
     "studios": "Studiyalar",
     "venues": "To'yxonalar",
+    "subscriptions": "Obunalar",
 }
 
 

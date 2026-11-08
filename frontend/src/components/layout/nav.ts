@@ -5,6 +5,7 @@ import {
   CastleIcon,
   CrownIcon,
   GaugeIcon,
+  GemIcon,
   GlobeIcon,
   HardDriveIcon,
   HistoryIcon,
@@ -38,6 +39,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/admins", label: "Adminlar", icon: ShieldCheckIcon, requires: "super" },
   { href: "/studios", label: "Studiyalar", icon: VideoIcon, requires: "studios.view" },
   { href: "/venues", label: "To'yxonalar", icon: CastleIcon, requires: "venues.view" },
+  { href: "/subscriptions", label: "Obunalar", icon: GemIcon, requires: "subscriptions.view" },
   { href: "/storage", label: "Google Drive", icon: HardDriveIcon, requires: "super" },
   { href: "/settings", label: "Sozlamalar", icon: Settings2Icon },
 ];

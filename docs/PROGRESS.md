@@ -1,5 +1,16 @@
 # Progress
 
+## 2026-11-08 — To'yxona jadvali, sana bo'yicha qidiruv va bron ✅
+
+Foydalanuvchi qarorlari: kun **smenalarga** bo'linadi (standart Nahor 06–10, Kunduzgi 12–16, Kechki 18–23; to'yxonachi o'zgartiradi); bron = **so'rov → to'yxona tasdiqlaydi**; userga **faqat admin tasdiqlagan (APPROVED) va faol** to'yxonalar ko'rinadi.
+
+* **Backend** (`apps/venues`): `HallSession`, `HallBooking` (REQUESTED / CONFIRMED / BLOCKED / REJECTED / CANCELLED), migratsiyalar `0002`, `0003` (mavjud zallarga standart smenalar). Qoidalar `scheduling.py`da. Ikki marta band qilishdan himoya: zal qatori qulfi + `(session, date)` qisman unique index (CONFIRMED/BLOCKED) → 409. Tasdiqlanganda shu smenaga boshqa so'rovlar avtomatik rad etiladi.
+* **API:** ommaviy `GET /venues/search/?date=&region=&guests=&q=`, `GET /venues/{id}/`, `GET /venues/{id}/availability/?from=&to=`; mijoz `GET/POST /me/venue-bookings/`, `POST …/{id}/cancel/`; to'yxona `…/calendar/`, `…/bookings/` (+ confirm / reject / cancel / PATCH), `…/halls/{hall_id}/sessions/`. Kontrakt + changelog yangilandi.
+* **frontend-user:** "To'yxonalar" (sana, hudud, mehmonlar → bo'sh smenalar, "Band qilish"), to'yxona sahifasi (oylik bo'sh kunlar kalendari), "Bronlarim" (holat, bekor qilish).
+* **frontend-toyxona:** "Jadval" tabi — yangi so'rovlar (tasdiqlash/rad), oylik to'r (har smena: vaqt + marosim turi, rangli), kun paneli (mijoz, telefon, mehmonlar, izoh; mijoz yozish, smena yopish/ochish, bekor qilish), ro'yxat ko'rinishi, smenalar sozlamasi.
+* **Testlar:** `tests/test_venue_bookings.py` (14) + to'liq to'plam yashil; tsc/eslint toza; jonli e2e (user so'rov → to'yxona tasdiq → qidiruvda band) proxy orqali o'tdi. Brauzerda bosib ko'rilmadi.
+* Dev DB: "Demo Navro'z to'yxonasi" APPROVED qilindi.
+
 ## 2026-11-07 (kech) — Admin panelda To'yxonalar, venues.* ruxsatlari, galereya, +998 telefon, UI tuzatishlari ✅
 
 * **Ruxsatlar:** `venues.view / create / update / delete / publish` — Super Admin adminlarga beradi/oladi (Adminlar → "N ta ruxsat"); har so'rovda qayta tekshiriladi.

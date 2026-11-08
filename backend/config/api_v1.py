@@ -13,6 +13,13 @@ from apps.ceremonies.views import (
 )
 from apps.monitoring.health import LiveView, ReadyView
 from apps.studios.views import StudioViewSet
+from apps.subscriptions.views import (
+    AdminPlanViewSet,
+    AdminSettingsViewSet,
+    AdminSubscriptionViewSet,
+    MySubscriptionViewSet,
+    PlanListViewSet,
+)
 from apps.venues.admin_views import AdminVenueViewSet
 from apps.venues.public_views import MyVenueBookingViewSet, PublicVenueViewSet
 from apps.venues.views import VenueOwnerVenueViewSet
@@ -28,6 +35,10 @@ router.register("me/invitations", InvitationViewSet, basename="my-invitation")
 router.register("venue-owner/venues", VenueOwnerVenueViewSet, basename="venue-owner-venue")
 router.register("admin/venues", AdminVenueViewSet, basename="admin-venue")
 router.register("venues", PublicVenueViewSet, basename="venue")
+router.register("subscriptions/plans", PlanListViewSet, basename="subscription-plan")
+router.register("me/subscriptions", MySubscriptionViewSet, basename="my-subscription")
+router.register("admin/subscriptions", AdminSubscriptionViewSet, basename="admin-subscription")
+router.register("admin/subscription-plans", AdminPlanViewSet, basename="admin-subscription-plan")
 router.register("me/venue-bookings", MyVenueBookingViewSet, basename="my-venue-booking")
 
 urlpatterns = [
@@ -43,5 +54,10 @@ urlpatterns = [
     path("studios/me/ceremonies/", StudioMeCeremoniesView.as_view(), name="studio-me-ceremonies"),
     path("ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls")),
     path("me/ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls_me")),
+    path(
+        "admin/subscription-settings/",
+        AdminSettingsViewSet.as_view({"get": "retrieve", "patch": "partial_update"}),
+        name="admin-subscription-settings",
+    ),
     path("", include(router.urls)),
 ]

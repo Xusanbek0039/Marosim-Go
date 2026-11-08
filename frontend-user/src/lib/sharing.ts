@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { API_BASE, api } from "./api";
 import type { AccessDuration, CeremonyMembers, MyMedia, SentInvitation } from "./types";
 
-/** Each owner may share with this many people at once (backend CEREMONY_MAX_VIEWERS_PER_OWNER). */
+/** Free limit (no subscription); the real one comes from `members.viewer_limit`. */
 export const MAX_VIEWERS = 5;
 
 export const DURATIONS: { value: AccessDuration; label: string }[] = [
@@ -30,7 +30,12 @@ const keys = {
 };
 
 export function useCeremonyMedia(ceremonyId: string) {
-  return useQuery({ queryKey: keys.media(ceremonyId), queryFn: () => api.get<MyMedia[]>(`/me/ceremonies/${ceremonyId}/media/`) });
+  return useQuery({
+    queryKey: keys.media(ceremonyId),
+    queryFn: () => api.get<MyMedia[]>(`/me/ceremonies/${ceremonyId}/media/`),
+    // while a video's logo copy is being made, check back every 15 s
+    refetchInterval: (q) => (q.state.data?.some((m) => m.processing) ? 15_000 : false),
+  });
 }
 
 export function useMembers(ceremonyId: string, enabled: boolean) {

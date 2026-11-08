@@ -48,6 +48,16 @@ def kind_of(mime_type: str) -> str:
     return MediaKind.PHOTO if mime_type in PHOTO_TYPES else MediaKind.VIDEO
 
 
+class WatermarkStatus(models.TextChoices):
+    """Burned-in logo copy of a VIDEO (photos are stamped on the fly and stay NONE)."""
+
+    NONE = "NONE", "Kerak emas"
+    PENDING = "PENDING", "Navbatda"
+    PROCESSING = "PROCESSING", "Tayyorlanmoqda"
+    READY = "READY", "Tayyor"
+    FAILED = "FAILED", "Xato"
+
+
 class CeremonyMedia(BaseModel):
     ceremony = models.ForeignKey(Ceremony, on_delete=models.PROTECT, related_name="media")
     kind = models.CharField(max_length=10, choices=MediaKind.choices)
@@ -72,12 +82,20 @@ class CeremonyMedia(BaseModel):
     width = models.PositiveIntegerField(null=True, blank=True)
     height = models.PositiveIntegerField(null=True, blank=True)
     duration_ms = models.PositiveBigIntegerField(null=True, blank=True)
+    # Watermarked copy (videos): what everyone without a running subscription is served.
+    wm_status = models.CharField(max_length=12, choices=WatermarkStatus.choices, default=WatermarkStatus.NONE)
+    wm_drive_file_id = models.CharField(max_length=128, blank=True)
+    wm_size_bytes = models.BigIntegerField(null=True, blank=True)
+    wm_attempts = models.PositiveSmallIntegerField(default=0)
+    wm_error = models.CharField(max_length=300, blank=True)
+    wm_started_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["ceremony", "status"]),
             models.Index(fields=["status", "session_expires_at"]),
+            models.Index(fields=["wm_status", "created_at"]),
         ]
         constraints = [
             models.UniqueConstraint(

@@ -15,7 +15,11 @@ export type PermissionCode =
   | "venues.create"
   | "venues.update"
   | "venues.delete"
-  | "venues.publish";
+  | "venues.publish"
+  | "subscriptions.view"
+  | "subscriptions.create"
+  | "subscriptions.update"
+  | "subscriptions.plans";
 
 export interface Me {
   id: string;

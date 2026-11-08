@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, FilmIcon, ImageIcon, Loader2Icon, PlayIcon, XIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, CrownIcon, DownloadIcon, FilmIcon, ImageIcon, Loader2Icon, PlayIcon, XIcon } from "lucide-react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -9,6 +10,7 @@ import { downloadUrl, streamUrl, thumbUrl, useCeremonyMedia } from "@/lib/sharin
 import type { MyMedia } from "@/lib/types";
 
 import { Card, cn, EmptyState, ErrorState, Skeleton } from "./ui";
+import { VideoPlayer } from "./video-player";
 
 /** Browsers other than Safari cannot render HEIC: show Drive's (JPEG) preview instead of the original. */
 const BROWSER_IMAGE = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -101,7 +103,7 @@ function Viewer({
         </div>
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-6 sm:px-16" onContextMenu={blockSave}>
-        {!ready && <Loader2Icon className="absolute size-10 animate-spin text-white/60" aria-label="Yuklanmoqda" />}
+        {!ready && !(media.kind === "VIDEO" && media.processing) && <Loader2Icon className="absolute size-10 animate-spin text-white/60" aria-label="Yuklanmoqda" />}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={media.id}
@@ -111,24 +113,27 @@ function Viewer({
             transition={{ duration: 0.18 }}
             className="flex size-full items-center justify-center"
           >
-            {media.kind === "VIDEO" ? (
-              <video
+            {media.kind === "VIDEO" && media.processing ? (
+              <div className="flex max-w-sm flex-col items-center gap-3 rounded-2xl bg-white/5 p-8 text-center text-white">
+                <Loader2Icon className="size-10 animate-spin text-cyan-300" aria-hidden />
+                <p className="font-semibold">Video tayyorlanmoqda</p>
+                <p className="text-sm text-white/70">MarosimGo logosi qo&apos;shilmoqda. Bu bir necha daqiqa davom etadi — sahifa o&apos;zi yangilanadi.</p>
+              </div>
+            ) : media.kind === "VIDEO" ? (
+              <VideoPlayer
+                key={media.id}
                 src={streamUrl(ceremonyId, media.id)}
                 poster={thumbUrl(ceremonyId, media.id, 960)}
-                controls
-                autoPlay
-                playsInline
-                onLoadedData={() => setReadyId(media.id)}
-                controlsList={media.can_download ? undefined : "nodownload"}
-                disablePictureInPicture={!media.can_download}
-                className="max-h-full max-w-full rounded-2xl bg-black"
+                allowDownload={media.can_download}
+                onReady={() => setReadyId(media.id)}
               />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element -- authenticated same-origin media
               <img
-                src={BROWSER_IMAGE.has(media.mime_type) ? streamUrl(ceremonyId, media.id) : thumbUrl(ceremonyId, media.id, 960)}
+                src={BROWSER_IMAGE.has(media.mime_type) || media.watermarked ? streamUrl(ceremonyId, media.id) : thumbUrl(ceremonyId, media.id, 960)}
                 alt=""
                 draggable={media.can_download}
+                onContextMenu={blockSave}
                 onLoad={() => setReadyId(media.id)}
                 className={cn("max-h-full max-w-full rounded-2xl object-contain transition-opacity", ready ? "opacity-100" : "opacity-0")}
               />
@@ -152,6 +157,7 @@ function Viewer({
 
 export function Gallery({ ceremonyId, isOwner }: { ceremonyId: string; isOwner: boolean }) {
   const { data, error, isPending, refetch } = useCeremonyMedia(ceremonyId);
+  const watermarked = (data ?? []).some((m) => m.watermarked);
   const [open, setOpen] = useState<number | null>(null);
   const items = data ?? [];
   // Videos first (the main product), then photos; the viewer pages through both in this order.
@@ -175,6 +181,18 @@ export function Gallery({ ceremonyId, isOwner }: { ceremonyId: string; isOwner: 
         )}
       </div>
 
+      {isOwner && watermarked && (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber-400/40 bg-amber-500/[0.08] p-3.5">
+          <CrownIcon className="size-5 shrink-0 text-amber-500" aria-hidden />
+          <p className="min-w-0 flex-1 text-sm">
+            Video va rasmlar <b>MarosimGo logosi</b> bilan ko&apos;rsatilmoqda. Obuna bilan logosiz ko&apos;rasiz, yuklab olasiz va ko&apos;proq odamga ruxsat berasiz.
+          </p>
+          <Link href="/obuna" className="inline-flex h-9 items-center rounded-xl px-3 text-[13px] font-semibold brand-gradient text-white">
+            Obuna olish
+          </Link>
+        </div>
+      )}
+
       {isPending ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {[0, 1, 2].map((i) => (
@@ -197,6 +215,11 @@ export function Gallery({ ceremonyId, isOwner }: { ceremonyId: string; isOwner: 
                     <span className="absolute top-1/2 left-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-blue-700 shadow-xl transition group-hover:scale-110">
                       <PlayIcon className="ml-0.5 size-6 fill-current" />
                     </span>
+                    {m.processing && (
+                      <span className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-0.5 text-[11px] font-semibold text-white">
+                        <Loader2Icon className="size-3 animate-spin" /> Tayyorlanmoqda
+                      </span>
+                    )}
                     {m.duration_ms && <span className="absolute right-3 bottom-2 text-xs font-bold text-white tabular-nums">{duration(m.duration_ms)}</span>}
                   </button>
                 </li>

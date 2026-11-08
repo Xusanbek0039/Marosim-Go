@@ -41,7 +41,7 @@ function useNow() {
   return now;
 }
 
-function ShareForm({ ceremonyId, slotsLeft }: { ceremonyId: string; slotsLeft: number }) {
+function ShareForm({ ceremonyId, slotsLeft, limit }: { ceremonyId: string; slotsLeft: number; limit: number }) {
   const share = useShare(ceremonyId);
   const [type, setType] = useState<"PHONE" | "PINFL">("PHONE");
   const [value, setValue] = useState("");
@@ -74,7 +74,7 @@ function ShareForm({ ceremonyId, slotsLeft }: { ceremonyId: string; slotsLeft: n
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-bold">Ko&apos;rishga ruxsat berish</p>
         <Badge tone={full ? "danger" : "brand"}>
-          {MAX_VIEWERS - slotsLeft}/{MAX_VIEWERS}
+          {limit - slotsLeft}/{limit}
         </Badge>
       </div>
 
@@ -149,7 +149,7 @@ function ShareForm({ ceremonyId, slotsLeft }: { ceremonyId: string; slotsLeft: n
       </Button>
       <p className="text-xs text-muted-foreground">
         {full
-          ? `Siz ${MAX_VIEWERS} kishiga ruxsat bergansiz. Yangisini qo'shish uchun avvalgilaridan birini bekor qiling.`
+          ? `Siz ${limit} kishiga ruxsat bergansiz. Avvalgilaridan birini bekor qiling yoki obuna orqali limitni oshiring.`
           : "Odam taklifni o'z hisobidan qabul qilgandan keyin galereyani ko'radi. Muddat qabul qilingan paytdan hisoblanadi. Ko'ruvchi faylni yuklab ololmaydi."}
       </p>
     </form>
@@ -168,7 +168,8 @@ export function SharePanel({ ceremonyId }: { ceremonyId: string }) {
   const myPending = (sent.data ?? []).filter(
     (i) => i.is_mine && i.requested_role === "VIEWER" && i.status === "PENDING" && new Date(i.expires_at).getTime() > now,
   );
-  const slotsLeft = MAX_VIEWERS - myViewers.length - myPending.length;
+  const limit = members.data?.viewer_limit ?? MAX_VIEWERS;
+  const slotsLeft = limit - myViewers.length - myPending.length;
 
   return (
     <Card className="flex flex-col gap-4">
@@ -177,7 +178,7 @@ export function SharePanel({ ceremonyId }: { ceremonyId: string }) {
         <p className="text-sm text-muted-foreground">Yaqinlaringizga vaqtinchalik ruxsat bering. Ko&apos;pi bilan {MAX_VIEWERS} kishi.</p>
       </div>
 
-      <ShareForm ceremonyId={ceremonyId} slotsLeft={slotsLeft} />
+      <ShareForm ceremonyId={ceremonyId} slotsLeft={slotsLeft} limit={limit} />
 
       {members.isPending || sent.isPending ? (
         <Skeleton className="h-20" />

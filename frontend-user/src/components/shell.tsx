@@ -115,14 +115,14 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
         </div>
       </header>
       {nav.length > 1 && (
-        <nav aria-label="Mobil menyu" className="glass flex gap-1 rounded-2xl p-1 sm:hidden">
+        <nav aria-label="Mobil menyu" className="glass flex gap-1 overflow-x-auto rounded-2xl p-1 [scrollbar-width:none] sm:hidden">
           {nav.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn("flex-1 rounded-xl py-2 text-center text-sm font-semibold", active ? "brand-gradient text-white" : "text-muted-foreground")}
+                className={cn("flex-1 shrink-0 rounded-xl px-3 py-2 text-center text-sm font-semibold whitespace-nowrap", active ? "brand-gradient text-white" : "text-muted-foreground")}
               >
                 {item.label}
               </Link>

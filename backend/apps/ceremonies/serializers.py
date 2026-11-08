@@ -482,6 +482,7 @@ class MembersSerializer(serializers.Serializer):
     owners = MemberOwnerSerializer(many=True)
     viewers = MemberViewerSerializer(many=True)
     pending_owner_requests = serializers.IntegerField()
+    viewer_limit = serializers.IntegerField(help_text="So'rovchi nechta odamga ruxsat bera oladi (obunaga qarab).")
 
 
 @extend_schema_serializer(

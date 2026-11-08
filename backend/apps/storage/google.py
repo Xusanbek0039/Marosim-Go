@@ -349,6 +349,35 @@ class GoogleGateway:
         kept = {k: res.headers[k] for k in ("Content-Length", "Content-Range") if k in res.headers}
         return MediaStream(status=res.status_code, headers=kept, chunks=res.iter_content(MEDIA_CHUNK), close=res.close)
 
+    def download_to_file(self, creds, file_id: str, path) -> int:
+        """Copy a Drive file's bytes to a local path (server-side processing). Returns the byte count."""
+        stream = self.open_media(creds, file_id)
+        written = 0
+        try:
+            with open(path, "wb") as out:
+                for chunk in stream.chunks:
+                    out.write(chunk)
+                    written += len(chunk)
+        finally:
+            stream.close()
+        return written
+
+    def upload_file(self, creds, *, name: str, parent_id: str, path, mime_type: str, app_properties: dict) -> dict:
+        """Upload a local file into a platform folder (resumable, 8 MiB chunks). Returns its metadata."""
+        from googleapiclient.errors import HttpError
+        from googleapiclient.http import MediaFileUpload
+
+        media = MediaFileUpload(str(path), mimetype=mime_type, resumable=True, chunksize=8 * 1024 * 1024)
+        body = {"name": name, "parents": [parent_id], "mimeType": mime_type, "appProperties": app_properties}
+        try:
+            request = self.drive(creds).files().create(body=body, media_body=media, fields=FILE_FIELDS)
+            response = None
+            while response is None:
+                _, response = request.next_chunk(num_retries=3)
+            return response
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+
     def thumbnail(self, creds, file_id: str, size: int) -> tuple[bytes, str] | None:
         """A Drive-generated preview image (photos and most videos), or ``None`` if Drive has none yet."""
         import re

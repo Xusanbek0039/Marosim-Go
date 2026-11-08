@@ -186,13 +186,16 @@ def create_invitation(
 
 
 def _check_viewer_quota(ceremony: Ceremony, owner, live_invitations) -> None:
-    """Each owner shares with at most ``CEREMONY_MAX_VIEWERS_PER_OWNER`` people at a time:
+    """Each owner shares with at most ``subscriptions.services.viewer_limit(owner)`` people at a time
+    (``CEREMONY_MAX_VIEWERS_PER_OWNER`` without a subscription, the plan's limit with one):
     live viewer access they granted + their viewer invitations still awaiting an answer.
 
     Called inside the creating transaction after the ceremony row is locked, so two parallel
     requests cannot both take the last slot.
     """
-    limit = settings.CEREMONY_MAX_VIEWERS_PER_OWNER
+    from apps.subscriptions.services import viewer_limit
+
+    limit = viewer_limit(owner)
     used = (
         ownership.live_viewers().filter(ceremony=ceremony, granted_by=owner).count()
         + live_invitations.filter(requested_role=AccessRole.VIEWER, invited_by=owner).count()
@@ -201,7 +204,8 @@ def _check_viewer_quota(ceremony: Ceremony, owner, live_invitations) -> None:
         raise ValidationError(
             {
                 "non_field_errors": [
-                    f"Siz ko'pi bilan {limit} kishiga ruxsat bera olasiz. Avvalgi ruxsat yoki taklifni bekor qiling."
+                    f"Siz ko'pi bilan {limit} kishiga ruxsat bera olasiz. "
+                    "Avvalgi ruxsat yoki taklifni bekor qiling yoki obunani kengaytiring."
                 ]
             }
         )

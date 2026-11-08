@@ -20,6 +20,7 @@ from apps.accounts.access import AccessNote
 from apps.audit.services import AuditAction, diff, record, snapshot
 from apps.studios.models import StudioMembership
 from apps.studios.services import active_memberships
+from apps.subscriptions.services import viewer_limit
 
 from . import invitations, ownership, services
 from .models import (
@@ -403,6 +404,7 @@ class MyCeremonyViewSet(viewsets.ReadOnlyModelViewSet):
             .select_related("user", "granted_by", "ceremony__studio")
             .order_by("accepted_at"),
             "pending_owner_requests": ceremony.ownerships.filter(status=OwnershipStatus.PENDING).count(),
+            "viewer_limit": viewer_limit(request.user),
         }
         return Response(MembersSerializer(data, context={"request": request}).data)
 

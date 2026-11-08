@@ -133,3 +133,7 @@ Admin bloklagan to'yxonada (`is_active=false`) a'zolarda faqat VIEW qoladi. Nofa
 | Studiya xizmatlari, bo'sh kun/soatlari, aloqa; user bron qiladi | C (StudioResource) + F + G |
 | Bron so'rovi va tasdiq | G |
 | Super Admin boshqaruvi (kalendarlar, bronlar, narxlar, approval) | H |
+
+## 2026-11-08 — Smenali jadval (C/F/G ning soddalashtirilgan amalga oshirilishi)
+
+Foydalanuvchi qarori bilan erkin vaqt oraliqlari (`scheduling.Resource` + `tstzrange` exclusion) o'rniga **smena modeli** qurildi: `HallSession` (zal kuni bo'linishi, kesishmaydi) va `HallBooking` (bitta smena × bitta sana). Band qiluvchi holatlar: CONFIRMED, BLOCKED; REQUESTED band qilmaydi. Himoya: zal qatori `SELECT … FOR UPDATE` + qisman unique index `venues_booking_one_per_slot` (SQLite va PG'da ishlaydi). Narx: `quoted_price = hall.effective_base_price` (Phase D dinamik narx hali yo'q). Studiya resurslari (Phase C qismi), dinamik narx (D), publish-request oqimi (E, hozircha admin `publication_status`ni o'zi qo'yadi) — keyingi bosqichlar.

@@ -312,6 +312,20 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_hall_booking_scope",
     ),
+    # subscriptions — tests live in tests/test_subscriptions.py
+    **dict.fromkeys(["me_subscriptions_list", "me_subscriptions_cancel_create"], "ownership_my_subscriptions"),
+    **dict.fromkeys(
+        [
+            "admin_subscriptions_list",
+            "admin_subscriptions_create",
+            "admin_subscriptions_summary_retrieve",
+            "admin_subscriptions_retrieve",
+            "admin_subscriptions_approve_create",
+            "admin_subscriptions_cancel_create",
+            "admin_subscriptions_reject_create",
+        ],
+        "ownership_admin_subscriptions",
+    ),
 }
 
 from . import test_ceremonies as _ceremony_tests  # noqa: E402
@@ -351,6 +365,11 @@ ownership_venue_gallery_by_membership = _admin_venue_tests.test_gallery_rights_f
 from . import test_venue_bookings as _booking_tests  # noqa: E402
 
 ownership_hall_booking_scope = _booking_tests.test_booking_scope_is_own
+
+from . import test_subscriptions as _subscription_tests  # noqa: E402
+
+ownership_my_subscriptions = _subscription_tests.test_my_subscriptions_scope_is_own
+ownership_admin_subscriptions = _subscription_tests.test_admin_rights_come_only_from_granted_codes
 
 
 @pytest.mark.parametrize(

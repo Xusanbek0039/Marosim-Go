@@ -9,6 +9,7 @@ export const APP = {
     { href: "/", label: "Marosimlarim" },
     { href: "/toyxonalar", label: "To'yxonalar" },
     { href: "/bronlarim", label: "Bronlarim" },
+    { href: "/obuna", label: "Obuna" },
     { href: "/profile", label: "Profil" },
   ],
   allowRegister: true,

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "apps.ceremonies",
     "apps.media",
     "apps.venues",
+    "apps.subscriptions",
     "apps.devcenter",
 ]
 
@@ -265,6 +266,9 @@ SPECTACULAR_SETTINGS = {
         "BookingEventTypeEnum": "apps.venues.models.BookingEventType",
         "BookingSourceEnum": "apps.venues.models.BookingSource",
         "VenueEntryStatusEnum": ["CONFIRMED", "BLOCKED"],
+        "SubscriptionStatusEnum": "apps.subscriptions.models.SubscriptionStatus",
+        "SubscriptionStateEnum": ["PENDING", "ACTIVE", "SCHEDULED", "EXPIRED", "REJECTED", "CANCELLED"],
+        "PaymentMethodEnum": "apps.subscriptions.models.PaymentMethod",
         "MediaStatusEnum": "apps.media.models.MediaStatus",
         "StorageConnectionStatusEnum": "apps.storage.models.ConnectionStatus",
         "VenueRegionEnum": "apps.venues.models.Region",
@@ -290,6 +294,9 @@ CEREMONY_INVITATION_TTL_DAYS = env.int("CEREMONY_INVITATION_TTL_DAYS", default=1
 CEREMONY_MAX_PENDING_INVITATIONS = env.int("CEREMONY_MAX_PENDING_INVITATIONS", default=50)
 #: How many people one ceremony owner may share the gallery with at a time (live access + pending invitations).
 CEREMONY_MAX_VIEWERS_PER_OWNER = env.int("CEREMONY_MAX_VIEWERS_PER_OWNER", default=5)
+#: Burn the MarosimGo logo into videos in a background thread of the web process (needs ffmpeg).
+#: Off: run `manage.py process_watermarks --loop` as a separate worker instead.
+MEDIA_WATERMARK_INLINE = env.bool("MEDIA_WATERMARK_INLINE", default=True)
 CEREMONY_MAX_INVITATION_SENDS = env.int("CEREMONY_MAX_INVITATION_SENDS", default=5)
 
 # Ceremony media (Phase D): client → Google Drive resumable sessions; nothing is public.

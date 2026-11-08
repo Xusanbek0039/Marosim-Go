@@ -331,6 +331,9 @@ def _finalize(request, media: CeremonyMedia, created: dict | None) -> None:
                 changes={"ceremony": str(media.ceremony_id), "kind": media.kind, "size_bytes": media.size_bytes},
                 target_label=f"{media.ceremony_id} · {media.kind}",
             )
+            from .watermark_jobs import queue_for
+
+            queue_for(media)  # videos: burned-in logo copy for viewers without a subscription
 
 
 # ----------------------------------------------------------------- cancel

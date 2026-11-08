@@ -28,6 +28,11 @@ def next_phone() -> str:
 
 
 @pytest.fixture(autouse=True)
+def _no_background_watermarks(settings):
+    settings.MEDIA_WATERMARK_INLINE = False  # tests run the watermark jobs explicitly
+
+
+@pytest.fixture(autouse=True)
 def _clean_state():
     cache.clear()
     yield
@@ -111,3 +116,25 @@ def image_file(name="avatar.png", fmt="PNG", size=(64, 64)) -> SimpleUploadedFil
     Image.new("RGB", size, (37, 99, 235)).save(buf, format=fmt)
     content_type = {"PNG": "image/png", "JPEG": "image/jpeg", "WEBP": "image/webp"}.get(fmt, "image/gif")
     return SimpleUploadedFile(name, buf.getvalue(), content_type=content_type)
+
+
+def subscribe(user, code: str = "M1"):
+    """Give ``user`` a running subscription (as if an admin approved the payment)."""
+    from django.utils import timezone
+
+    from apps.subscriptions.models import Subscription, SubscriptionPlan, SubscriptionStatus
+    from apps.subscriptions.services import add_months
+
+    plan = SubscriptionPlan.objects.get(code=code)
+    now = timezone.now()
+    return Subscription.objects.create(
+        user=user,
+        plan=plan,
+        status=SubscriptionStatus.ACTIVE,
+        price=plan.price,
+        duration_months=plan.duration_months,
+        max_viewers=plan.max_viewers,
+        starts_at=now,
+        ends_at=add_months(now, plan.duration_months),
+        paid_amount=plan.price,
+    )

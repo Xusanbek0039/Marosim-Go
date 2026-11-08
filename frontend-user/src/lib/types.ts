@@ -121,9 +121,14 @@ export interface MyMedia {
   duration_ms: number | null;
   completed_at: string;
   can_download: boolean;
+  /** Shown with the MarosimGo logo (no running subscription, or a viewer). */
+  watermarked: boolean;
+  /** Video: the logo copy is still being prepared. */
+  processing: boolean;
 }
 
 export interface CeremonyMembers {
+  viewer_limit: number;
   owners: { id: string; owner_type: string; full_name: string; is_me: boolean; accepted_at: string }[];
   viewers: {
     id: string;

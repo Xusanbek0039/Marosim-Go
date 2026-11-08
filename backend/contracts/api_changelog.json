@@ -488,6 +488,69 @@
       "changed": {},
       "breaking": [],
       "schema_changed": []
+    },
+    {
+      "revision": 12,
+      "date": "2026-11-08",
+      "note": "Obunalar (tariflar, so'rov, admin tasdig'i, to'lovlar), logoli media va obunaga bog'liq yuklab olish",
+      "added": [
+        "GET /api/v1/admin/subscription-plans/",
+        "GET /api/v1/admin/subscription-settings/",
+        "GET /api/v1/admin/subscriptions/",
+        "GET /api/v1/admin/subscriptions/summary/",
+        "GET /api/v1/admin/subscriptions/{id}/",
+        "GET /api/v1/me/subscriptions/",
+        "GET /api/v1/me/subscriptions/status/",
+        "GET /api/v1/subscriptions/plans/",
+        "PATCH /api/v1/admin/subscription-plans/{id}/",
+        "PATCH /api/v1/admin/subscription-settings/",
+        "POST /api/v1/admin/subscription-plans/",
+        "POST /api/v1/admin/subscriptions/",
+        "POST /api/v1/admin/subscriptions/{id}/approve/",
+        "POST /api/v1/admin/subscriptions/{id}/cancel/",
+        "POST /api/v1/admin/subscriptions/{id}/reject/",
+        "POST /api/v1/me/subscriptions/",
+        "POST /api/v1/me/subscriptions/{id}/cancel/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/": [
+          "conditions"
+        ],
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/": [
+          "conditions"
+        ],
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/": [
+          "conditions"
+        ],
+        "GET /api/v1/me/ceremonies/{id}/members/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admins/",
+        "GET /api/v1/admins/{id}/",
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/",
+        "GET /api/v1/me/ceremonies/{id}/members/",
+        "PATCH /api/v1/admins/{id}/",
+        "POST /api/v1/admins/"
+      ]
     }
   ]
 }
