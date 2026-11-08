@@ -199,7 +199,7 @@ def _run(cmd: list[str], duration: float, on_progress, workdir: Path) -> tuple[i
                     if pct > last:
                         last = pct
                         on_progress(pct)
-            proc.wait(timeout=60)
+            proc.wait()
         finally:
             if proc.poll() is None:
                 proc.kill()
@@ -226,7 +226,8 @@ def burn_video(src, dst: Path, workdir: Path, *, http_headers: str | None = None
     head = ["-headers", http_headers, "-reconnect", "1", "-reconnect_delay_max", "30"] if http_headers else []
 
     encoder = video_encoder()
-    attempts = [(encoder, True)] if encoder == CPU else [(encoder, True), (CPU, False)]
+    # GPU decode + chosen encoder first; if anything about it fails, once more purely on the CPU.
+    attempts = [(encoder, True), (CPU, False)]
     tail = ""
     for enc, hw in attempts:
         args, pix = _ENCODERS[enc]

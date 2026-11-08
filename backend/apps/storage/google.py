@@ -349,6 +349,11 @@ class GoogleGateway:
         kept = {k: res.headers[k] for k in ("Content-Length", "Content-Range") if k in res.headers}
         return MediaStream(status=res.status_code, headers=kept, chunks=res.iter_content(MEDIA_CHUNK), close=res.close)
 
+    def media_request(self, creds, file_id: str) -> tuple[str, str]:
+        """URL + ``Authorization`` header so ffmpeg can read a file straight from Drive (with seeking)."""
+        return f"{FILES_URL}/{file_id}?alt=media", f"Authorization: Bearer {creds.token}
+"
+
     def download_to_file(self, creds, file_id: str, path) -> int:
         """Copy a Drive file's bytes to a local path (server-side processing). Returns the byte count."""
         stream = self.open_media(creds, file_id)
