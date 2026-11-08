@@ -72,6 +72,21 @@ TEMPLATES = [
 # SQLite by default; switch to PostgreSQL by setting e.g.
 # DATABASE_URL=postgres://marosimgo:password@localhost:5432/marosimgo
 DATABASES = {"default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    # Many concurrent users on SQLite: WAL lets readers run during a write, writers queue up to
+    # 20 s instead of failing with "database is locked", and IMMEDIATE transactions take the write
+    # lock up front (no deadlock when two requests upgrade a read to a write).
+    DATABASES["default"].setdefault("OPTIONS", {}).update(
+        {
+            "timeout": 20,
+            "transaction_mode": "IMMEDIATE",
+            "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=20000;",
+        }
+    )
+else:
+    # PostgreSQL / MySQL: reuse connections between requests instead of reconnecting every time.
+    DATABASES["default"].setdefault("CONN_MAX_AGE", env.int("DB_CONN_MAX_AGE", default=60))
+    DATABASES["default"].setdefault("CONN_HEALTH_CHECKS", True)
 # No ATOMIC_REQUESTS: audit/security records must survive a failed request.
 # Write paths use explicit transaction.atomic blocks instead.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
