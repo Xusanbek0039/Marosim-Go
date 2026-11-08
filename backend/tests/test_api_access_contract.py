@@ -293,6 +293,25 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_venue_scope_is_own_membership",
     ),
+    # hall sessions + bookings — tests live in tests/test_venue_bookings.py
+    **dict.fromkeys(
+        [
+            "me_venue_bookings_list",
+            "me_venue_bookings_retrieve",
+            "me_venue_bookings_cancel_create",
+            "venue_owner_venues_bookings_list",
+            "venue_owner_venues_bookings_create",
+            "venue_owner_venues_bookings_partial_update",
+            "venue_owner_venues_bookings_confirm_create",
+            "venue_owner_venues_bookings_reject_create",
+            "venue_owner_venues_bookings_cancel_create",
+            "venue_owner_venues_calendar_retrieve",
+            "venue_owner_venues_halls_sessions_list",
+            "venue_owner_venues_halls_sessions_create",
+            "venue_owner_venues_halls_sessions_partial_update",
+        ],
+        "ownership_hall_booking_scope",
+    ),
 }
 
 from . import test_ceremonies as _ceremony_tests  # noqa: E402
@@ -328,6 +347,10 @@ from . import test_admin_venues as _admin_venue_tests  # noqa: E402
 
 ownership_admin_venues_all = _admin_venue_tests.test_admin_venue_rights_come_only_from_granted_codes
 ownership_venue_gallery_by_membership = _admin_venue_tests.test_gallery_rights_follow_membership
+
+from . import test_venue_bookings as _booking_tests  # noqa: E402
+
+ownership_hall_booking_scope = _booking_tests.test_booking_scope_is_own
 
 
 @pytest.mark.parametrize(
