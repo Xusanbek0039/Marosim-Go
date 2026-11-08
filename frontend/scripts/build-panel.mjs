@@ -20,5 +20,8 @@ if (build.status !== 0 || !existsSync(join(out, "index.html"))) process.exit(bui
 
 rmSync(target, { recursive: true, force: true });
 cpSync(out, target, { recursive: true });
+writeFileSync(join(target, ".gitattributes"), "# Built files: keep the bytes exactly as Next.js wrote them (RSC payloads contain byte lengths).
+* -text
+");
 writeFileSync(join(target, "BUILD_INFO.txt"), `MarosimGo Super Admin panel — static build\nBuilt: ${new Date().toISOString()}\nDo not edit: regenerate with \`npm run build:panel\` in frontend/.\n`);
 console.log(`\nPanel copied to ${target}`);
