@@ -343,12 +343,15 @@ GOOGLE_TOKEN_ENCRYPTION_KEYS = env.list("GOOGLE_TOKEN_ENCRYPTION_KEY", default=[
 # Optional default root folder (Phase B lets the Super Admin pick one instead).
 GOOGLE_DRIVE_ROOT_FOLDER_ID = env.str("GOOGLE_DRIVE_ROOT_FOLDER_ID", default="")
 # Where the OAuth callback sends the browser back to (the Super Admin panel).
-# Production: the panel is served by Django on the API domain → PANEL_URL=https://api.marosimgo.uz
+# Production: PANEL_URL=https://superadmin.marosimgo.uz (served by this same Django app)
 PANEL_URL = env.str("PANEL_URL", default="http://localhost:3000").rstrip("/")
 # The Super Admin panel's static export (`npm run build:panel` in frontend/), served by Django
 # on every path outside /api/, /media/ and /static/ (see config/panel.py).
 SERVE_PANEL = env.bool("SERVE_PANEL", default=True)
 PANEL_BUILD_DIR = Path(env.str("PANEL_BUILD_DIR", default=str(BASE_DIR / "panel")))
+# Hostnames that get the panel (e.g. superadmin.marosimgo.uz). Empty = every host (development).
+# Other hosts (api.marosimgo.uz) serve only /api/v1/.
+PANEL_HOSTS = [h.lower() for h in env.list("PANEL_HOSTS", default=[])]
 
 # -------------------------------------------------------------------- monitoring
 MONITORING = {

@@ -1,4 +1,10 @@
-"""The Super Admin panel, served by Django itself (api.marosimgo.uz = API + panel, one deploy).
+"""The Super Admin panel, served by Django itself — one deploy for the API and the panel.
+
+Production: the same Django app answers two hostnames (both in ``DJANGO_ALLOWED_HOSTS``):
+
+* ``api.marosimgo.uz``        — the API only (mobile apps, admin/studio panels)
+* ``superadmin.marosimgo.uz`` — the panel (``PANEL_HOSTS``) *and* ``/api/v1/`` on the same origin,
+  so the httpOnly auth cookies stay first-party and no CORS is involved.
 
 ``frontend/`` is built as a static export (``npm run build:panel``) into ``backend/panel/``. Every
 path that is not ``api/``, ``media/`` or ``static/`` is looked up there:
@@ -73,8 +79,18 @@ def _respond(file: Path, status: int = 200) -> FileResponse:
     return response
 
 
+def _is_panel_host(request) -> bool:
+    hosts = settings.PANEL_HOSTS
+    return not hosts or request.get_host().split(":")[0].lower() in hosts
+
+
 @require_safe
 def serve_panel(request, path: str = ""):
+    if not _is_panel_host(request):
+        # api.marosimgo.uz: no panel here, just say what this host is.
+        if path.strip("/") == "":
+            return HttpResponse("MarosimGo API — /api/v1/", content_type="text/plain; charset=utf-8")
+        raise Http404
     if not (_root() / "index.html").is_file():
         return HttpResponse(
             "MarosimGo API ishlayapti. Super Admin panel hali build qilinmagan: "

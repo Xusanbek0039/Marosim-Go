@@ -1,5 +1,5 @@
 // Builds the Super Admin panel as static files into backend/panel/, where Django serves it
-// (api.marosimgo.uz = API + Super Admin panel in one deploy). Run: npm run build:panel
+// on superadmin.marosimgo.uz (one deploy with the API at api.marosimgo.uz). Run: npm run build:panel
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -10,7 +10,7 @@ const out = join(root, "out");
 const target = join(root, "..", "backend", "panel");
 
 rmSync(out, { recursive: true, force: true });
-const build = spawnSync("npx", ["next", "build"], {
+const build = spawnSync(process.platform === "win32" ? "npx.cmd next build" : "npx next build", {
   cwd: root,
   stdio: "inherit",
   shell: true,

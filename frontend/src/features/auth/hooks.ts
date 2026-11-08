@@ -43,7 +43,7 @@ export function useLogout() {
 
 /**
  * Which roles this build of the panel admits (NEXT_PUBLIC_PANEL_AUDIENCE, fixed at build time):
- * - "super_admin" — api.marosimgo.uz (served by Django together with the API)
+ * - "super_admin" — superadmin.marosimgo.uz (served by Django together with the API)
  * - "admin"       — admin.marosimgo.uz
  * - unset         — both (local development)
  * Django still authorizes every API call; this only keeps each panel on its own domain.
@@ -57,5 +57,5 @@ export const panelAudienceMessage =
   AUDIENCE === "super_admin"
     ? "Bu panel faqat Super Admin uchun. Adminlar admin.marosimgo.uz orqali kiradi."
     : AUDIENCE === "admin"
-      ? "Bu panel faqat adminlar uchun. Super Admin api.marosimgo.uz orqali kiradi."
+      ? "Bu panel faqat adminlar uchun. Super Admin superadmin.marosimgo.uz orqali kiradi."
       : "Bu panel faqat administratorlar uchun.";
