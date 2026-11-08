@@ -104,3 +104,17 @@ def test_unbuilt_panel_and_unknown_host(build, settings):
     assert Client(HTTP_HOST="localhost").get("/dashboard").status_code == 404  # API-only by default
     settings.PANEL_DEFAULT_SITE = "superadmin"  # development
     assert Client(HTTP_HOST="localhost").get("/dashboard").status_code == 200
+
+
+def test_root_domain_serves_the_landing_page(settings):
+    from django.conf import settings as conf
+
+    settings.PANEL_SITES = {**settings.PANEL_SITES, "landing": conf.BASE_DIR / "landing"}
+    settings.PANEL_HOST_SITES = {"marosimgo.uz": "landing", "www.marosimgo.uz": "landing"}
+    settings.ALLOWED_HOSTS = ["marosimgo.uz", "www.marosimgo.uz"]
+    for host in ("marosimgo.uz", "www.marosimgo.uz"):
+        res = Client(HTTP_HOST=host).get("/")
+        assert res.status_code == 200 and b"MarosimGo" in body(res)  # no redirect to /dashboard
+    assert Client(HTTP_HOST="marosimgo.uz").get("/fonts/jakarta-latin.woff2").status_code == 200
+    missing = Client(HTTP_HOST="marosimgo.uz").get("/nope")
+    assert missing.status_code == 404 and b"Bosh sahifaga" in body(missing)

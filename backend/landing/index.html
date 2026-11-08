@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MarosimGo — to'y videolaringiz oilangizda</title>
+<meta name="description" content="MarosimGo to'yxona, video studiya va oilani bog'laydi: zalni band qiling, studiya marosimni yuklaydi, siz videoni xavfsiz ko'rasiz va yaqinlaringiz bilan muddatli ulashasiz.">
+<meta name="theme-color" content="#16204a">
+<meta property="og:title" content="MarosimGo">
+<meta property="og:description" content="To'y kuni o'tadi. Uning videosi oilangizda qoladi.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://marosimgo.uz/">
+<link rel="icon" href="/favicon.png" type="image/png">
+<link rel="preload" href="/fonts/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Jakarta";font-weight:200 800;font-display:swap;src:url(/fonts/jakarta-latin.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2212}
+@font-face{font-family:"Jakarta";font-weight:200 800;font-display:swap;src:url(/fonts/jakarta-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02FF,U+1E00-1EFF,U+20A0-20AB,U+20AD-20C4,U+2C60-2C7F,U+A720-A7FF}
+
+:root{
+  --porcelain:#f3f5fa;   /* glazed white tile */
+  --surface:#ffffff;
+  --ink:#16204a;         /* cobalt ink */
+  --muted:#56608a;
+  --line:#d9deec;
+  --cobalt:#2447c9;
+  --turquoise:#129fb4;
+  --saffron:#e3a234;
+  --pomegranate:#c2364e;
+  --pale:#dfe7fb;
+  --band:#16204a;
+  --band-ink:#e9edf9;
+  --band-muted:#a9b3d6;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --porcelain:#0d1330;--surface:#141b3d;--ink:#e9edf9;--muted:#a3acd0;--line:#26305c;
+    --cobalt:#5b7cff;--turquoise:#2cc3d6;--saffron:#f0b44c;--pomegranate:#ec5a73;--pale:#24306a;
+    --band:#070b20;--band-ink:#e9edf9;--band-muted:#9aa4cc;
+    color-scheme:dark;
+  }
+}
+
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--porcelain);color:var(--ink);font:400 17px/1.6 "Jakarta",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--turquoise);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1160px,100% - 32px);margin-inline:auto}
+
+/* ------------------------------------------------------------------ header */
+.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--porcelain) 86%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .3s}
+.top.scrolled{border-bottom-color:var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.brand img{width:38px;height:auto}
+.brand b{color:var(--turquoise);font-weight:800}
+.top nav{display:flex;gap:28px;font-weight:600;font-size:15px}
+.top nav a{text-decoration:none;color:var(--muted);transition:color .2s}
+.top nav a:hover{color:var(--ink)}
+
+/* -------------------------------------------------------------------- hero */
+.hero{position:relative;padding:64px 0 96px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23129fb4' stroke-opacity='.16'%3E%3Cpath d='M48 20l8 20 20 8-20 8-8 20-8-20-20-8 20-8z'/%3E%3Cpath d='M28 28h40v40H28z' transform='rotate(45 48 48)'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-image:radial-gradient(ellipse 70% 80% at 75% 45%,#000 10%,transparent 70%);mask-image:radial-gradient(ellipse 70% 80% at 75% 45%,#000 10%,transparent 70%)}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:40px}
+.hero h1{font-size:clamp(40px,5vw,66px);line-height:1;letter-spacing:-.04em;font-weight:800;max-width:14ch;text-wrap:balance}
+.hero h1 .l2{display:block;color:var(--cobalt)}
+.hero p.lead{margin-top:28px;font-size:clamp(17px,1.6vw,20px);line-height:1.6;color:var(--muted);max-width:34em}
+.actions{margin-top:36px;display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 26px;border-radius:999px;font:700 16px/1 inherit;font-family:inherit;text-decoration:none;cursor:pointer;border:0;transition:transform .2s,background .2s,box-shadow .2s}
+.btn-main{background:var(--cobalt);color:#fff;box-shadow:0 10px 30px -10px color-mix(in srgb,var(--cobalt) 70%,transparent)}
+.btn-main:hover{transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink)}
+
+.girih{width:100%;max-width:520px;justify-self:center;aspect-ratio:1;overflow:visible}
+.girih .t{transform-box:fill-box;transform-origin:center;stroke:var(--porcelain);stroke-width:2.5;stroke-linejoin:round;
+  animation:land 1.1s cubic-bezier(.2,.9,.25,1.15) both;animation-delay:var(--d)}
+.t-cob{fill:var(--cobalt)} .t-tur{fill:var(--turquoise)} .t-saf{fill:var(--saffron)} .t-pale{fill:var(--pale)}
+.girih .ring{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 1.8s ease-out .2s forwards}
+.girih .core{fill:var(--ink);transform-box:fill-box;transform-origin:center;animation:pop .7s cubic-bezier(.3,1.6,.5,1) 1.25s both}
+.girih .play{fill:var(--porcelain);transform-box:fill-box;transform-origin:center;animation:pop .5s cubic-bezier(.3,1.6,.5,1) 1.55s both}
+.girih .rec{fill:var(--pomegranate);animation:pop .4s ease-out 1.8s both,blink 2.4s ease-in-out 2.4s infinite}
+@keyframes land{from{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(.4)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(0) rotate(-45deg)}to{opacity:1;transform:none}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes blink{50%{opacity:.25}}
+.hero-copy>*{animation:rise .9s cubic-bezier(.2,.8,.2,1) both}
+.hero-copy>:nth-child(2){animation-delay:.12s}.hero-copy>:nth-child(3){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* --------------------------------------------------------------- sections */
+section.block{padding:104px 0}
+.block h2{font-size:clamp(32px,4.2vw,52px);line-height:1.05;letter-spacing:-.035em;font-weight:800;max-width:22ch;text-wrap:balance}
+.block .intro{margin-top:18px;color:var(--muted);max-width:36em;font-size:18px}
+
+/* journey: a real sequence, so it is numbered */
+.journey{margin-top:64px;display:grid;grid-template-columns:repeat(5,1fr);gap:28px;position:relative;list-style:none;padding:0;counter-reset:step}
+.journey::before,.journey::after{content:"";position:absolute;top:27px;left:28px;right:calc((100% - 112px) / 5 - 28px);height:2px;background:var(--line)}
+.journey::after{background:linear-gradient(90deg,var(--cobalt),var(--turquoise));transform-origin:left;transform:scaleX(var(--p,0));transition:transform 1.4s cubic-bezier(.3,.8,.2,1)}
+.journey li{position:relative;z-index:1}
+.journey .dot{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:2px solid var(--line);font-weight:800;font-size:18px;color:var(--muted);transition:background .5s,border-color .5s,color .5s;transition-delay:var(--sd,0s)}
+.journey.on .dot{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.journey li:nth-child(5) .dot{transition-delay:1.1s}.journey li:nth-child(4) .dot{transition-delay:.85s}.journey li:nth-child(3) .dot{transition-delay:.6s}.journey li:nth-child(2) .dot{transition-delay:.35s}
+.journey h3{margin-top:22px;font-size:19px;line-height:1.25;letter-spacing:-.015em;font-weight:700}
+.journey p{margin-top:8px;color:var(--muted);font-size:15.5px;line-height:1.55}
+
+/* share demo */
+.share{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
+.share-copy ul{margin-top:28px;padding:0;list-style:none;display:grid;gap:14px}
+.share-copy li{display:flex;gap:12px;align-items:flex-start;font-size:16.5px}
+.share-copy li svg{flex:none;margin-top:3px;color:var(--turquoise)}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:0 30px 70px -40px color-mix(in srgb,var(--ink) 45%,transparent)}
+.demo-head{display:flex;gap:16px;align-items:center}
+.thumb{width:84px;height:84px;border-radius:18px;flex:none;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--cobalt),var(--turquoise))}
+.thumb::after{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 7.5v9l7.5-4.5z'/%3E%3C/svg%3E") center/38px no-repeat}
+.demo-head strong{display:block;font-size:18px;letter-spacing:-.01em}
+.demo-head span{color:var(--muted);font-size:14.5px}
+.demo h4{margin-top:28px;font-size:14px;font-weight:700;color:var(--muted)}
+.chips{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 15px/1 inherit;font-family:inherit;padding:11px 16px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.chip:hover{border-color:var(--cobalt)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--porcelain)}
+.seats{margin-top:12px;display:grid;grid-template-columns:repeat(5,minmax(0,72px));gap:12px}
+.seat{aspect-ratio:1;border-radius:50%;border:2px dashed var(--line);background:transparent;display:grid;place-items:center;color:var(--muted);font:700 15px/1 inherit;font-family:inherit;cursor:pointer;transition:border-color .2s}
+.seat:hover{border-color:var(--turquoise)}
+.seat.filled{border:0;color:#fff;cursor:default;animation:seat .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes seat{from{transform:scale(.3)}to{transform:none}}
+.seat-label{display:block;font-size:11.5px;font-weight:600;margin-top:4px}
+.verdict{margin-top:24px;padding:16px 18px;border-radius:16px;background:var(--pale);font-size:15.5px;line-height:1.5}
+.verdict b{font-weight:700}
+.verdict .until{transition:opacity .25s}
+
+/* audiences: one row per audience, typographic */
+.who{margin-top:56px;border-top:1px solid var(--line)}
+.who-row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:32px;padding:40px 0;border-bottom:1px solid var(--line)}
+.who-row h3{font-size:clamp(28px,3.4vw,42px);letter-spacing:-.035em;line-height:1.05;font-weight:800;display:flex;gap:16px;align-items:center}
+.who-row h3 i{width:14px;height:14px;transform:rotate(45deg);border-radius:3px;flex:none}
+.who-row p{color:var(--muted);font-size:17px;max-width:38em}
+.tags{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none}
+.tags li{font-size:14px;font-weight:600;padding:7px 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+
+/* trust band */
+.trust{background:var(--band);color:var(--band-ink);border-radius:40px;margin:0 16px;padding:96px 0;position:relative;overflow:hidden}
+.trust::before{content:"";position:absolute;right:-140px;top:-140px;width:460px;height:460px;opacity:.12;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-100 -100 200 200'%3E%3Cg fill='none' stroke='white' stroke-width='1.2'%3E%3Crect x='-60' y='-60' width='120' height='120'/%3E%3Crect x='-60' y='-60' width='120' height='120' transform='rotate(45)'/%3E%3Ccircle r='92'/%3E%3Ccircle r='30'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat}
+.trust h2{color:var(--band-ink)}
+.trust .intro{color:var(--band-muted)}
+.facts{margin-top:56px;display:grid;grid-template-columns:repeat(2,1fr);gap:40px 56px}
+.fact{display:grid;grid-template-columns:44px 1fr;gap:18px}
+.fact svg{width:44px;height:44px;color:var(--saffron)}
+.fact h3{font-size:20px;letter-spacing:-.015em;font-weight:700}
+.fact p{margin-top:6px;color:var(--band-muted);font-size:16px}
+
+footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
+
+/* --------------------------------------------------------------- responsive */
+@media (max-width:960px){
+  .hero .wrap,.share{grid-template-columns:1fr}
+  .girih{max-width:380px;order:-1}
+  .hero{padding-top:24px}
+  .journey{grid-template-columns:1fr;gap:0}
+  .journey::before,.journey::after{top:28px;bottom:28px;left:27px;right:auto;width:2px;height:auto}
+  .journey::after{transform-origin:top;transform:scaleY(var(--p,0))}
+  .journey li{display:grid;grid-template-columns:56px 1fr;gap:0 20px;padding-bottom:32px}
+  .journey li:last-child{padding-bottom:0}
+  .journey h3{margin-top:14px}
+  .journey p{grid-column:2}
+  .who-row{grid-template-columns:1fr;gap:14px}
+  .facts{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .top nav{display:none}
+  section.block{padding:72px 0}
+  .trust{margin:0 8px;border-radius:28px;padding:64px 0}
+  .demo{padding:22px;border-radius:22px}
+  .seat-label{font-size:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="MarosimGo bosh sahifa"><img src="/img/logo-icon.png" alt="" width="38" height="30"><span>Marosim<b>Go</b></span></a>
+    <nav aria-label="Bo'limlar">
+      <a href="#yol">Qanday ishlaydi</a>
+      <a href="#ulashish">Ulashish</a>
+      <a href="#kimlar">Kimlar uchun</a>
+      <a href="#ishonch">Xavfsizlik</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1>To'y kuni o'tadi. <span class="l2">Videosi oilangizda qoladi.</span></h1>
+        <p class="lead">MarosimGo to'yxona, video studiya va oilani bir joyga bog'laydi. Zalni band qilasiz, studiya marosimni yozib yuklaydi, siz esa videoni xavfsiz ko'rasiz va yaqinlaringiz bilan muddatli ulashasiz.</p>
+        <div class="actions">
+          <a class="btn btn-main" href="#yol">Qanday ishlashini ko'rish</a>
+          <a class="btn btn-ghost" href="#ulashish">Ulashishni sinab ko'rish</a>
+        </div>
+      </div>
+      <svg class="girih" viewBox="-200 -200 400 400" role="img" aria-label="Sakkiz qirrali girih yulduzi — o'rtada video belgisi">
+        <circle class="ring" r="186"/>
+        <polygon class="t t-saf" points="65.8,-158.9 73.4,-140.6 55.1,-133.0 47.5,-151.3" style="--dx:58px;--dy:-125px;--r:-49deg;--d:120ms"/>
+        <polygon class="t t-saf" points="158.9,-65.8 151.3,-47.5 133.0,-55.1 140.6,-73.4" style="--dx:187px;--dy:-50px;--r:-104deg;--d:160ms"/>
+        <polygon class="t t-saf" points="158.9,65.8 140.6,73.4 133.0,55.1 151.3,47.5" style="--dx:131px;--dy:49px;--r:48deg;--d:200ms"/>
+        <polygon class="t t-saf" points="65.8,158.9 47.5,151.3 55.1,133.0 73.4,140.6" style="--dx:55px;--dy:162px;--r:-112deg;--d:240ms"/>
+        <polygon class="t t-saf" points="-65.8,158.9 -73.4,140.6 -55.1,133.0 -47.5,151.3" style="--dx:-51px;--dy:131px;--r:-113deg;--d:280ms"/>
+        <polygon class="t t-saf" points="-158.9,65.8 -151.3,47.5 -133.0,55.1 -140.6,73.4" style="--dx:-165px;--dy:48px;--r:-45deg;--d:320ms"/>
+        <polygon class="t t-saf" points="-158.9,-65.8 -140.6,-73.4 -133.0,-55.1 -151.3,-47.5" style="--dx:-162px;--dy:-51px;--r:58deg;--d:360ms"/>
+        <polygon class="t t-saf" points="-65.8,-158.9 -47.5,-151.3 -55.1,-133.0 -73.4,-140.6" style="--dx:-67px;--dy:-164px;--r:-53deg;--d:400ms"/>
+        <polygon class="t t-cob" points="0.0,-78.0 -26.5,-115.0 0.0,-168.0 26.5,-115.0" style="--dx:0px;--dy:-184px;--r:52deg;--d:360ms"/>
+        <polygon class="t t-tur" points="55.2,-55.2 62.5,-100.1 118.8,-118.8 100.1,-62.5" style="--dx:124px;--dy:-89px;--r:-119deg;--d:415ms"/>
+        <polygon class="t t-cob" points="78.0,0.0 115.0,-26.5 168.0,0.0 115.0,26.5" style="--dx:141px;--dy:0px;--r:139deg;--d:470ms"/>
+        <polygon class="t t-tur" points="55.2,55.2 100.1,62.5 118.8,118.8 62.5,100.1" style="--dx:107px;--dy:126px;--r:86deg;--d:525ms"/>
+        <polygon class="t t-cob" points="0.0,78.0 26.5,115.0 0.0,168.0 -26.5,115.0" style="--dx:0px;--dy:199px;--r:-50deg;--d:580ms"/>
+        <polygon class="t t-tur" points="-55.2,55.2 -62.5,100.1 -118.8,118.8 -100.1,62.5" style="--dx:-125px;--dy:122px;--r:133deg;--d:635ms"/>
+        <polygon class="t t-cob" points="-78.0,0.0 -115.0,26.5 -168.0,0.0 -115.0,-26.5" style="--dx:-165px;--dy:0px;--r:-55deg;--d:690ms"/>
+        <polygon class="t t-tur" points="-55.2,-55.2 -100.1,-62.5 -118.8,-118.8 -62.5,-100.1" style="--dx:-121px;--dy:-97px;--r:59deg;--d:745ms"/>
+        <polygon class="t t-pale" points="15.2,-68.3 14.2,-94.9 47.5,-114.6 57.1,-77.2 37.6,-59.0 23.7,-57.3" style="--dx:82px;--dy:-150px;--r:-137deg;--d:760ms"/>
+        <polygon class="t t-pale" points="59.0,-37.6 77.2,-57.1 114.6,-47.5 94.9,-14.2 68.3,-15.2 57.3,-23.7" style="--dx:162px;--dy:-76px;--r:83deg;--d:805ms"/>
+        <polygon class="t t-pale" points="68.3,15.2 94.9,14.2 114.6,47.5 77.2,57.1 59.0,37.6 57.3,23.7" style="--dx:175px;--dy:69px;--r:48deg;--d:850ms"/>
+        <polygon class="t t-pale" points="37.6,59.0 57.1,77.2 47.5,114.6 14.2,94.9 15.2,68.3 23.7,57.3" style="--dx:78px;--dy:198px;--r:129deg;--d:895ms"/>
+        <polygon class="t t-pale" points="-15.2,68.3 -14.2,94.9 -47.5,114.6 -57.1,77.2 -37.6,59.0 -23.7,57.3" style="--dx:-71px;--dy:116px;--r:122deg;--d:940ms"/>
+        <polygon class="t t-pale" points="-59.0,37.6 -77.2,57.1 -114.6,47.5 -94.9,14.2 -68.3,15.2 -57.3,23.7" style="--dx:-164px;--dy:72px;--r:76deg;--d:985ms"/>
+        <polygon class="t t-pale" points="-68.3,-15.2 -94.9,-14.2 -114.6,-47.5 -77.2,-57.1 -59.0,-37.6 -57.3,-23.7" style="--dx:-177px;--dy:-80px;--r:42deg;--d:1030ms"/>
+        <polygon class="t t-pale" points="-37.6,-59.0 -57.1,-77.2 -47.5,-114.6 -14.2,-94.9 -15.2,-68.3 -23.7,-57.3" style="--dx:-82px;--dy:-144px;--r:-103deg;--d:1075ms"/>
+        <polygon class="core" points="0.0,-58.0 11.5,-27.7 41.0,-41.0 27.7,-11.5 58.0,0.0 27.7,11.5 41.0,41.0 11.5,27.7 0.0,58.0 -11.5,27.7 -41.0,41.0 -27.7,11.5 -58.0,0.0 -27.7,-11.5 -41.0,-41.0 -11.5,-27.7"/>
+        <path class="play" d="M-9 -15 L17 0 L-9 15 Z"/>
+        <circle class="rec" cx="0" cy="-196" r="5"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block" id="yol">
+    <div class="wrap">
+      <h2>Marosimdan xotiragacha besh qadam</h2>
+      <p class="intro">Har bir ishtirokchi o'z ishini o'z kabinetida qiladi. Siz faqat natijani ko'rasiz.</p>
+      <ol class="journey" id="journey">
+        <li><span class="dot">1</span><h3>To'yxonani band qilish</h3><p>Bo'sh smenani tanlab so'rov yuborasiz. To'yxona tasdiqlagach, sana sizniki.</p></li>
+        <li><span class="dot">2</span><h3>Marosim ochiladi</h3><p>Studiya marosimni MarosimGo'da yaratadi va kelin-kuyovni telefon raqami orqali taklif qiladi.</p></li>
+        <li><span class="dot">3</span><h3>Video yuklanadi</h3><p>Studiya video va suratlarni to'g'ridan-to'g'ri himoyalangan Google Drive omboriga yuklaydi.</p></li>
+        <li><span class="dot">4</span><h3>Oila ko'radi</h3><p>Taklifni qabul qilgan marosim egalari videoni ilovada ko'radi. Yuklab olish faqat egalarga.</p></li>
+        <li><span class="dot">5</span><h3>Yaqinlar bilan ulashish</h3><p>Har bir ega 5 tagacha yaqinini 24 soatdan bir oygacha ko'rishga taklif qiladi.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="ulashish">
+    <div class="wrap share">
+      <div class="share-copy">
+        <h2>Kim, qancha vaqt ko'rishini siz hal qilasiz</h2>
+        <p class="intro">Havola internetda aylanib yurmaydi. Siz taklif qilgan odam videoni faqat belgilangan muddatgacha ko'radi, keyin kirish o'zi yopiladi.</p>
+        <ul>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Har bir egaga 5 tagacha ko'ruvchi</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Ko'ruvchi faqat ko'radi, yuklab ololmaydi</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Ko'rish nusxasida MarosimGo belgisi turadi</li>
+        </ul>
+      </div>
+
+      <div class="demo" aria-label="Ulashish namunasi">
+        <div class="demo-head">
+          <div class="thumb" aria-hidden="true"></div>
+          <div><strong>Aziza va Jasur to'yi</strong><span>Video · 2 soat 14 daqiqa</span></div>
+        </div>
+        <h4 id="dur-label">Ko'rish muddati</h4>
+        <div class="chips" role="group" aria-labelledby="dur-label">
+          <button class="chip" type="button" data-hours="24" aria-pressed="true">24 soat</button>
+          <button class="chip" type="button" data-hours="72" aria-pressed="false">3 kun</button>
+          <button class="chip" type="button" data-hours="168" aria-pressed="false">1 hafta</button>
+          <button class="chip" type="button" data-hours="720" aria-pressed="false">1 oy</button>
+        </div>
+        <h4 id="seat-label">Ko'ruvchilar — joyni bosib qo'shing</h4>
+        <div class="seats" id="seats" role="group" aria-labelledby="seat-label"></div>
+        <p class="verdict" aria-live="polite"><span id="verdict-who"><b>Hali hech kim</b> taklif qilinmagan.</span> <span class="until" id="verdict-until"></span></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="kimlar">
+    <div class="wrap">
+      <h2>Bitta platforma, uch xil kabinet</h2>
+      <div class="who">
+        <div class="who-row">
+          <h3><i style="background:var(--cobalt)"></i>Oilalar</h3>
+          <div>
+            <p>Barcha marosimlaringiz bir ilovada: videolar, suratlar, to'yxona bronlari va obuna. Yangi marosim qo'shilganda studiya sizni taklif qiladi.</p>
+            <ul class="tags"><li>To'y</li><li>Fotiha</li><li>Sunnat to'yi</li><li>Beshik to'yi</li><li>Tug'ilgan kun</li><li>Yubiley</li></ul>
+          </div>
+        </div>
+        <div class="who-row">
+          <h3><i style="background:var(--turquoise)"></i>Video studiyalar</h3>
+          <div>
+            <p>Marosimni ochasiz, kelin-kuyovni taklif qilasiz va katta videolarni to'g'ridan-to'g'ri omborga yuklaysiz. Fayl uzatish, flesh-karta va messenjerdagi havolalar kerak emas.</p>
+          </div>
+        </div>
+        <div class="who-row">
+          <h3><i style="background:var(--saffron)"></i>To'yxonalar</h3>
+          <div>
+            <p>Zallar, smenalar va bandlik jadvali bir joyda. Mijoz so'rovini ko'rib, bir bosishda tasdiqlaysiz. Kalendarda faqat tasdiqlangan bronlar band bo'lib ko'rinadi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block trust" id="ishonch">
+    <div class="wrap">
+      <h2>Oilaviy xotira begona qo'lga tushmaydi</h2>
+      <p class="intro">Shaxsiy ma'lumot va videolar uchun himoya tizimning har qatlamida o'rnatilgan.</p>
+      <div class="facts">
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <div><h3>JSHSHIR shifrlangan</h3><p>Shaxsiy raqam bazada shifrlangan holda saqlanadi va hech qayerda to'liq ko'rsatilmaydi.</p></div>
+        </div>
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M11 18h2"/></svg>
+          <div><h3>Kirish telefon orqali</h3><p>Marosim egasi bo'lish uchun telefon raqami tasdiqlangan bo'lishi shart.</p></div>
+        </div>
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <div><h3>Muddat tugasa, eshik yopiladi</h3><p>Ko'ruvchilarning kirishi siz tanlagan vaqtda o'zi bekor bo'ladi. Uni istalgan payt oldinroq ham yopish mumkin.</p></div>
+        </div>
+        <div class="fact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h18v10H3z"/><path d="m14 12-4-2.5v5z"/></svg>
+          <div><h3>Belgili nusxa</h3><p>Ko'ruvchilarga ko'rsatiladigan videoda MarosimGo belgisi turadi. Asl fayl faqat egada qoladi.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="/img/logo-icon.png" alt="" width="38" height="30"><span>Marosim<b>Go</b></span></a>
+    <span>© <span id="year">2026</span> MarosimGo. Marosimlaringiz, video va suratlaringiz bir joyda.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // header hairline once the page scrolls
+  const top = document.getElementById("top");
+  const onScroll = () => top.classList.toggle("scrolled", scrollY > 8);
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // journey: the line fills once the steps are on screen
+  const journey = document.getElementById("journey");
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver((entries, io) => {
+      if (entries.some((e) => e.isIntersecting)) { journey.style.setProperty("--p", 1); journey.classList.add("on"); io.disconnect(); }
+    }, { threshold: 0.45 }).observe(journey);
+  } else { journey.style.setProperty("--p", 1); journey.classList.add("on"); }
+
+  // share demo
+  const MONTHS = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
+  const PEOPLE = [["Onam", "var(--cobalt)"], ["Dadam", "var(--turquoise)"], ["Opam", "var(--saffron)"], ["Akam", "var(--pomegranate)"], ["Do'stim", "var(--ink)"]];
+  const seats = document.getElementById("seats");
+  const who = document.getElementById("verdict-who");
+  const until = document.getElementById("verdict-until");
+  let hours = 24, filled = 0;
+
+  PEOPLE.forEach(() => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "seat"; b.textContent = "+";
+    b.setAttribute("aria-label", "Ko'ruvchi qo'shish");
+    b.addEventListener("click", add);
+    seats.append(b);
+  });
+
+  function add() {
+    if (filled >= PEOPLE.length) return;
+    const seat = seats.children[filled];
+    const [name, color] = PEOPLE[filled];
+    seat.classList.add("filled"); seat.style.background = color;
+    seat.innerHTML = `<span>${name[0]}<span class="seat-label">${name}</span></span>`;
+    seat.setAttribute("aria-label", `${name} — taklif qilindi`);
+    seat.disabled = true;
+    filled++;
+    render();
+    const next = seats.children[filled];
+    if (next) next.focus();
+  }
+
+  function render() {
+    const end = new Date(Date.now() + hours * 3600e3);
+    const date = `${end.getDate()}-${MONTHS[end.getMonth()]}, ${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`;
+    if (!filled) { who.innerHTML = "<b>Hali hech kim</b> taklif qilinmagan."; until.textContent = "Bo'sh joyni bosing."; return; }
+    const names = PEOPLE.slice(0, filled).map((p) => p[0]).join(", ");
+    who.innerHTML = `<b>${names}</b> videoni ${date} gacha ko'ra oladi.`;
+    until.textContent = filled === PEOPLE.length ? "5 kishilik joy to'ldi." : `Yana ${PEOPLE.length - filled} kishini qo'shish mumkin.`;
+    until.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+  }
+
+  document.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+    hours = Number(chip.dataset.hours);
+    render();
+  }));
+  render();
+})();
+</script>
+</body>
+</html>

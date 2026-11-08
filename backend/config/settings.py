@@ -370,18 +370,28 @@ PANEL_URL = env.str("PANEL_URL", default="http://localhost:3000").rstrip("/")
 #   superadmin.marosimgo.uz → backend/panel/         (frontend/: npm run build:panel)
 #   admin.marosimgo.uz      → backend/panel-admin/   (frontend/: npm run build:panel:admin)
 #   studio.marosimgo.uz     → backend/panel-studio/  (frontend-studio/: npm run build:panel)
+#   marosimgo.uz, www.      → backend/landing/       (the public landing page)
 #   api.marosimgo.uz        → API only
 SERVE_PANEL = env.bool("SERVE_PANEL", default=True)
 PANEL_SITES = {
     "superadmin": BASE_DIR / "panel",
     "admin": BASE_DIR / "panel-admin",
     "studio": BASE_DIR / "panel-studio",
+    "landing": BASE_DIR / "landing",  # hand-written page, no build step
 }
 # A host picks its site by its first DNS label (studio.marosimgo.uz → studio, studio.localhost → studio).
 # Explicit overrides (other domains, local development): PANEL_HOST_SITES=panel.example.com=superadmin,...
 PANEL_HOST_SITES = {
     k.lower(): v
-    for k, v in env.dict("PANEL_HOST_SITES", default={"localhost": "superadmin", "127.0.0.1": "superadmin"}).items()
+    for k, v in env.dict(
+        "PANEL_HOST_SITES",
+        default={
+            "marosimgo.uz": "landing",
+            "www.marosimgo.uz": "landing",
+            "localhost": "superadmin",
+            "127.0.0.1": "superadmin",
+        },
+    ).items()
 }
 # Hosts that match no site get this one; empty = API only (api.marosimgo.uz).
 PANEL_DEFAULT_SITE = env.str("PANEL_DEFAULT_SITE", default="")

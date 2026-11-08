@@ -1,10 +1,11 @@
-# Deploy — cPanel, bitta backend, to'rtta domen
+# Deploy — cPanel, bitta backend, beshta domen
 
-Faqat `backend/` papkasi deploy qilinadi. Bitta Django ilovasi (Passenger) to'rtala domenga javob beradi,
+Faqat `backend/` papkasi deploy qilinadi. Bitta Django ilovasi (Passenger) barcha domenlarga javob beradi,
 Node.js kerak emas:
 
 | Domen | Nima ochiladi | Build papkasi |
 |---|---|---|
+| `marosimgo.uz`, `www.marosimgo.uz` | Loyiha haqidagi landing sahifa | `backend/landing/` (qo'lda yozilgan, build kerak emas) |
 | `api.marosimgo.uz` | Faqat API (`/api/v1/`) — mobil ilovalar | — |
 | `superadmin.marosimgo.uz` | Super Admin panel + `/api/v1/` | `backend/panel/` |
 | `admin.marosimgo.uz` | Admin panel + `/api/v1/` | `backend/panel-admin/` |
@@ -25,14 +26,14 @@ Build fayllari gitga commit qilinadi, server ularni `git pull` bilan oladi.
 
 ## 2. cPanel sozlamalari
 
-1. **Domains → Subdomains:** `api`, `superadmin`, `admin`, `studio` subdomenlarini yarating.
+1. **Domains:** asosiy domen `marosimgo.uz` va `api`, `superadmin`, `admin`, `studio` subdomenlari.
 2. **Setup Python App:** Application root = `backend/`, startup file = `passenger_wsgi.py`,
    entry point = `application`, Application URL = `api.marosimgo.uz`.
-3. Qolgan uchta subdomen ham **shu bitta** ilovaga ulanishi kerak. cPanel bitta ilovaga bitta URL
+3. Qolgan domenlar (`marosimgo.uz`, `superadmin`, `admin`, `studio`) ham **shu bitta** ilovaga ulanishi kerak. cPanel bitta ilovaga bitta URL
    bersa, `api` subdomenining document root'idagi `.htaccess` faylidan Passenger qatorlarini
-   (`PassengerAppRoot`, `PassengerBaseURI`, `PassengerPython` va boshqalar) `superadmin`, `admin` va
-   `studio` document root'laridagi `.htaccess` ga nusxalang. Ikkinchi Python ilova yaratmang.
-4. **SSL/TLS Status → Run AutoSSL:** to'rtala subdomenga sertifikat chiqaring.
+   (`PassengerAppRoot`, `PassengerBaseURI`, `PassengerPython` va boshqalar) ularning document root'laridagi
+   `.htaccess` ga nusxalang. Ikkinchi Python ilova yaratmang.
+4. **SSL/TLS Status → Run AutoSSL:** barcha domenlarga (`www` bilan) sertifikat chiqaring.
 5. `backend/.env` faylini `backend/.env.production.example` asosida to'ldiring.
 
 > **`.env` formati:** `KALIT=qiymat`, `=` atrofida va vergullardan keyin bo'sh joy qoldirmang.
@@ -40,7 +41,7 @@ Build fayllari gitga commit qilinadi, server ularni `git pull` bilan oladi.
 > natijada har bir so'rov 400 xato beradi.
 
 ```dotenv
-DJANGO_ALLOWED_HOSTS=api.marosimgo.uz,superadmin.marosimgo.uz,admin.marosimgo.uz,studio.marosimgo.uz
+DJANGO_ALLOWED_HOSTS=marosimgo.uz,www.marosimgo.uz,api.marosimgo.uz,superadmin.marosimgo.uz,admin.marosimgo.uz,studio.marosimgo.uz
 CSRF_TRUSTED_ORIGINS=https://superadmin.marosimgo.uz,https://admin.marosimgo.uz,https://studio.marosimgo.uz
 CORS_ALLOWED_ORIGINS=https://superadmin.marosimgo.uz,https://admin.marosimgo.uz,https://studio.marosimgo.uz
 MEDIA_UPLOAD_BROWSER_ORIGINS=https://studio.marosimgo.uz
