@@ -2,8 +2,16 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// The panel only talks to its own origin (/api/v1 is proxied to Django server-side),
-// so the browser never needs to reach another host.
+/**
+ * PANEL_EXPORT=1 (`npm run build:panel`): a static export that Django serves itself at
+ * api.marosimgo.uz — one deploy for the API and the Super Admin panel, same origin, no Node.js.
+ * Otherwise (dev / a Node host) /api/v1 and /media are proxied to BACKEND_URL by rewrites.
+ */
+const isExport = process.env.PANEL_EXPORT === "1";
+const BACKEND_URL = (process.env.BACKEND_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+
+// The panel only talks to its own origin, so the browser never needs to reach another host.
+// (In the static export Django sends the same policy — see backend/config/panel.py.)
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -18,8 +26,9 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  partialPrefetching: true,
+  ...(isExport ? { output: "export" as const, images: { unoptimized: true } } : {}),
+  // Partial prerendering cannot run in a static export.
+  ...(isExport ? {} : { cacheComponents: true, partialPrefetching: true }),
   // Django URLs end with "/": never let Next strip it before proxying.
   skipTrailingSlashRedirect: true,
   poweredByHeader: false,
@@ -31,8 +40,18 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  async headers() {
-    return [
+  ...(isExport ? {} : { rewrites, headers }),
+};
+
+async function rewrites() {
+  return [
+    { source: "/api/v1/:path*", destination: `${BACKEND_URL}/api/v1/:path*` },
+    { source: "/media/:path*", destination: `${BACKEND_URL}/media/:path*` },
+  ];
+}
+
+async function headers() {
+  return [
       {
         source: "/:path*",
         headers: [
@@ -45,7 +64,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-};
+}
 
 export default nextConfig;
