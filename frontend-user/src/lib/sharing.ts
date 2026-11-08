@@ -33,8 +33,8 @@ export function useCeremonyMedia(ceremonyId: string) {
   return useQuery({
     queryKey: keys.media(ceremonyId),
     queryFn: () => api.get<MyMedia[]>(`/me/ceremonies/${ceremonyId}/media/`),
-    // while a video's logo copy is being made, check back every 15 s
-    refetchInterval: (q) => (q.state.data?.some((m) => m.processing) ? 15_000 : false),
+    // while a video's logo copy is being made, check back every 5 s (shows the % moving)
+    refetchInterval: (q) => (q.state.data?.some((m) => m.processing) ? 5_000 : false),
   });
 }
 

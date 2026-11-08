@@ -125,6 +125,8 @@ export interface MyMedia {
   watermarked: boolean;
   /** Video: the logo copy is still being prepared. */
   processing: boolean;
+  /** 0-100 while the logo copy is being made (null while still queued). */
+  progress: number | null;
 }
 
 export interface CeremonyMembers {

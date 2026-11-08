@@ -116,8 +116,15 @@ function Viewer({
             {media.kind === "VIDEO" && media.processing ? (
               <div className="flex max-w-sm flex-col items-center gap-3 rounded-2xl bg-white/5 p-8 text-center text-white">
                 <Loader2Icon className="size-10 animate-spin text-cyan-300" aria-hidden />
-                <p className="font-semibold">Video tayyorlanmoqda</p>
-                <p className="text-sm text-white/70">MarosimGo logosi qo&apos;shilmoqda. Bu bir necha daqiqa davom etadi — sahifa o&apos;zi yangilanadi.</p>
+                <p className="font-semibold">Video tayyorlanmoqda{media.progress != null && <span className="tabular-nums"> — {media.progress}%</span>}</p>
+                {media.progress != null && (
+                  <div className="h-1.5 w-56 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full rounded-full bg-cyan-300 transition-[width] duration-700" style={{ width: `${Math.max(3, media.progress)}%` }} />
+                  </div>
+                )}
+                <p className="text-sm text-white/70">
+                  {media.progress == null ? "Navbatda turibdi, tez orada boshlanadi." : "MarosimGo logosi qo'shilmoqda."} Sahifa o&apos;zi yangilanadi.
+                </p>
               </div>
             ) : media.kind === "VIDEO" ? (
               <VideoPlayer
@@ -217,7 +224,7 @@ export function Gallery({ ceremonyId, isOwner }: { ceremonyId: string; isOwner: 
                     </span>
                     {m.processing && (
                       <span className="absolute top-2 left-2 flex items-center gap-1 rounded-full bg-slate-950/70 px-2 py-0.5 text-[11px] font-semibold text-white">
-                        <Loader2Icon className="size-3 animate-spin" /> Tayyorlanmoqda
+                        <Loader2Icon className="size-3 animate-spin" /> Tayyorlanmoqda{m.progress != null && <span className="tabular-nums"> {m.progress}%</span>}
                       </span>
                     )}
                     {m.duration_ms && <span className="absolute right-3 bottom-2 text-xs font-bold text-white tabular-nums">{duration(m.duration_ms)}</span>}
