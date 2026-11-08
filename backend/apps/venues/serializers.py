@@ -5,8 +5,19 @@ from apps.accounts.models import Role, User
 from apps.accounts.serializers import PhoneNumberField
 from apps.core.uploads import process_image
 
-from . import services
-from .models import MembershipRole, PublicationStatus, Venue, VenueHall, VenueImage, VenueMembership
+from . import scheduling, services
+from .models import (
+    BookingEventType,
+    BookingStatus,
+    HallBooking,
+    HallSession,
+    MembershipRole,
+    PublicationStatus,
+    Venue,
+    VenueHall,
+    VenueImage,
+    VenueMembership,
+)
 
 #: Explicit ceiling: without it DRF copies the DB's integer range into the schema
 #: (SQLite 2**63-1 vs PostgreSQL 2**31-1), so the API contract would depend on the database.
@@ -56,6 +67,11 @@ class VenueHallSerializer(serializers.ModelSerializer):
         if qs.exists():
             raise serializers.ValidationError("Bu to'yxonada shu nomdagi zal allaqachon bor.")
         return value
+
+    def create(self, validated_data):
+        hall = super().create(validated_data)
+        scheduling.create_default_sessions(hall)  # every new hall starts with Nahor / Kunduzgi / Kechki
+        return hall
 
 
 @extend_schema_serializer(
@@ -250,3 +266,235 @@ class AdminVenueSerializer(OwnerVenueSerializer):
         if self.instance is None and "owner_id" not in attrs:
             raise serializers.ValidationError({"owner_id": ["To'yxona egasini tanlang."]})
         return attrs
+
+
+# ------------------------------------------------------------ schedule
+class HallSessionSerializer(serializers.ModelSerializer):
+    """A hall's recurring slot. ``context["hall"]`` is required for writes (overlap check)."""
+
+    class Meta:
+        model = HallSession
+        fields = ["id", "name", "starts_at", "ends_at", "is_active"]
+        read_only_fields = ["id"]
+
+    def validate_name(self, value: str) -> str:
+        value = " ".join(value.split())
+        if not value:
+            raise serializers.ValidationError("Smena nomi kiritilishi shart.")
+        return value
+
+    def validate(self, attrs):
+        starts = attrs.get("starts_at", getattr(self.instance, "starts_at", None))
+        ends = attrs.get("ends_at", getattr(self.instance, "ends_at", None))
+        active = attrs.get("is_active", getattr(self.instance, "is_active", True))
+        if active and starts is not None and ends is not None:
+            scheduling.validate_session_window(
+                self.context["hall"], starts, ends, exclude_pk=getattr(self.instance, "pk", None)
+            )
+        return attrs
+
+
+class _HallBriefSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+
+
+class _SessionBriefSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    starts_at = serializers.TimeField()
+    ends_at = serializers.TimeField()
+
+
+class _RequesterSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    full_name = serializers.CharField()
+    phone_number = serializers.CharField()
+
+
+class OwnerBookingSerializer(serializers.ModelSerializer):
+    """A calendar entry as the venue sees it: incl. the couple's contact and the internal note."""
+
+    hall = _HallBriefSerializer(read_only=True)
+    session = _SessionBriefSerializer(read_only=True)
+    requester = _RequesterSerializer(read_only=True, allow_null=True)
+
+    class Meta:
+        model = HallBooking
+        fields = [
+            "id",
+            "hall",
+            "session",
+            "date",
+            "status",
+            "source",
+            "event_type",
+            "guest_count",
+            "requester",
+            "contact_name",
+            "contact_phone",
+            "note",
+            "venue_note",
+            "quoted_price",
+            "currency",
+            "decided_at",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = fields
+
+
+class OwnerBookingCreateSerializer(serializers.Serializer):
+    session = serializers.UUIDField()
+    date = serializers.DateField()
+    status = serializers.ChoiceField(
+        choices=[BookingStatus.CONFIRMED, BookingStatus.BLOCKED],
+        default=BookingStatus.CONFIRMED,
+        help_text="CONFIRMED — to'yxonaning o'z mijozi; BLOCKED — smena yopiq (ta'mir, dam olish…).",
+    )
+    event_type = serializers.ChoiceField(choices=BookingEventType.choices, required=False)
+    guest_count = serializers.IntegerField(min_value=1, max_value=MAX_CAPACITY, required=False, allow_null=True)
+    contact_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    contact_phone = PhoneNumberField(required=False, allow_blank=True)
+    venue_note = serializers.CharField(max_length=1000, required=False, allow_blank=True)
+
+
+class OwnerBookingUpdateSerializer(serializers.ModelSerializer):
+    contact_phone = PhoneNumberField(required=False, allow_blank=True)
+
+    class Meta:
+        model = HallBooking
+        fields = ["event_type", "guest_count", "contact_name", "contact_phone", "venue_note"]
+        extra_kwargs = {"guest_count": {"min_value": 1, "max_value": MAX_CAPACITY}}
+
+
+class BookingDecisionSerializer(serializers.Serializer):
+    venue_note = serializers.CharField(max_length=1000, required=False, allow_blank=True)
+
+
+class OwnerCalendarHallSerializer(serializers.ModelSerializer):
+    sessions = HallSessionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = VenueHall
+        fields = ["id", "name", "capacity", "is_active", "sessions"]
+        read_only_fields = fields
+
+
+class OwnerCalendarSerializer(serializers.Serializer):
+    date_from = serializers.DateField()
+    date_to = serializers.DateField()
+    halls = OwnerCalendarHallSerializer(many=True)
+    bookings = OwnerBookingSerializer(many=True)
+
+
+# -------------------------------------------------------------- public
+class PublicVenueSerializer(serializers.ModelSerializer):
+    """What anyone may see about an approved venue — the business, never its customers."""
+
+    images = VenueImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Venue
+        fields = [
+            "id",
+            "name",
+            "description",
+            "venue_type",
+            "address",
+            "region",
+            "district",
+            "latitude",
+            "longitude",
+            "phone_number",
+            "cover_image",
+            "capacity_min",
+            "capacity_max",
+            "base_price",
+            "currency",
+            "images",
+        ]
+        read_only_fields = fields
+
+
+class PublicSlotSerializer(_SessionBriefSerializer):
+    is_free = serializers.BooleanField()
+
+
+class PublicHallSlotsSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    capacity = serializers.IntegerField()
+    price = serializers.DecimalField(max_digits=14, decimal_places=2)
+    slots = PublicSlotSerializer(many=True)
+
+
+class VenueSearchResultSerializer(serializers.Serializer):
+    venue = PublicVenueSerializer()
+    halls = PublicHallSlotsSerializer(many=True)
+    free_slots = serializers.IntegerField()
+
+
+class PublicHallSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    capacity = serializers.IntegerField()
+    price = serializers.DecimalField(max_digits=14, decimal_places=2)
+    sessions = _SessionBriefSerializer(many=True)
+
+
+class PublicVenueDetailSerializer(serializers.Serializer):
+    venue = PublicVenueSerializer()
+    halls = PublicHallSerializer(many=True)
+
+
+class VenueAvailabilitySerializer(serializers.Serializer):
+    date_from = serializers.DateField()
+    date_to = serializers.DateField()
+    free = serializers.DictField(
+        child=serializers.DictField(child=serializers.ListField(child=serializers.UUIDField())),
+        help_text="{hall_id: {YYYY-MM-DD: [bo'sh smena id'lari]}} — band yoki o'tgan kunlar ro'yxatda yo'q.",
+    )
+
+
+# ----------------------------------------------------- my (couple) bookings
+class _VenueBriefSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField()
+    address = serializers.CharField()
+    phone_number = serializers.CharField()
+
+
+class MyBookingSerializer(serializers.ModelSerializer):
+    venue = _VenueBriefSerializer(source="hall.venue", read_only=True)
+    hall = _HallBriefSerializer(read_only=True)
+    session = _SessionBriefSerializer(read_only=True)
+
+    class Meta:
+        model = HallBooking
+        fields = [
+            "id",
+            "venue",
+            "hall",
+            "session",
+            "date",
+            "status",
+            "event_type",
+            "guest_count",
+            "contact_phone",
+            "note",
+            "quoted_price",
+            "currency",
+            "decided_at",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+
+class MyBookingCreateSerializer(serializers.Serializer):
+    session = serializers.UUIDField(help_text="Zal smenasining id'si (qidiruv natijasidagi slots[].id).")
+    date = serializers.DateField()
+    event_type = serializers.ChoiceField(choices=BookingEventType.choices, required=False)
+    guest_count = serializers.IntegerField(min_value=1, max_value=MAX_CAPACITY, required=False, allow_null=True)
+    contact_phone = PhoneNumberField(required=False, allow_blank=True)
+    note = serializers.CharField(max_length=1000, required=False, allow_blank=True)

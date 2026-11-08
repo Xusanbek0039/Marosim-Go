@@ -685,6 +685,34 @@
       "operation_id": "me_invitations_retrieve",
       "schema_fingerprint": "dbe5ecb4f45df2e6"
     },
+    "GET /api/v1/me/venue-bookings/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z bronlari; boshqasiniki 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_venue_bookings_list",
+      "schema_fingerprint": "d62f757678b4f1b7"
+    },
+    "GET /api/v1/me/venue-bookings/{id}/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z bronlari; boshqasiniki 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_venue_bookings_retrieve",
+      "schema_fingerprint": "cc929f487722a766"
+    },
     "GET /api/v1/monitoring/endpoints/": {
       "allowed_roles": [
         "SUPER_ADMIN"
@@ -891,6 +919,42 @@
       "operation_id": "venue_owner_venues_retrieve",
       "schema_fingerprint": "fd743e80371c2a0f"
     },
+    "GET /api/v1/venue-owner/venues/{id}/bookings/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "POST CONFIRMED: A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "POST BLOCKED: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.",
+        "Band smenaga ikkinchi yozuv — 409 (DB unique index + qator qulfi)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_bookings_list",
+      "schema_fingerprint": "2a09be5b12eaa76f"
+    },
+    "GET /api/v1/venue-owner/venues/{id}/calendar/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "Har qanday faol a'zo (VIEW).",
+        "Oraliq ko'pi bilan 62 kun."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_calendar_retrieve",
+      "schema_fingerprint": "bf72e10c21f526a5"
+    },
     "GET /api/v1/venue-owner/venues/{id}/halls/": {
       "allowed_roles": [
         "VENUE_OWNER"
@@ -907,6 +971,23 @@
       "deprecated": false,
       "operation_id": "venue_owner_venues_halls_list",
       "schema_fingerprint": "0087f4da5b1d90e4"
+    },
+    "GET /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "POST: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_halls_sessions_list",
+      "schema_fingerprint": "007bfbcfabd05c23"
     },
     "GET /api/v1/venue-owner/venues/{id}/images/": {
       "allowed_roles": [
@@ -944,6 +1025,54 @@
       "deprecated": false,
       "operation_id": "venue_owner_venues_members_list",
       "schema_fingerprint": "ccb0171bb766a678"
+    },
+    "GET /api/v1/venues/search/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venues_search_list",
+      "schema_fingerprint": "ba0eea57a35d70e8"
+    },
+    "GET /api/v1/venues/{id}/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venues_retrieve",
+      "schema_fingerprint": "de34b0b7f37ef7cf"
+    },
+    "GET /api/v1/venues/{id}/availability/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venues_availability_retrieve",
+      "schema_fingerprint": "7e71e763fd48b169"
     },
     "PATCH /api/v1/admin/venues/{id}/": {
       "allowed_roles": [
@@ -1100,6 +1229,23 @@
       "operation_id": "venue_owner_venues_partial_update",
       "schema_fingerprint": "ed2631c9cb2e2dd2"
     },
+    "PATCH /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "BLOCKED: MANAGE_SCHEDULE, boshqalar: MANAGE_BOOKINGS",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_bookings_partial_update",
+      "schema_fingerprint": "a743a737fe0e1a0e"
+    },
     "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/": {
       "allowed_roles": [
         "VENUE_OWNER"
@@ -1116,6 +1262,24 @@
       "deprecated": false,
       "operation_id": "venue_owner_venues_halls_partial_update",
       "schema_fingerprint": "a51a7b1ae7fe97d6"
+    },
+    "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/{session_id}/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.",
+        "Bir zal smenalari vaqt bo'yicha kesishmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_halls_sessions_partial_update",
+      "schema_fingerprint": "6966e6468fa718b6"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/": {
       "allowed_roles": [
@@ -1586,6 +1750,38 @@
       "operation_id": "me_invitations_decline_create",
       "schema_fingerprint": "478a59a6830ee2bf"
     },
+    "POST /api/v1/me/venue-bookings/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Faqat ommaga chiqqan to'yxonaning faol smenasi, bugundan boshlab 2 yilgacha.",
+        "Smena band bo'lsa 409; bir vaqtda ko'pi bilan 10 ta ochiq so'rov.",
+        "So'rov smenani band qilmaydi — to'yxona tasdiqlaganda band bo'ladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_venue_bookings_create",
+      "schema_fingerprint": "3930ce792a19b6c4"
+    },
+    "POST /api/v1/me/venue-bookings/{id}/cancel/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z bronlari; boshqasiniki 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_venue_bookings_cancel_create",
+      "schema_fingerprint": "abf39e10c79ba5b9"
+    },
     "POST /api/v1/studios/": {
       "allowed_roles": [
         "ADMIN",
@@ -1666,6 +1862,77 @@
       "operation_id": "venue_owner_venues_create",
       "schema_fingerprint": "4429dae1119dc243"
     },
+    "POST /api/v1/venue-owner/venues/{id}/bookings/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "POST CONFIRMED: A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "POST BLOCKED: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.",
+        "Band smenaga ikkinchi yozuv — 409 (DB unique index + qator qulfi)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_bookings_create",
+      "schema_fingerprint": "d3f5424588d00510"
+    },
+    "POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/cancel/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "BLOCKED: MANAGE_SCHEDULE, boshqalar: MANAGE_BOOKINGS",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_bookings_cancel_create",
+      "schema_fingerprint": "8a51b24cd065ede0"
+    },
+    "POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/confirm/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.",
+        "Shu smenaga boshqa kutilayotgan so'rovlar avtomatik rad etiladi; band bo'lsa 409."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_bookings_confirm_create",
+      "schema_fingerprint": "8a51b24cd065ede0"
+    },
+    "POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/reject/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_bookings_reject_create",
+      "schema_fingerprint": "8a51b24cd065ede0"
+    },
     "POST /api/v1/venue-owner/venues/{id}/halls/": {
       "allowed_roles": [
         "VENUE_OWNER"
@@ -1682,6 +1949,23 @@
       "deprecated": false,
       "operation_id": "venue_owner_venues_halls_create",
       "schema_fingerprint": "bca8478296c437fc"
+    },
+    "POST /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/": {
+      "allowed_roles": [
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404.",
+      "conditions": [
+        "POST: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).",
+        "Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "venue_owner_venues_halls_sessions_create",
+      "schema_fingerprint": "b038054f4bcd2a4d"
     },
     "POST /api/v1/venue-owner/venues/{id}/images/": {
       "allowed_roles": [

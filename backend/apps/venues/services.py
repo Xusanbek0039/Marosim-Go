@@ -13,6 +13,7 @@ from apps.accounts.models import Role
 from apps.audit.services import AuditAction, diff, record, snapshot
 from apps.core.uploads import process_image
 
+from . import scheduling
 from .models import Capability, MembershipRole, Venue, VenueHall, VenueImage, VenueMembership
 
 VENUE_AUDITED_FIELDS = [
@@ -94,6 +95,7 @@ def create_venue(request, owner, **data) -> Venue:
     venue = Venue.objects.create(**data)
     VenueMembership.objects.create(venue=venue, user=owner, role=MembershipRole.OWNER)
     hall = VenueHall.objects.create(venue=venue, name=DEFAULT_HALL_NAME, capacity=venue.capacity_max)
+    scheduling.create_default_sessions(hall)
     record(request, AuditAction.CREATE, venue, changes=snapshot(venue, VENUE_AUDITED_FIELDS))
     record(request, AuditAction.CREATE, hall, changes=snapshot(hall, HALL_AUDITED_FIELDS))
     return venue

@@ -460,6 +460,34 @@
         "POST /api/v1/admins/",
         "POST /api/v1/venue-owner/venues/"
       ]
+    },
+    {
+      "revision": 11,
+      "date": "2026-11-08",
+      "note": "To'yxona smenalari, sana bo'yicha qidiruv va bronlar (user so'rovi -> to'yxona tasdig'i)",
+      "added": [
+        "GET /api/v1/me/venue-bookings/",
+        "GET /api/v1/me/venue-bookings/{id}/",
+        "GET /api/v1/venue-owner/venues/{id}/bookings/",
+        "GET /api/v1/venue-owner/venues/{id}/calendar/",
+        "GET /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/",
+        "GET /api/v1/venues/search/",
+        "GET /api/v1/venues/{id}/",
+        "GET /api/v1/venues/{id}/availability/",
+        "PATCH /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/",
+        "PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/{session_id}/",
+        "POST /api/v1/me/venue-bookings/",
+        "POST /api/v1/me/venue-bookings/{id}/cancel/",
+        "POST /api/v1/venue-owner/venues/{id}/bookings/",
+        "POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/cancel/",
+        "POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/confirm/",
+        "POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/reject/",
+        "POST /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/"
+      ],
+      "removed": [],
+      "changed": {},
+      "breaking": [],
+      "schema_changed": []
     }
   ]
 }
