@@ -551,6 +551,22 @@
         "PATCH /api/v1/admins/{id}/",
         "POST /api/v1/admins/"
       ]
+    },
+    {
+      "revision": 13,
+      "date": "2026-11-08",
+      "note": "Media ro'yxati: video logoli nusxasi tayyorlanish foizi (progress, 0-100 yoki null)",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/me/ceremonies/{ceremony_id}/media/"
+      ]
     }
   ]
 }

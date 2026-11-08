@@ -647,7 +647,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_media_list",
-      "schema_fingerprint": "a571965927c2864d"
+      "schema_fingerprint": "d8eed1951491c836"
     },
     "GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/": {
       "allowed_roles": [
