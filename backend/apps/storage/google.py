@@ -351,8 +351,7 @@ class GoogleGateway:
 
     def media_request(self, creds, file_id: str) -> tuple[str, str]:
         """URL + ``Authorization`` header so ffmpeg can read a file straight from Drive (with seeking)."""
-        return f"{FILES_URL}/{file_id}?alt=media", f"Authorization: Bearer {creds.token}
-"
+        return f"{FILES_URL}/{file_id}?alt=media", f"Authorization: Bearer {creds.token}\r\n"
 
     def download_to_file(self, creds, file_id: str, path) -> int:
         """Copy a Drive file's bytes to a local path (server-side processing). Returns the byte count."""
