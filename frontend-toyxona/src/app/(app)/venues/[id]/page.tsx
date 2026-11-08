@@ -23,7 +23,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { PhoneInput } from "@/components/phone-input";
-import { CalendarPreview } from "@/components/calendar-preview";
+import { ScheduleTab } from "@/components/schedule-tab";
 import { GalleryTab } from "@/components/gallery-tab";
 import { Avatar, Badge, Button, Card, cn, EmptyState, ErrorState, Field, Input, Modal, Select, Skeleton } from "@/components/ui";
 import { VenueForm, venueToForm } from "@/components/venue-form";
@@ -477,11 +477,7 @@ export default function VenuePage() {
           <Tabs tab={tab} setTab={setTab} tabs={tabs} />
           <AnimatePresence mode="wait">
             <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
-              {tab === "schedule" && (
-                <Card>
-                  <CalendarPreview halls={venue.halls} />
-                </Card>
-              )}
+              {tab === "schedule" && <ScheduleTab venue={venue} />}
               {tab === "profile" && <ProfileTab venue={venue} />}
               {tab === "gallery" && <GalleryTab venue={venue} />}
               {tab === "halls" && <HallsTab venue={venue} />}
