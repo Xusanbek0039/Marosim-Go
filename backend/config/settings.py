@@ -363,10 +363,13 @@ PANEL_SITES = {
     "studio": BASE_DIR / "panel-studio",
 }
 # A host picks its site by its first DNS label (studio.marosimgo.uz → studio, studio.localhost → studio).
-# Explicit overrides for other domains: PANEL_HOST_SITES=panel.example.com=superadmin,...
-PANEL_HOST_SITES = {k.lower(): v for k, v in env.dict("PANEL_HOST_SITES", default={}).items()}
-# Hosts that match no site (localhost in development) get this one; empty = API only.
-PANEL_DEFAULT_SITE = env.str("PANEL_DEFAULT_SITE", default="superadmin" if DEBUG else "")
+# Explicit overrides (other domains, local development): PANEL_HOST_SITES=panel.example.com=superadmin,...
+PANEL_HOST_SITES = {
+    k.lower(): v
+    for k, v in env.dict("PANEL_HOST_SITES", default={"localhost": "superadmin", "127.0.0.1": "superadmin"}).items()
+}
+# Hosts that match no site get this one; empty = API only (api.marosimgo.uz).
+PANEL_DEFAULT_SITE = env.str("PANEL_DEFAULT_SITE", default="")
 
 # -------------------------------------------------------------------- monitoring
 MONITORING = {
