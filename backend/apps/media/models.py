@@ -89,6 +89,8 @@ class CeremonyMedia(BaseModel):
     wm_attempts = models.PositiveSmallIntegerField(default=0)
     wm_error = models.CharField(max_length=300, blank=True)
     wm_started_at = models.DateTimeField(null=True, blank=True)
+    #: 0-100 while PROCESSING, shown in the gallery.
+    wm_progress = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ["-created_at"]

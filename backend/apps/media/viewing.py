@@ -70,6 +70,7 @@ class MyMediaSerializer(serializers.ModelSerializer):
     can_download = serializers.SerializerMethodField()
     watermarked = serializers.SerializerMethodField(help_text="Logo bilan ko'rsatiladi (obuna yo'q yoki ko'ruvchi)")
     processing = serializers.SerializerMethodField(help_text="Video uchun logoli nusxa hali tayyor emas")
+    progress = serializers.SerializerMethodField(help_text="Logoli nusxa tayyorlanishi, % (faqat processing paytida)")
 
     class Meta:
         model = CeremonyMedia
@@ -85,6 +86,7 @@ class MyMediaSerializer(serializers.ModelSerializer):
             "can_download",
             "watermarked",
             "processing",
+            "progress",
         ]
         read_only_fields = fields
 
@@ -96,6 +98,11 @@ class MyMediaSerializer(serializers.ModelSerializer):
 
     def get_processing(self, obj) -> bool:
         return not self.context["clean"] and obj.kind == MediaKind.VIDEO and obj.wm_status != WatermarkStatus.READY
+
+    def get_progress(self, obj) -> int | None:
+        if not self.get_processing(obj) or obj.wm_status != WatermarkStatus.PROCESSING:
+            return None
+        return obj.wm_progress
 
 
 def _safe_range(raw: str | None) -> str | None:

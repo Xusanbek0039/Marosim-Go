@@ -94,7 +94,7 @@ def _burn(media: CeremonyMedia, creds, work: Path, dst: Path, on_progress) -> No
             watermark.burn_video(url, dst, work, http_headers=headers, on_progress=on_progress)
             return
         except watermark.WatermarkError as exc:
-            if str(exc) in ("ffmpeg_missing", "not_a_video"):
+            if str(exc) == "ffmpeg_missing":
                 raise
             logger.warning("watermark: streaming from Drive failed for %s, downloading first", media.pk)
     src = work / "source"

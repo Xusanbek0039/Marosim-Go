@@ -297,6 +297,12 @@ CEREMONY_MAX_VIEWERS_PER_OWNER = env.int("CEREMONY_MAX_VIEWERS_PER_OWNER", defau
 #: Burn the MarosimGo logo into videos in a background thread of the web process (needs ffmpeg).
 #: Off: run `manage.py process_watermarks --loop` as a separate worker instead.
 MEDIA_WATERMARK_INLINE = env.bool("MEDIA_WATERMARK_INLINE", default=True)
+#: The logo copy is a preview: its shorter side is scaled down to this (0 = keep the original size).
+MEDIA_WATERMARK_MAX_HEIGHT = env.int("MEDIA_WATERMARK_MAX_HEIGHT", default=720)
+#: "auto" picks the first working GPU encoder (h264_nvenc / h264_qsv / h264_amf), else libx264.
+MEDIA_WATERMARK_ENCODER = env.str("MEDIA_WATERMARK_ENCODER", default="auto")
+#: ffmpeg reads the original straight from Drive while encoding (no full download first).
+MEDIA_WATERMARK_STREAM_SOURCE = env.bool("MEDIA_WATERMARK_STREAM_SOURCE", default=True)
 CEREMONY_MAX_INVITATION_SENDS = env.int("CEREMONY_MAX_INVITATION_SENDS", default=5)
 
 # Ceremony media (Phase D): client → Google Drive resumable sessions; nothing is public.

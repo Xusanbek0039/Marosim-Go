@@ -208,7 +208,7 @@ def wm_drive(drive, monkeypatch):
     fake.__dict__.update({k: v for k, v in drive.__dict__.items() if k not in ("uploaded",)})
     storage_services.set_gateway(fake)
     monkeypatch.setattr(
-        watermark, "burn_video", lambda src, dst, work: dst.write_bytes(b"LOGO" + src.read_bytes()[:50])
+        watermark, "burn_video", lambda src, dst, work, **kw: dst.write_bytes(b"LOGO" + src.read_bytes()[:50])
     )
     return fake
 
@@ -269,7 +269,7 @@ def test_failed_watermark_is_retried_then_given_up(gallery, wm_drive, monkeypatc
     video.wm_status = WatermarkStatus.PENDING
     video.save()
 
-    def boom(src, dst, work):
+    def boom(src, dst, work, **kw):
         raise watermark.WatermarkError("ffmpeg_failed: test")
 
     monkeypatch.setattr(watermark, "burn_video", boom)
