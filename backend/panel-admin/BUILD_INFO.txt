@@ -1,0 +1,3 @@
+MarosimGo Admin panel — static build
+Built: 2026-11-08T13:26:11.524Z
+Do not edit: regenerate with `npm run build:panel:admin` in frontend/.
