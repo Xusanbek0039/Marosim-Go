@@ -32,3 +32,5 @@ GOOGLE_OAUTH_CLIENT_FILE = BASE_DIR / ".test-missing-google-client.json"  # noqa
 GOOGLE_OAUTH_CLIENT_ID = "test-client-id.apps.googleusercontent.com"
 GOOGLE_OAUTH_CLIENT_SECRET = "test-client-secret"
 CEREMONY_INVITE_REQUIRE_VERIFIED_PHONE = False  # mirrors dev; the strict mode is tested explicitly
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "tests"}}
+PANEL_DEFAULT_SITE = ""  # host-based panel routing is tested explicitly

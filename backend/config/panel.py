@@ -1,21 +1,28 @@
-"""The Super Admin panel, served by Django itself — one deploy for the API and the panel.
+"""The web panels, served by Django itself — one deploy for the API and every panel.
 
-Production: the same Django app answers two hostnames (both in ``DJANGO_ALLOWED_HOSTS``):
+Production: the same Django app answers every hostname (all in ``DJANGO_ALLOWED_HOSTS``) and picks
+the panel by the host's first DNS label (``settings.PANEL_SITES``):
 
-* ``api.marosimgo.uz``        — the API only (mobile apps, admin/studio panels)
-* ``superadmin.marosimgo.uz`` — the panel (``PANEL_HOSTS``) *and* ``/api/v1/`` on the same origin,
-  so the httpOnly auth cookies stay first-party and no CORS is involved.
+* ``api.marosimgo.uz``        — the API only (mobile apps)
+* ``superadmin.marosimgo.uz`` — Super Admin panel  (``backend/panel/``)
+* ``admin.marosimgo.uz``      — Admin panel        (``backend/panel-admin/``)
+* ``studio.marosimgo.uz``     — Studio cabinet     (``backend/panel-studio/``)
 
-``frontend/`` is built as a static export (``npm run build:panel``) into ``backend/panel/``. Every
-path that is not ``api/``, ``media/`` or ``static/`` is looked up there:
+Every panel host also serves ``/api/v1/`` on its own origin, so the httpOnly auth cookies stay
+first-party and no CORS is involved.
+
+The panels are Next.js static exports. Every path that is not ``api/``, ``media/`` or ``static/``
+is looked up in the host's build:
 
 * ``/dashboard``          → ``dashboard.html``
 * ``/dashboard.txt``, ``/_next/static/...`` → the file itself (RSC payloads, JS, CSS, images)
+* ``/ceremonies/<uuid>``  → ``ceremonies/_.html`` — a dynamic segment is exported once under the
+  placeholder ``_`` and the page reads the real value from the URL
 * anything else           → ``404.html`` with status 404
 
 ``_next/static`` files have content hashes in their names, so they are cached for a year; HTML and
 RSC payloads are revalidated on every load so a new deploy shows up immediately. All panel responses
-carry the same CSP the Next.js server used to send.
+carry the CSP the Next.js servers used to send.
 """
 
 import mimetypes
@@ -26,20 +33,30 @@ from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirec
 from django.utils._os import safe_join
 from django.views.decorators.http import require_safe
 
-CSP = "; ".join(
-    [
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'",  # Next.js bootstraps with inline scripts
-        "style-src 'self' 'unsafe-inline'",
-        "img-src 'self' data: blob:",
-        "font-src 'self'",
-        "connect-src 'self'",
-        "frame-ancestors 'none'",
-        "form-action 'self'",
-        "base-uri 'self'",
-        "object-src 'none'",
-    ]
-)
+PLACEHOLDER = "_"
+# Pages a bare "/" opens, per site (the Super Admin / Admin panels have no root page).
+HOME = {"superadmin": "/dashboard", "admin": "/dashboard"}
+# Extra browser connections a site needs: the studio uploads videos straight to Google Drive.
+EXTRA_CONNECT = {"studio": " https://www.googleapis.com"}
+
+
+def csp(site: str) -> str:
+    return "; ".join(
+        [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline'",  # Next.js bootstraps with inline scripts
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self'",
+            f"connect-src 'self'{EXTRA_CONNECT.get(site, '')}",
+            "frame-ancestors 'none'",
+            "form-action 'self'",
+            "base-uri 'self'",
+            "object-src 'none'",
+        ]
+    )
+
+
 IMMUTABLE = "public, max-age=31536000, immutable"
 REVALIDATE = "no-cache"
 
@@ -48,62 +65,93 @@ mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("font/woff2", ".woff2")
 
 
-def _root() -> Path:
-    return Path(settings.PANEL_BUILD_DIR)
+def site_for(request) -> str | None:
+    """The panel this host serves, or None (API-only host)."""
+    host = request.get_host().split(":")[0].lower()
+    site = settings.PANEL_HOST_SITES.get(host) or host.split(".")[0]
+    if site not in settings.PANEL_SITES:
+        site = settings.PANEL_DEFAULT_SITE
+    return site if site in settings.PANEL_SITES else None
 
 
-def _find(path: str) -> Path | None:
-    """The build file for a URL path, or None. ``safe_join`` refuses anything outside the build."""
-    root = _root()
-    path = path.strip("/")
-    candidates = [path, f"{path}.html", f"{path}/index.html"] if path else ["index.html"]
-    for candidate in candidates:
-        try:
-            file = Path(safe_join(root, candidate))
-        except Exception:  # noqa: BLE001 — SuspiciousFileOperation / ValueError: path escapes the build
+def _safe(root: Path, rel: str) -> Path | None:
+    try:
+        return Path(safe_join(root, rel))
+    except Exception:  # noqa: BLE001 — SuspiciousFileOperation / ValueError: path escapes the build
+        return None
+
+
+def _resolve_dirs(root: Path, parts: list[str]) -> list[str] | None:
+    """Directory segments, each one literal if it exists, else the ``_`` placeholder directory."""
+    resolved: list[str] = []
+    for part in parts:
+        if part in ("", ".", ".."):
             return None
-        if file.is_file():
+        for candidate in (part, PLACEHOLDER):
+            folder = _safe(root, "/".join([*resolved, candidate]))
+            if folder is not None and folder.is_dir():
+                resolved.append(candidate)
+                break
+        else:
+            return None
+    return resolved
+
+
+def _find(root: Path, path: str) -> Path | None:
+    """The build file for a URL path, or None. ``safe_join`` refuses anything outside the build."""
+    path = path.strip("/")
+    if not path:
+        file = root / "index.html"
+        return file if file.is_file() else None
+    *dirs, name = path.split("/")
+    folders = _resolve_dirs(root, dirs)
+    if folders is None:
+        return None
+    stem, dot, ext = name.partition(".")
+    names = [name, f"{name}.html", f"{name}/index.html"]
+    # ``abc`` → ``_.html`` / ``_/index.html``; ``abc.txt`` → ``_.txt`` (the RSC payload of that page)
+    names += [f"{PLACEHOLDER}{dot}{ext}"] if dot else [f"{PLACEHOLDER}.html", f"{PLACEHOLDER}/index.html"]
+    for candidate in names:
+        file = _safe(root, "/".join([*folders, candidate]))
+        if file is not None and file.is_file():
             return file
     return None
 
 
-def _respond(file: Path, status: int = 200) -> FileResponse:
+def _respond(root: Path, site: str, file: Path, status: int = 200) -> FileResponse:
     content_type, encoding = mimetypes.guess_type(file.name)
     response = FileResponse(file.open("rb"), status=status, content_type=content_type or "application/octet-stream")
     if encoding:
         response.headers.pop("Content-Encoding", None)
-    rel = file.relative_to(_root()).as_posix()
+    rel = file.relative_to(root).as_posix()
     response["Cache-Control"] = IMMUTABLE if rel.startswith("_next/static/") else REVALIDATE
-    response["Content-Security-Policy"] = CSP
+    response["Content-Security-Policy"] = csp(site)
     response["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     return response
 
 
-def _is_panel_host(request) -> bool:
-    hosts = settings.PANEL_HOSTS
-    return not hosts or request.get_host().split(":")[0].lower() in hosts
-
-
 @require_safe
 def serve_panel(request, path: str = ""):
-    if not _is_panel_host(request):
+    site = site_for(request)
+    if site is None:
         # api.marosimgo.uz: no panel here, just say what this host is.
         if path.strip("/") == "":
             return HttpResponse("MarosimGo API — /api/v1/", content_type="text/plain; charset=utf-8")
         raise Http404
-    if not (_root() / "index.html").is_file():
+    root = Path(settings.PANEL_SITES[site])
+    if not (root / "index.html").is_file():
         return HttpResponse(
-            "MarosimGo API ishlayapti. Super Admin panel hali build qilinmagan: "
-            "frontend/ papkasida `npm run build:panel` ni ishga tushiring.",
+            f"MarosimGo API ishlayapti. '{site}' paneli hali build qilinmagan (backend/{root.name}/ bo'sh). "
+            "Build buyruqlari: docs/DEPLOY.md.",
             content_type="text/plain; charset=utf-8",
             status=404,
         )
-    if path.strip("/") == "":
-        return HttpResponseRedirect("/dashboard")
-    file = _find(path)
+    if path.strip("/") == "" and site in HOME:
+        return HttpResponseRedirect(HOME[site])
+    file = _find(root, path)
     if file is not None:
-        return _respond(file)
-    not_found = _find("404")
+        return _respond(root, site, file)
+    not_found = _find(root, "404")
     if not_found is None:
         raise Http404
-    return _respond(not_found, status=404)
+    return _respond(root, site, not_found, status=404)

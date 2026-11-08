@@ -1,4 +1,4 @@
-"""The Super Admin panel's static export is served by Django (superadmin.marosimgo.uz)."""
+"""The panels' static exports are served by Django, one build per subdomain."""
 
 import pytest
 from django.test import Client
@@ -13,9 +13,24 @@ def build(tmp_path, settings):
     (tmp_path / "404.html").write_text("<html>not found</html>")
     (tmp_path / "_next/static/chunks/app.js").write_text("console.log(1)")
     (tmp_path.parent / "secret.txt").write_text("nope")
-    settings.PANEL_BUILD_DIR = tmp_path
-    settings.PANEL_HOSTS = ["superadmin.marosimgo.uz"]
-    settings.ALLOWED_HOSTS = ["superadmin.marosimgo.uz", "api.marosimgo.uz"]
+    studio = tmp_path.parent / "studio-build"
+    (studio / "ceremonies/_").mkdir(parents=True, exist_ok=True)
+    (studio / "index.html").write_text("<html>studio home</html>")
+    (studio / "ceremonies/_.html").write_text("<html>ceremony detail</html>")
+    (studio / "ceremonies/_.txt").write_text("ceremony rsc")
+    (studio / "ceremonies/_/__next.page.txt").write_text("segment rsc")
+    (studio / "404.html").write_text("<html>studio 404</html>")
+    settings.PANEL_SITES = {"superadmin": tmp_path, "admin": tmp_path.parent / "missing", "studio": studio}
+    settings.PANEL_HOST_SITES = {"panel.example.com": "superadmin"}
+    settings.PANEL_DEFAULT_SITE = ""
+    settings.ALLOWED_HOSTS = [
+        "superadmin.marosimgo.uz",
+        "api.marosimgo.uz",
+        "studio.marosimgo.uz",
+        "admin.marosimgo.uz",
+        "panel.example.com",
+        "localhost",
+    ]
     return tmp_path
 
 
@@ -54,3 +69,38 @@ def test_api_host_has_no_panel_but_api_still_works(build):
 
 def test_panel_is_read_only(build):
     assert panel().post("/dashboard").status_code in (403, 405)
+
+
+def body(res):
+    return b"".join(res.streaming_content)
+
+
+def test_each_subdomain_gets_its_own_panel(build):
+    studio = Client(HTTP_HOST="studio.marosimgo.uz")
+    home = studio.get("/")
+    assert home.status_code == 200 and b"studio home" in body(home)
+    assert "https://www.googleapis.com" in home["Content-Security-Policy"]
+    assert "googleapis" not in panel().get("/dashboard")["Content-Security-Policy"]
+    assert studio.get("/dashboard").status_code == 404  # the Super Admin page is not on the studio host
+    assert studio.get("/api/v1/health/live/").status_code == 200
+    explicit = Client(HTTP_HOST="panel.example.com").get("/dashboard")
+    assert explicit.status_code == 200 and b"dashboard" in body(explicit)
+
+
+def test_dynamic_segments_use_the_placeholder_export(build):
+    studio = Client(HTTP_HOST="studio.marosimgo.uz")
+    page = studio.get("/ceremonies/dfe97f48-7712-461f-bffa-a125b3aa50a9")
+    assert page.status_code == 200 and b"ceremony detail" in body(page)
+    assert b"ceremony rsc" in body(studio.get("/ceremonies/dfe97f48.txt"))
+    assert b"segment rsc" in body(studio.get("/ceremonies/dfe97f48/__next.page.txt"))
+    missing = studio.get("/ceremonies/x/y/z")
+    assert missing.status_code == 404 and b"studio 404" in body(missing)
+    assert studio.get("/ceremonies/../../secret.txt").status_code == 404
+
+
+def test_unbuilt_panel_and_unknown_host(build, settings):
+    res = Client(HTTP_HOST="admin.marosimgo.uz").get("/dashboard")
+    assert res.status_code == 404 and "build" in res.content.decode()
+    assert Client(HTTP_HOST="localhost").get("/dashboard").status_code == 404  # API-only by default
+    settings.PANEL_DEFAULT_SITE = "superadmin"  # development
+    assert Client(HTTP_HOST="localhost").get("/dashboard").status_code == 200

@@ -76,7 +76,12 @@ DATABASES = {"default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / '
 # Write paths use explicit transaction.atomic blocks instead.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CACHES = {"default": env.cache("CACHE_URL", default="locmemcache://marosimgo")}
+# Login lockout, throttling and the readiness probe need ONE cache shared by every worker process.
+# Production default: a table in the main database (created by `migrate`); set CACHE_URL=redis://...
+# when Redis is available. Development keeps the in-process cache.
+CACHES = {
+    "default": env.cache("CACHE_URL", default="locmemcache://marosimgo" if DEBUG else "dbcache://marosimgo_cache")
+}
 
 # --------------------------------------------------------------------------- auth
 AUTH_USER_MODEL = "accounts.User"
@@ -345,13 +350,23 @@ GOOGLE_DRIVE_ROOT_FOLDER_ID = env.str("GOOGLE_DRIVE_ROOT_FOLDER_ID", default="")
 # Where the OAuth callback sends the browser back to (the Super Admin panel).
 # Production: PANEL_URL=https://superadmin.marosimgo.uz (served by this same Django app)
 PANEL_URL = env.str("PANEL_URL", default="http://localhost:3000").rstrip("/")
-# The Super Admin panel's static export (`npm run build:panel` in frontend/), served by Django
-# on every path outside /api/, /media/ and /static/ (see config/panel.py).
+# The panels are static exports served by this same Django app on every path outside /api/,
+# /media/ and /static/ (see config/panel.py) — one cPanel deploy, no Node.js:
+#   superadmin.marosimgo.uz → backend/panel/         (frontend/: npm run build:panel)
+#   admin.marosimgo.uz      → backend/panel-admin/   (frontend/: npm run build:panel:admin)
+#   studio.marosimgo.uz     → backend/panel-studio/  (frontend-studio/: npm run build:panel)
+#   api.marosimgo.uz        → API only
 SERVE_PANEL = env.bool("SERVE_PANEL", default=True)
-PANEL_BUILD_DIR = Path(env.str("PANEL_BUILD_DIR", default=str(BASE_DIR / "panel")))
-# Hostnames that get the panel (e.g. superadmin.marosimgo.uz). Empty = every host (development).
-# Other hosts (api.marosimgo.uz) serve only /api/v1/.
-PANEL_HOSTS = [h.lower() for h in env.list("PANEL_HOSTS", default=[])]
+PANEL_SITES = {
+    "superadmin": BASE_DIR / "panel",
+    "admin": BASE_DIR / "panel-admin",
+    "studio": BASE_DIR / "panel-studio",
+}
+# A host picks its site by its first DNS label (studio.marosimgo.uz → studio, studio.localhost → studio).
+# Explicit overrides for other domains: PANEL_HOST_SITES=panel.example.com=superadmin,...
+PANEL_HOST_SITES = {k.lower(): v for k, v in env.dict("PANEL_HOST_SITES", default={}).items()}
+# Hosts that match no site (localhost in development) get this one; empty = API only.
+PANEL_DEFAULT_SITE = env.str("PANEL_DEFAULT_SITE", default="superadmin" if DEBUG else "")
 
 # -------------------------------------------------------------------- monitoring
 MONITORING = {
