@@ -13,6 +13,9 @@ from apps.ceremonies.views import (
 )
 from apps.media.admin_views import AdminDeletionRequestViewSet
 from apps.monitoring.health import LiveView, ReadyView
+from apps.reviews.models import TargetKind
+from apps.reviews.views import AdminReviewViewSet, LikeView, MyReviewView, TargetReviewsView
+from apps.studios.public_views import PublicStudioViewSet, StudioMePortfolioImageView, StudioMePortfolioView
 from apps.studios.views import StudioViewSet
 from apps.subscriptions.views import (
     AdminPlanViewSet,
@@ -38,6 +41,8 @@ router.register("me/invitations", InvitationViewSet, basename="my-invitation")
 router.register("venue-owner/venues", VenueOwnerVenueViewSet, basename="venue-owner-venue")
 router.register("admin/venues", AdminVenueViewSet, basename="admin-venue")
 router.register("venues", PublicVenueViewSet, basename="venue")
+router.register("public/studios", PublicStudioViewSet, basename="public-studio")
+router.register("admin/reviews", AdminReviewViewSet, basename="admin-review")
 router.register("subscriptions/plans", PlanListViewSet, basename="subscription-plan")
 router.register("me/subscriptions", MySubscriptionViewSet, basename="my-subscription")
 router.register("admin/subscriptions", AdminSubscriptionViewSet, basename="admin-subscription")
@@ -60,6 +65,22 @@ urlpatterns = [
     # Before the router: "studios/me/" must not be captured by "studios/{id}/".
     path("studios/me/", StudioMeView.as_view(), name="studio-me"),
     path("studios/me/ceremonies/", StudioMeCeremoniesView.as_view(), name="studio-me-ceremonies"),
+    path("studios/me/<uuid:studio_id>/images/", StudioMePortfolioView.as_view(), name="studio-me-images"),
+    path(
+        "studios/me/<uuid:studio_id>/images/<uuid:image_id>/",
+        StudioMePortfolioImageView.as_view(),
+        name="studio-me-image",
+    ),
+    # reviews / likes of public venues and studios
+    *[
+        p
+        for prefix, kind in (("venues", TargetKind.VENUE), ("public/studios", TargetKind.STUDIO))
+        for p in (
+            path(f"{prefix}/<uuid:target_id>/reviews/", TargetReviewsView.as_view(kind=kind), name=f"{kind}-reviews"),
+            path(f"{prefix}/<uuid:target_id>/reviews/mine/", MyReviewView.as_view(kind=kind), name=f"{kind}-my-review"),
+            path(f"{prefix}/<uuid:target_id>/like/", LikeView.as_view(kind=kind), name=f"{kind}-like"),
+        )
+    ],
     path("ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls")),
     path("me/ceremonies/<uuid:ceremony_id>/media/", include("apps.media.urls_me")),
     path(

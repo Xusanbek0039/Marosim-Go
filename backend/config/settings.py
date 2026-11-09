@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "apps.ceremonies",
     "apps.media",
     "apps.venues",
+    "apps.reviews",
     "apps.subscriptions",
     "apps.devcenter",
     "apps.support",

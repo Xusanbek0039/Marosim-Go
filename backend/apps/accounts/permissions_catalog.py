@@ -30,6 +30,11 @@ ADMIN_PERMISSIONS: tuple[PermissionDef, ...] = (
     PermissionDef("venues.update", "venues", "To'yxonani tahrirlash (zallar, rasmlar, bloklash)"),
     PermissionDef("venues.delete", "venues", "To'yxonani o'chirish"),
     PermissionDef("venues.publish", "venues", "Ommaga chiqarishni tasdiqlash / rad etish / to'xtatish"),
+    PermissionDef(
+        "venues.schedule", "venues", "To'yxona jadvalini boshqarish (bron tasdiqlash / rad / bekor, smenalar)"
+    ),
+    PermissionDef("reviews.view", "reviews", "To'yxona va studiyalar sharhlarini ko'rish"),
+    PermissionDef("reviews.moderate", "reviews", "Sharhlarni yashirish / o'chirish"),
     PermissionDef("subscriptions.view", "subscriptions", "Obunalar va to'lovlarni ko'rish"),
     PermissionDef("subscriptions.create", "subscriptions", "Foydalanuvchiga obuna berish (to'lov qayd etib)"),
     PermissionDef("subscriptions.update", "subscriptions", "Obuna so'rovini tasdiqlash / rad etish / bekor qilish"),
@@ -52,6 +57,7 @@ MODULE_LABELS = {
     "users": "Foydalanuvchilar",
     "studios": "Studiyalar",
     "venues": "To'yxonalar",
+    "reviews": "Sharhlar",
     "subscriptions": "Obunalar",
     "requests": "So'rovlar",
     "support": "Yordam",
