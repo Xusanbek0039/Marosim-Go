@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useCan } from "@/features/auth/hooks";
 import { studiosResource } from "@/features/resources";
+import { StudioPortfolio, StudioSchedule } from "@/features/schedule/studio-panel";
 import { StudioFormDialog } from "@/features/studios/studio-form-dialog";
 import { STATUS_FILTER, useListState } from "@/features/use-list-state";
 import { ApiError } from "@/lib/api/client";
@@ -62,7 +63,11 @@ function StudiosContent() {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Studio | null>(null);
-  const [viewing, setViewing] = useState<Studio | null>(null);
+  const [viewingId, setViewingId] = useState<string | null>(null);
+  // Live detail so portfolio uploads show up in the open drawer immediately.
+  const detail = studiosResource.useDetail(viewingId);
+  const viewing = detail.data ?? data?.results.find((s) => s.id === viewingId) ?? null;
+  const setViewing = (studio: Studio | null) => setViewingId(studio?.id ?? null);
   const [confirm, setConfirm] = useState<Confirm>(null);
 
   const openEdit = (studio: Studio) => {
@@ -243,6 +248,7 @@ function StudiosContent() {
             <div className="rounded-2xl border border-glass-border bg-muted/40 px-4">
               {[
                 ["Holat", <StatusBadge key="s" active={viewing.is_active} />],
+                ["Telefon", viewing.phone_number ? formatPhone(viewing.phone_number) : "—"],
                 ["Mas'ul shaxs", viewing.responsible_user.full_name],
                 ["Mas'ul telefon", formatPhone(viewing.responsible_user.phone_number)],
                 ["Mas'ul JSHSHIR", viewing.responsible_user.pinfl_masked ?? "—"],
@@ -258,6 +264,9 @@ function StudiosContent() {
                 </div>
               ))}
             </div>
+            {viewing.description && <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{viewing.description}</p>}
+            <StudioPortfolio studio={viewing} editable={can("studios.update")} />
+            <StudioSchedule studioId={viewing.id} />
           </>
         )}
       </MotionDrawer>

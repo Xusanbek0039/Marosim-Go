@@ -50,6 +50,7 @@ import {
   VENUE_TYPE_LABELS,
   venuesResource,
 } from "@/features/venues/api";
+import { VenueSchedule } from "@/features/schedule/venue-schedule";
 import { VenueFormDialog } from "@/features/venues/venue-form-dialog";
 import { ApiError } from "@/lib/api/client";
 import type { AdminVenue, PublicationStatus, VenueRegion } from "@/lib/api/types";
@@ -445,6 +446,7 @@ function VenuesContent() {
             </div>
             {viewing.description && <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{viewing.description}</p>}
             <Gallery venue={viewing} editable={can("venues.update")} />
+            <VenueSchedule venueId={viewing.id} canManage={can("venues.schedule")} />
             <Halls venue={viewing} editable={can("venues.update")} />
             <section className="flex flex-col gap-2">
               <h4 className="flex items-center gap-1.5 text-sm font-bold">
