@@ -775,6 +775,93 @@
       "schema_changed": [
         "POST /api/v1/public/partner-applications/"
       ]
+    },
+    {
+      "revision": 20,
+      "date": "2026-11-09",
+      "note": "Sharhlar/like, studiyalar ommaviy katalogi va jadvali, panelda to'yxona jadvali boshqaruvi",
+      "added": [
+        "DELETE /api/v1/admin/reviews/{id}/",
+        "DELETE /api/v1/public/studios/{target_id}/like/",
+        "DELETE /api/v1/public/studios/{target_id}/reviews/mine/",
+        "DELETE /api/v1/studios/me/{studio_id}/images/{image_id}/",
+        "DELETE /api/v1/studios/{id}/images/{image_id}/",
+        "DELETE /api/v1/venues/{target_id}/like/",
+        "DELETE /api/v1/venues/{target_id}/reviews/mine/",
+        "GET /api/v1/admin/reviews/",
+        "GET /api/v1/admin/reviews/{id}/",
+        "GET /api/v1/admin/venues/{id}/bookings/",
+        "GET /api/v1/admin/venues/{id}/calendar/",
+        "GET /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/",
+        "GET /api/v1/public/studios/",
+        "GET /api/v1/public/studios/{id}/",
+        "GET /api/v1/public/studios/{id}/schedule/",
+        "GET /api/v1/public/studios/{target_id}/reviews/",
+        "GET /api/v1/studios/me/{studio_id}/images/",
+        "GET /api/v1/studios/{id}/calendar/",
+        "GET /api/v1/venues/",
+        "GET /api/v1/venues/{target_id}/reviews/",
+        "PATCH /api/v1/admin/reviews/{id}/",
+        "PATCH /api/v1/admin/venues/{id}/bookings/{booking_id}/",
+        "PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/{session_id}/",
+        "POST /api/v1/admin/venues/{id}/bookings/",
+        "POST /api/v1/admin/venues/{id}/bookings/{booking_id}/cancel/",
+        "POST /api/v1/admin/venues/{id}/bookings/{booking_id}/confirm/",
+        "POST /api/v1/admin/venues/{id}/bookings/{booking_id}/reject/",
+        "POST /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/",
+        "POST /api/v1/public/studios/{target_id}/like/",
+        "POST /api/v1/studios/me/{studio_id}/images/",
+        "POST /api/v1/studios/{id}/images/",
+        "POST /api/v1/venues/{target_id}/like/",
+        "PUT /api/v1/public/studios/{target_id}/reviews/mine/",
+        "PUT /api/v1/venues/{target_id}/reviews/mine/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venues/search/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admins/",
+        "GET /api/v1/admins/{id}/",
+        "GET /api/v1/studios/",
+        "GET /api/v1/studios/{id}/",
+        "GET /api/v1/venues/search/",
+        "GET /api/v1/venues/{id}/",
+        "PATCH /api/v1/admins/{id}/",
+        "PATCH /api/v1/studios/{id}/",
+        "POST /api/v1/admins/",
+        "POST /api/v1/studios/"
+      ]
     }
   ]
 }
