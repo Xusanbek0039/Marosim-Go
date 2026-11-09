@@ -7,11 +7,28 @@
 
 | Metod | Yo'l | Tavsif | Rollar | Ruxsat kodi (ADMIN) | Auth | Ma'lumot doirasi | Holat |
 |---|---|---|---|---|---|---|---|
+| GET | `/api/v1/admin/media-deletion-requests/` | Media o'chirish so'rovlari | ADMIN, SUPER_ADMIN | `requests.view` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/media-deletion-requests/summary/` | Kutilayotgan so'rovlar soni (menyu belgisi uchun) | ADMIN, SUPER_ADMIN | `requests.view` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/media-deletion-requests/{id}/` | O'chirish so'rovi tafsiloti | ADMIN, SUPER_ADMIN | `requests.view` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
+| POST | `/api/v1/admin/media-deletion-requests/{id}/approve/` | Tasdiqlash: fayl Drive savatiga o'tadi va ilovadan o'chadi | ADMIN, SUPER_ADMIN | `requests.media_delete` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
+| POST | `/api/v1/admin/media-deletion-requests/{id}/reject/` | Rad etish (fayl qoladi) | ADMIN, SUPER_ADMIN | `requests.media_delete` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
 | GET | `/api/v1/admin/storage/google/callback/` | Google OAuth callback (brauzer redirect) | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/admin/storage/google/connect/` | Google Drive'ni ulashni boshlash | SUPER_ADMIN | — | JWT | — | OK |
 | POST | `/api/v1/admin/storage/google/disconnect/` | Google Drive'ni uzish | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/admin/storage/google/status/` | Google Drive ulanish holati | SUPER_ADMIN | — | JWT | — | OK |
 | POST | `/api/v1/admin/storage/google/test/` | Ulanishni tekshirish | SUPER_ADMIN | — | JWT | — | OK |
+| GET | `/api/v1/admin/subscription-plans/` | Tariflar (barchasi) | ADMIN, SUPER_ADMIN | `subscriptions.view` | JWT | — | OK |
+| POST | `/api/v1/admin/subscription-plans/` | Tarif qo'shish | ADMIN, SUPER_ADMIN | `subscriptions.plans` | JWT | — | OK |
+| PATCH | `/api/v1/admin/subscription-plans/{id}/` | Tarif narxi / muddati / limitini o'zgartirish | ADMIN, SUPER_ADMIN | `subscriptions.plans` | JWT | — | OK |
+| GET | `/api/v1/admin/subscription-settings/` | To'lov ma'lumotlari (mijozga ko'rsatiladi) | ADMIN, SUPER_ADMIN | `subscriptions.view` | JWT | — | OK |
+| PATCH | `/api/v1/admin/subscription-settings/` | To'lov ma'lumotlarini o'zgartirish | ADMIN, SUPER_ADMIN | `subscriptions.plans` | JWT | — | OK |
+| GET | `/api/v1/admin/subscriptions/` | Obunalar va to'lovlar | ADMIN, SUPER_ADMIN | `subscriptions.view` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| POST | `/api/v1/admin/subscriptions/` | Foydalanuvchiga obuna berish (to'lov qayd etiladi) | ADMIN, SUPER_ADMIN | `subscriptions.create` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/subscriptions/summary/` | Obunalar statistikasi (so'rovlar, faollar, tushum) | ADMIN, SUPER_ADMIN | `subscriptions.view` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/subscriptions/{id}/` | Obuna tafsiloti | ADMIN, SUPER_ADMIN | `subscriptions.view` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| POST | `/api/v1/admin/subscriptions/{id}/approve/` | To'lovni qayd etib tasdiqlash | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| POST | `/api/v1/admin/subscriptions/{id}/cancel/` | Obunani bekor qilish | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| POST | `/api/v1/admin/subscriptions/{id}/reject/` | So'rovni rad etish | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
 | GET | `/api/v1/admin/venues/` | To'yxonalar ro'yxati (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | POST | `/api/v1/admin/venues/` | To'yxona qo'shish (egasi bilan) | ADMIN, SUPER_ADMIN | `venues.create` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | GET | `/api/v1/admin/venues/{id}/` | To'yxona ma'lumotlari (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
@@ -41,8 +58,11 @@
 | GET | `/api/v1/ceremonies/{ceremony_id}/media/` | Marosimning yuklangan fayllari va holati | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
 | POST | `/api/v1/ceremonies/{ceremony_id}/media/uploads/` | Media yuklashni boshlash (Google Drive resumable sessiya) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` | Yuklash holati (Google'dan jonli progress) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| DELETE | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` | Tugallanmagan yuklashni ro'yxatdan o'chirish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
 | POST | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/` | Yuklashni bekor qilish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
 | POST | `/api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/` | Yuklashni yakunlash va tekshirish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/` | Tayyor faylni o'chirishni so'rash (admin tasdiqlaydi) | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
+| POST | `/api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/cancel/` | O'chirish so'rovini qaytarib olish | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/ceremonies/{id}/` | Marosim ma'lumotlari | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | PATCH | `/api/v1/ceremonies/{id}/` | Marosimni tahrirlash | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
 | GET | `/api/v1/ceremonies/{id}/owners/` | Marosim egalari va egalik takliflari | STUDIO, SUPER_ADMIN | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
@@ -59,7 +79,7 @@
 | GET | `/api/v1/health/ready/` | Readiness — bog'liqliklar (database, cache) tayyormi | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/me/ceremonies/` | Menga biriktirilgan marosimlar | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{ceremony_id}/media/` | Marosim rasm va videolari | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
-| GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/` | Faylni yuklab olish (faqat ega) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
+| GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/` | Faylni yuklab olish (faqat obunasi faol ega, logosiz original) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/` | Faylni ko'rish (oqim, Range) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/` | Kichik rasm (preview) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{id}/` | Menga biriktirilgan marosim | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
@@ -77,6 +97,14 @@
 | GET | `/api/v1/me/invitations/{id}/` | Taklif tafsilotlari | USER | — | JWT | Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404. | OK |
 | POST | `/api/v1/me/invitations/{id}/accept/` | Taklifni qabul qilish | USER | — | JWT | Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404. | OK |
 | POST | `/api/v1/me/invitations/{id}/decline/` | Taklifni rad etish | USER | — | JWT | Faqat so'rovchining telefoni yoki JSHSHIRiga (hash bo'yicha aniq moslik) yuborilgan, javob kutilayotgan va muddati o'tmagan takliflar; boshqasi 404. | OK |
+| GET | `/api/v1/me/subscriptions/` | Mening obuna so'rovlarim va obunalarim | USER | — | JWT | Faqat so'rovchining o'z obunalari; boshqasiniki 404. | OK |
+| POST | `/api/v1/me/subscriptions/` | Obuna so'rovi yuborish (to'lov admin tomonidan tasdiqlanadi) | USER | — | JWT | — | OK |
+| GET | `/api/v1/me/subscriptions/status/` | Obuna holati, limitlar, tariflar va to'lov ma'lumotlari | USER | — | JWT | — | OK |
+| POST | `/api/v1/me/subscriptions/{id}/cancel/` | Kutilayotgan so'rovni bekor qilish | USER | — | JWT | Faqat so'rovchining o'z obunalari; boshqasiniki 404. | OK |
+| GET | `/api/v1/me/venue-bookings/` | Mening to'yxona bronlarim | USER | — | JWT | Faqat so'rovchining o'z bronlari; boshqasiniki 404. | OK |
+| POST | `/api/v1/me/venue-bookings/` | To'yxona smenasiga bron so'rovi yuborish | USER | — | JWT | — | OK |
+| GET | `/api/v1/me/venue-bookings/{id}/` | Bron tafsiloti | USER | — | JWT | Faqat so'rovchining o'z bronlari; boshqasiniki 404. | OK |
+| POST | `/api/v1/me/venue-bookings/{id}/cancel/` | Bron / so'rovni bekor qilish | USER | — | JWT | Faqat so'rovchining o'z bronlari; boshqasiniki 404. | OK |
 | GET | `/api/v1/monitoring/endpoints/` | API endpointlar katalogi (OpenAPI'dan avtomatik) | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/logs/` | So'rovlar jurnali | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | SUPER_ADMIN | — | JWT | — | OK |
@@ -87,6 +115,7 @@
 | GET | `/api/v1/studios/{id}/` | Studiya ma'lumotlari | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | PATCH | `/api/v1/studios/{id}/` | Studiyani tahrirlash | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | DELETE | `/api/v1/studios/{id}/` | Studiyani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `studios.delete` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| GET | `/api/v1/subscriptions/plans/` | Obuna tariflari | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/users/` | Mijozlar ro'yxati (USER, STUDIO, VENUE_OWNER) | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | POST | `/api/v1/users/` | Mijoz qo'shish | ADMIN, SUPER_ADMIN | `users.create` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | GET | `/api/v1/users/{id}/` | Mijoz ma'lumotlari | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
@@ -98,19 +127,32 @@
 | POST | `/api/v1/venue-owner/venues/` | To'yxona yaratish (PRIVATE holatda) | VENUE_OWNER | — | JWT | — | OK |
 | GET | `/api/v1/venue-owner/venues/{id}/` | To'yxona ma'lumotlari (egasi uchun) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/` | To'yxonani tahrirlash | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venue-owner/venues/{id}/bookings/` | Bronlar va so'rovlar | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/bookings/` | Jadvalga yozuv qo'shish (o'z mijozi yoki yopiq smena) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| PATCH | `/api/v1/venue-owner/venues/{id}/bookings/{booking_id}/` | Yozuv tafsilotlarini tahrirlash | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/bookings/{booking_id}/cancel/` | Yozuvni bekor qilish (smena bo'shaydi) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/bookings/{booking_id}/confirm/` | So'rovni tasdiqlash (smena band bo'ladi) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/bookings/{booking_id}/reject/` | So'rovni rad etish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venue-owner/venues/{id}/calendar/` | Jadval: zallar, smenalar va shu oraliqdagi barcha yozuvlar | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | GET | `/api/v1/venue-owner/venues/{id}/halls/` | To'yxona zallari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/halls/` | Zal qo'shish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/halls/{hall_id}/` | Zalni tahrirlash | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/` | Zal smenalari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| POST | `/api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/` | Zalga smena qo'shish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| PATCH | `/api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/{session_id}/` | Smenani tahrirlash / o'chirish-yoqish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | GET | `/api/v1/venue-owner/venues/{id}/images/` | Galereya rasmlari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/images/` | Galereyaga rasm qo'shish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | DELETE | `/api/v1/venue-owner/venues/{id}/images/{image_id}/` | Galereyadan rasmni o'chirish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | GET | `/api/v1/venue-owner/venues/{id}/members/` | To'yxona a'zolari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/members/` | A'zo qo'shish (telefon raqam bo'yicha) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/members/{membership_id}/` | A'zoning rolini / faolligini o'zgartirish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venues/search/` | Sana bo'yicha bo'sh to'yxonalarni qidirish | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/venues/{id}/` | To'yxona (ommaviy ma'lumot, zallar va smenalar) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/venues/{id}/availability/` | To'yxona bo'sh smenalari (kalendar) | PUBLIC | — | NONE | — | OK |
 
 ## Rollar bo'yicha
 
-### PUBLIC (8)
+### PUBLIC (12)
 
 * `GET /api/v1/admin/storage/google/callback/` — Google OAuth callback (brauzer redirect)
 * `GET /api/v1/auth/csrf/` — CSRF cookie olish (web panel)
@@ -120,14 +162,18 @@
 * `POST /api/v1/auth/register/` — Ro'yxatdan o'tish (telefon + parol)
 * `GET /api/v1/health/live/` — Liveness — jarayon ishlayaptimi
 * `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
+* `GET /api/v1/subscriptions/plans/` — Obuna tariflari
+* `GET /api/v1/venues/search/` — Sana bo'yicha bo'sh to'yxonalarni qidirish
+* `GET /api/v1/venues/{id}/` — To'yxona (ommaviy ma'lumot, zallar va smenalar)
+* `GET /api/v1/venues/{id}/availability/` — To'yxona bo'sh smenalari (kalendar)
 
-### USER (22)
+### USER (30)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
 * `GET /api/v1/me/ceremonies/` — Menga biriktirilgan marosimlar
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/` — Marosim rasm va videolari
-* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/` — Faylni yuklab olish (faqat ega)
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/` — Faylni yuklab olish (faqat obunasi faol ega, logosiz original)
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/` — Faylni ko'rish (oqim, Range)
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/` — Kichik rasm (preview)
 * `GET /api/v1/me/ceremonies/{id}/` — Menga biriktirilgan marosim
@@ -145,8 +191,16 @@
 * `GET /api/v1/me/invitations/{id}/` — Taklif tafsilotlari
 * `POST /api/v1/me/invitations/{id}/accept/` — Taklifni qabul qilish
 * `POST /api/v1/me/invitations/{id}/decline/` — Taklifni rad etish
+* `GET /api/v1/me/subscriptions/` — Mening obuna so'rovlarim va obunalarim
+* `POST /api/v1/me/subscriptions/` — Obuna so'rovi yuborish (to'lov admin tomonidan tasdiqlanadi)
+* `GET /api/v1/me/subscriptions/status/` — Obuna holati, limitlar, tariflar va to'lov ma'lumotlari
+* `POST /api/v1/me/subscriptions/{id}/cancel/` — Kutilayotgan so'rovni bekor qilish
+* `GET /api/v1/me/venue-bookings/` — Mening to'yxona bronlarim
+* `POST /api/v1/me/venue-bookings/` — To'yxona smenasiga bron so'rovi yuborish
+* `GET /api/v1/me/venue-bookings/{id}/` — Bron tafsiloti
+* `POST /api/v1/me/venue-bookings/{id}/cancel/` — Bron / so'rovni bekor qilish
 
-### STUDIO (18)
+### STUDIO (21)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -155,8 +209,11 @@
 * `GET /api/v1/ceremonies/{ceremony_id}/media/` — Marosimning yuklangan fayllari va holati
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/` — Media yuklashni boshlash (Google Drive resumable sessiya)
 * `GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` — Yuklash holati (Google'dan jonli progress)
+* `DELETE /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` — Tugallanmagan yuklashni ro'yxatdan o'chirish
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/` — Yuklashni bekor qilish
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/` — Yuklashni yakunlash va tekshirish
+* `POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/` — Tayyor faylni o'chirishni so'rash (admin tasdiqlaydi)
+* `POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/cancel/` — O'chirish so'rovini qaytarib olish
 * `GET /api/v1/ceremonies/{id}/` — Marosim ma'lumotlari
 * `PATCH /api/v1/ceremonies/{id}/` — Marosimni tahrirlash
 * `GET /api/v1/ceremonies/{id}/owners/` — Marosim egalari va egalik takliflari
@@ -167,7 +224,7 @@
 * `GET /api/v1/studios/me/` — Mening studiyalarim
 * `GET /api/v1/studios/me/ceremonies/` — Mening studiyamning marosimlari
 
-### VENUE_OWNER (15)
+### VENUE_OWNER (25)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -175,9 +232,19 @@
 * `POST /api/v1/venue-owner/venues/` — To'yxona yaratish (PRIVATE holatda)
 * `GET /api/v1/venue-owner/venues/{id}/` — To'yxona ma'lumotlari (egasi uchun)
 * `PATCH /api/v1/venue-owner/venues/{id}/` — To'yxonani tahrirlash
+* `GET /api/v1/venue-owner/venues/{id}/bookings/` — Bronlar va so'rovlar
+* `POST /api/v1/venue-owner/venues/{id}/bookings/` — Jadvalga yozuv qo'shish (o'z mijozi yoki yopiq smena)
+* `PATCH /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/` — Yozuv tafsilotlarini tahrirlash
+* `POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/cancel/` — Yozuvni bekor qilish (smena bo'shaydi)
+* `POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/confirm/` — So'rovni tasdiqlash (smena band bo'ladi)
+* `POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/reject/` — So'rovni rad etish
+* `GET /api/v1/venue-owner/venues/{id}/calendar/` — Jadval: zallar, smenalar va shu oraliqdagi barcha yozuvlar
 * `GET /api/v1/venue-owner/venues/{id}/halls/` — To'yxona zallari
 * `POST /api/v1/venue-owner/venues/{id}/halls/` — Zal qo'shish
 * `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash
+* `GET /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/` — Zal smenalari
+* `POST /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/` — Zalga smena qo'shish
+* `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/{session_id}/` — Smenani tahrirlash / o'chirish-yoqish
 * `GET /api/v1/venue-owner/venues/{id}/images/` — Galereya rasmlari
 * `POST /api/v1/venue-owner/venues/{id}/images/` — Galereyaga rasm qo'shish
 * `DELETE /api/v1/venue-owner/venues/{id}/images/{image_id}/` — Galereyadan rasmni o'chirish
@@ -185,8 +252,25 @@
 * `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
 * `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
-### ADMIN (24)
+### ADMIN (41)
 
+* `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
+* `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
+* `GET /api/v1/admin/media-deletion-requests/{id}/` — O'chirish so'rovi tafsiloti
+* `POST /api/v1/admin/media-deletion-requests/{id}/approve/` — Tasdiqlash: fayl Drive savatiga o'tadi va ilovadan o'chadi
+* `POST /api/v1/admin/media-deletion-requests/{id}/reject/` — Rad etish (fayl qoladi)
+* `GET /api/v1/admin/subscription-plans/` — Tariflar (barchasi)
+* `POST /api/v1/admin/subscription-plans/` — Tarif qo'shish
+* `PATCH /api/v1/admin/subscription-plans/{id}/` — Tarif narxi / muddati / limitini o'zgartirish
+* `GET /api/v1/admin/subscription-settings/` — To'lov ma'lumotlari (mijozga ko'rsatiladi)
+* `PATCH /api/v1/admin/subscription-settings/` — To'lov ma'lumotlarini o'zgartirish
+* `GET /api/v1/admin/subscriptions/` — Obunalar va to'lovlar
+* `POST /api/v1/admin/subscriptions/` — Foydalanuvchiga obuna berish (to'lov qayd etiladi)
+* `GET /api/v1/admin/subscriptions/summary/` — Obunalar statistikasi (so'rovlar, faollar, tushum)
+* `GET /api/v1/admin/subscriptions/{id}/` — Obuna tafsiloti
+* `POST /api/v1/admin/subscriptions/{id}/approve/` — To'lovni qayd etib tasdiqlash
+* `POST /api/v1/admin/subscriptions/{id}/cancel/` — Obunani bekor qilish
+* `POST /api/v1/admin/subscriptions/{id}/reject/` — So'rovni rad etish
 * `GET /api/v1/admin/venues/` — To'yxonalar ro'yxati (panel)
 * `POST /api/v1/admin/venues/` — To'yxona qo'shish (egasi bilan)
 * `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
@@ -212,12 +296,29 @@
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (57)
+### SUPER_ADMIN (77)
 
+* `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
+* `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
+* `GET /api/v1/admin/media-deletion-requests/{id}/` — O'chirish so'rovi tafsiloti
+* `POST /api/v1/admin/media-deletion-requests/{id}/approve/` — Tasdiqlash: fayl Drive savatiga o'tadi va ilovadan o'chadi
+* `POST /api/v1/admin/media-deletion-requests/{id}/reject/` — Rad etish (fayl qoladi)
 * `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
 * `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
 * `GET /api/v1/admin/storage/google/status/` — Google Drive ulanish holati
 * `POST /api/v1/admin/storage/google/test/` — Ulanishni tekshirish
+* `GET /api/v1/admin/subscription-plans/` — Tariflar (barchasi)
+* `POST /api/v1/admin/subscription-plans/` — Tarif qo'shish
+* `PATCH /api/v1/admin/subscription-plans/{id}/` — Tarif narxi / muddati / limitini o'zgartirish
+* `GET /api/v1/admin/subscription-settings/` — To'lov ma'lumotlari (mijozga ko'rsatiladi)
+* `PATCH /api/v1/admin/subscription-settings/` — To'lov ma'lumotlarini o'zgartirish
+* `GET /api/v1/admin/subscriptions/` — Obunalar va to'lovlar
+* `POST /api/v1/admin/subscriptions/` — Foydalanuvchiga obuna berish (to'lov qayd etiladi)
+* `GET /api/v1/admin/subscriptions/summary/` — Obunalar statistikasi (so'rovlar, faollar, tushum)
+* `GET /api/v1/admin/subscriptions/{id}/` — Obuna tafsiloti
+* `POST /api/v1/admin/subscriptions/{id}/approve/` — To'lovni qayd etib tasdiqlash
+* `POST /api/v1/admin/subscriptions/{id}/cancel/` — Obunani bekor qilish
+* `POST /api/v1/admin/subscriptions/{id}/reject/` — So'rovni rad etish
 * `GET /api/v1/admin/venues/` — To'yxonalar ro'yxati (panel)
 * `POST /api/v1/admin/venues/` — To'yxona qo'shish (egasi bilan)
 * `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
@@ -242,8 +343,11 @@
 * `GET /api/v1/ceremonies/{ceremony_id}/media/` — Marosimning yuklangan fayllari va holati
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/` — Media yuklashni boshlash (Google Drive resumable sessiya)
 * `GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` — Yuklash holati (Google'dan jonli progress)
+* `DELETE /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/` — Tugallanmagan yuklashni ro'yxatdan o'chirish
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/` — Yuklashni bekor qilish
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/` — Yuklashni yakunlash va tekshirish
+* `POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/` — Tayyor faylni o'chirishni so'rash (admin tasdiqlaydi)
+* `POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/cancel/` — O'chirish so'rovini qaytarib olish
 * `GET /api/v1/ceremonies/{id}/` — Marosim ma'lumotlari
 * `PATCH /api/v1/ceremonies/{id}/` — Marosimni tahrirlash
 * `GET /api/v1/ceremonies/{id}/owners/` — Marosim egalari va egalik takliflari
@@ -276,6 +380,8 @@
 
 * `GET /api/v1/admin/storage/google/callback/`
   * JWT talab qilinmaydi (Google brauzer redirect'i), lekin faqat ulashni boshlagan faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga bog'lovchi httpOnly cookie
+* `PATCH /api/v1/admin/subscription-plans/{id}/`
+  * Yangi narx faqat keyingi so'rovlarga ta'sir qiladi.
 * `PATCH /api/v1/admin/venues/{id}/`
   * publication_status o'zgarishi uchun qo'shimcha `venues.publish`
 * `POST /api/v1/admin/venues/{id}/images/`
@@ -305,11 +411,19 @@
   * Arxivlangan marosimga yuklab bo'lmaydi; tur va hajm cheklangan.
 * `GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/`
   * upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi.
+* `DELETE /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/`
+  * Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.
+  * Faqat tugallanmagan fayl (UPLOADING / FAILED / CANCELLED / EXPIRED); tayyor fayl — so'rov orqali.
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/`
   * Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.
 * `POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/`
   * Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
   * Fayl Drive'dan qayta o'qilib tekshiriladi.
+* `POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/`
+  * Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.
+  * Faqat READY fayl; bir faylga bitta kutilayotgan so'rov.
+* `POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/cancel/`
+  * So'rovni yuborgan a'zo yoki studiya OWNER/MANAGER.
 * `PATCH /api/v1/ceremonies/{id}/`
   * STUDIO a'zoligi OWNER yoki MANAGER bo'lishi shart (UPLOADER — faqat ko'rish).
   * Holat o'tishlari cheklangan.
@@ -332,11 +446,14 @@
   * `recent_profiles` faqat `users.view` ruxsati bo'lsa to'ldiriladi, aks holda bo'sh
   * ADMIN profillari `recent_profiles` da faqat SUPER_ADMIN uchun ko'rinadi
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/download/`
-  * Faqat marosim EGASI; ko'ruvchi — 403
+  * Faqat obunasi faol marosim EGASI; ko'ruvchi — 403, obunasiz ega — 403 subscription_required
   * Har bir yuklab olish audit qilinadi
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/`
   * HTTP Range qo'llab-quvvatlanadi (video uchun)
   * Content-Disposition: inline
+  * Obunasi faol ega — original; boshqalar — logoli nusxa (video tayyor bo'lmasa 409 watermark_pending)
+* `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/`
+  * Obunasi faol ega bo'lmasa — MarosimGo logosi bilan
 * `GET /api/v1/me/ceremonies/{id}/invitations/`
   * Faqat marosimning ACCEPTED egasi (CEREMONY_OWNER); ko'ruvchi — 403.
   * POST VIEWER: darhol taklif; POST OWNER: qabul qilingach boshqa egalar tasdiqlaydi.
@@ -372,6 +489,12 @@
   * OWNER taklifini qabul qilish uchun telefon tasdiqlangan bo'lishi shart.
   * Taklif qabul qilinmaguncha hech qanday kirish huquqi berilmaydi.
   * Muddati o'tgan — 410.
+* `POST /api/v1/me/subscriptions/`
+  * Bir vaqtda bitta kutilayotgan so'rov.
+* `POST /api/v1/me/venue-bookings/`
+  * Faqat ommaga chiqqan to'yxonaning faol smenasi, bugundan boshlab 2 yilgacha.
+  * Smena band bo'lsa 409; bir vaqtda ko'pi bilan 10 ta ochiq so'rov.
+  * So'rov smenani band qilmaydi — to'yxona tasdiqlaganda band bo'ladi.
 * `DELETE /api/v1/users/{id}/`
   * Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
 * `GET /api/v1/users/{id}/pinfl/`
@@ -383,6 +506,32 @@
 * `PATCH /api/v1/venue-owner/venues/{id}/`
   * A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `GET /api/v1/venue-owner/venues/{id}/bookings/`
+  * POST CONFIRMED: A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * POST BLOCKED: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Band smenaga ikkinchi yozuv — 409 (DB unique index + qator qulfi).
+* `POST /api/v1/venue-owner/venues/{id}/bookings/`
+  * POST CONFIRMED: A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * POST BLOCKED: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Band smenaga ikkinchi yozuv — 409 (DB unique index + qator qulfi).
+* `PATCH /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/`
+  * BLOCKED: MANAGE_SCHEDULE, boshqalar: MANAGE_BOOKINGS
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/cancel/`
+  * BLOCKED: MANAGE_SCHEDULE, boshqalar: MANAGE_BOOKINGS
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/confirm/`
+  * A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Shu smenaga boshqa kutilayotgan so'rovlar avtomatik rad etiladi; band bo'lsa 409.
+* `POST /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/reject/`
+  * A'zolik roli `MANAGE_BOOKINGS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `GET /api/v1/venue-owner/venues/{id}/calendar/`
+  * Har qanday faol a'zo (VIEW).
+  * Oraliq ko'pi bilan 62 kun.
 * `GET /api/v1/venue-owner/venues/{id}/halls/`
   * POST: A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
@@ -392,6 +541,16 @@
 * `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/`
   * A'zolik roli `MANAGE_HALLS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `GET /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/`
+  * POST: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `POST /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/`
+  * POST: A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+* `PATCH /api/v1/venue-owner/venues/{id}/halls/{hall_id}/sessions/{session_id}/`
+  * A'zolik roli `MANAGE_SCHEDULE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
+  * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
+  * Bir zal smenalari vaqt bo'yicha kesishmaydi.
 * `GET /api/v1/venue-owner/venues/{id}/images/`
   * POST: A'zolik roli `EDIT_PROFILE` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
@@ -417,6 +576,12 @@
   * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
   * Oxirgi faol OWNER olib tashlanmaydi.
+* `GET /api/v1/venues/search/`
+  * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
+* `GET /api/v1/venues/{id}/`
+  * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
+* `GET /api/v1/venues/{id}/availability/`
+  * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
 
 ## Rejalashtirilgan (PLANNED — hali ishlamaydi)
 

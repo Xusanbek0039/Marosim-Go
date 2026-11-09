@@ -1,5 +1,18 @@
 # Progress
 
+## 2026-11-09 — Media o'chirish: so'rov → admin tasdig'i (1-bosqich) ✅
+
+Foydalanuvchi qarorlari: tugallanmagan yuklashni studiya **o'zi** o'chiradi; tayyor (READY) fayl faqat **so'rov orqali** — Admin (`requests.media_delete`) yoki Super Admin tasdiqlaydi; tasdiqlanganda fayl **Google Drive savatiga** o'tadi (~30 kun tiklash mumkin), butunlay o'chirilmaydi.
+
+* **Backend** (`apps/media`): `MediaStatus.DELETED`, `CeremonyMedia.deleted_at`, `MediaDeletionRequest` (PENDING / APPROVED / REJECTED / CANCELLED, faylga bitta PENDING), `deletion.py`, Drive `trash_file`. Migratsiyalar `media/0005`, `audit/0008` (MEDIA_DISMISS, MEDIA_DELETE_REQUEST / APPROVE / REJECT / CANCEL).
+* **Ruxsatlar:** `requests.view`, `requests.media_delete` (modul "So'rovlar") — Super Admin adminlarga beradi.
+* **API:** studiya `DELETE /ceremonies/{id}/media/uploads/{media_id}/`, `POST …/media/{media_id}/delete-request/` (+ `cancel/`); admin `/admin/media-deletion-requests/` (list, retrieve, `approve`, `reject`, `summary`). Kontrakt + changelog yangilandi.
+* **frontend-studio:** har faylda o'chirish tugmasi; tayyor fayl uchun sabab so'raladi, "O'chirish so'ralgan" belgisi va qaytarib olish.
+* **Admin / Super Admin panel:** "So'rovlar" sahifasi (filtr, qidiruv, tasdiqlash / rad etish, izoh), menyuda kutilayotganlar soni.
+* Admin faylning o'zini ko'rmaydi (shaxsiy media) — faqat nomi, hajmi, studiya, marosim va sabab.
+* Watermark ishlayotgan paytda video o'chirilsa, logoli nusxa ham savatga tashlanadi. Muvaffaqiyatsiz watermark endi 30 soniyadan keyin qayta uriniladi (oldin 3 urinish bir zumda tugardi).
+* **Testlar:** `tests/test_media_deletion.py` (8) + to'liq to'plam 1837 passed; tsc/eslint toza; 4 ta panel build. Brauzerda bosib ko'rilmadi.
+
 ## 2026-11-08 — To'yxona jadvali, sana bo'yicha qidiruv va bron ✅
 
 Foydalanuvchi qarorlari: kun **smenalarga** bo'linadi (standart Nahor 06–10, Kunduzgi 12–16, Kechki 18–23; to'yxonachi o'zgartiradi); bron = **so'rov → to'yxona tasdiqlaydi**; userga **faqat admin tasdiqlagan (APPROVED) va faol** to'yxonalar ko'rinadi.

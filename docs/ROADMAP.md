@@ -34,6 +34,13 @@ Qarorlar:
 * V4.1-E: Drive papkasi `Studio_<nom>/Mijoz_****<JSHSHIR oxirgi 4>_<id6>/{Videos,Photos}` (to'liq JSHSHIR hech qachon); har ega 5 tagacha ko'ruvchi; ko'ruvchi faqat ko'radi (2026-11-07, foydalanuvchi qarori).
 * V4.1: OWNER huquqi faqat tasdiqlangan telefon bilan (`CEREMONY_OWNER_REQUIRE_VERIFIED_PHONE`, DEBUG'da ham); JSHSHIR — faqat identifikator.
 
+## So'rovlar va yordam (2026-11-09)
+
+| # | Bosqich | Holat |
+|---|---|---|
+| 1 | Media o'chirish so'rovlari: studiya → Admin/Super Admin tasdig'i, Drive savati, `requests.*` ruxsatlari, "So'rovlar" sahifasi | ✅ 2026-11-09 |
+| 2 | Yordam (support) xatlari: Admin, To'yxona, Studiya, User panellari; umumiy navbat; `support.*` ruxsatlari; Super Admin to'liq kuzatuv | ⏳ tasdiq kutilmoqda |
+
 ## V5.0 — To'yxona va studiya bandlik tizimi ([VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md))
 
 | # | Bosqich | Holat |
