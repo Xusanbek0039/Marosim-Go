@@ -362,6 +362,42 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_hall_booking_scope",
     ),
+    # reviews, studio catalog / portfolio, panel schedules — tests live in tests/test_reviews_and_catalog.py
+    **dict.fromkeys(
+        [
+            f"{prefix}_{op}"
+            for prefix in ("venues", "public_studios")
+            for op in ("like_create", "like_destroy", "reviews_mine_update", "reviews_mine_destroy")
+        ],
+        "ownership_review_scope_is_own",
+    ),
+    **dict.fromkeys(
+        ["admin_reviews_list", "admin_reviews_retrieve", "admin_reviews_partial_update", "admin_reviews_destroy"],
+        "ownership_admin_reviews_all",
+    ),
+    **dict.fromkeys(
+        ["studios_me_images_list", "studios_me_images_create", "studios_me_images_destroy"],
+        "ownership_studio_portfolio_is_own",
+    ),
+    **dict.fromkeys(
+        ["studios_calendar_list", "studios_images_create", "studios_images_destroy"],
+        "ownership_panel_studio_calendar_portfolio",
+    ),
+    **dict.fromkeys(
+        [
+            "admin_venues_calendar_retrieve",
+            "admin_venues_bookings_list",
+            "admin_venues_bookings_create",
+            "admin_venues_bookings_partial_update",
+            "admin_venues_bookings_confirm_create",
+            "admin_venues_bookings_reject_create",
+            "admin_venues_bookings_cancel_create",
+            "admin_venues_halls_sessions_list",
+            "admin_venues_halls_sessions_create",
+            "admin_venues_halls_sessions_partial_update",
+        ],
+        "ownership_panel_venue_schedule",
+    ),
     # subscriptions — tests live in tests/test_subscriptions.py
     **dict.fromkeys(["me_subscriptions_list", "me_subscriptions_cancel_create"], "ownership_my_subscriptions"),
     **dict.fromkeys(
@@ -428,6 +464,14 @@ ownership_venue_gallery_by_membership = _admin_venue_tests.test_gallery_rights_f
 from . import test_venue_bookings as _booking_tests  # noqa: E402
 
 ownership_hall_booking_scope = _booking_tests.test_booking_scope_is_own
+
+from . import test_reviews_and_catalog as _review_tests  # noqa: E402
+
+ownership_review_scope_is_own = _review_tests.test_review_scope_is_own
+ownership_admin_reviews_all = _review_tests.test_admin_review_moderation_needs_codes
+ownership_studio_portfolio_is_own = _review_tests.test_studio_portfolio_is_own_studio
+ownership_panel_studio_calendar_portfolio = _review_tests.test_panel_studio_calendar_and_portfolio
+ownership_panel_venue_schedule = _review_tests.test_panel_controls_every_venue_schedule
 
 from . import test_subscriptions as _subscription_tests  # noqa: E402
 

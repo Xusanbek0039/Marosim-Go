@@ -4,6 +4,29 @@
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 PORTS="8000,8001,8002,3002,3003"
 
+# Prefer the activated environment, then the project's conventional venv locations.
+# Normalize Windows paths so environments activated in PowerShell also work in Git Bash.
+PYTHON=""
+for env_dir in "${VIRTUAL_ENV:-}" "$ROOT/backend/.venv" "$ROOT/.venv" "$ROOT/backend/venv" "$ROOT/venv"; do
+  [[ -n "$env_dir" ]] || continue
+  env_dir="${env_dir//\\//}"
+  for executable in "$env_dir/Scripts/python.exe" "$env_dir/Scripts/python" "$env_dir/bin/python"; do
+    if [[ -x "$executable" ]]; then
+      PYTHON="$executable"
+      break 2
+    fi
+  done
+done
+if [[ -z "$PYTHON" ]]; then
+  echo "No virtual environment Python found. Create backend/.venv and install backend/requirements.txt, or activate an existing environment." >&2
+  exit 1
+fi
+if ! "$PYTHON" --version >/dev/null 2>&1; then
+  echo "Virtual environment Python cannot run: $PYTHON" >&2
+  echo "Restore its base Python installation, or recreate the environment and install backend/requirements.txt." >&2
+  exit 1
+fi
+
 # Windows keeps node/python children alive after the bash parent dies (the venv python.exe is only
 # a launcher), so free the ports by the PID that actually listens on them. Python on Windows lets
 # several runserver processes share one port (old code keeps answering), and Get-NetTCPConnection
@@ -25,7 +48,7 @@ trap 'free_ports; exit 0' INT TERM
 # serve <port> <panel> [panel for 127.0.0.1]
 serve() {
   (cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=$2,localhost=$2,127.0.0.1=${3:-$2}" \
-    venv/Scripts/python manage.py runserver "0.0.0.0:$1" --insecure --noreload) &
+    "$PYTHON" manage.py runserver "0.0.0.0:$1" --insecure --noreload) &
 }
 serve 8000 superadmin landing
 serve 8001 admin

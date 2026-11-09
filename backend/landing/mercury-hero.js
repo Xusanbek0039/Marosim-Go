@@ -43,7 +43,7 @@ try{
   document.addEventListener('mg:theme',render);
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();lost=true;stage.classList.remove('webgl-ready');button.disabled=true;button.title='3D qayta yuklanishi uchun sahifani yangilang';});
   addEventListener('pagehide',e=>{if(!e.persisted){lost=true;geometry.dispose();material.dispose();environment.dispose();renderer.dispose();}});
-  resize();
+  resize();button.hidden=false;
   function frame(now){const dt=last?Math.min((now-last)/1000,.06):0;last=now;if(!paused&&visible&&!document.hidden&&!lost){time+=dt;if(now-lastPaint>=1000/30){lastPaint=now;render();}}requestAnimationFrame(frame);}requestAnimationFrame(frame);
 }catch(error){
   // CSS Mercury remains visible; the page and every navigation/form control still work.

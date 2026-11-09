@@ -5,11 +5,13 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useDeferredValue, useState } from "react";
 
+import { VenueAdCard } from "@/components/ad-cards";
 import { type BookingTarget, BookingModal } from "@/components/booking-modal";
+import { StatsLine } from "@/components/reviews";
 import { PageTitle } from "@/components/shell";
 import { Card, cn, EmptyState, ErrorState, Field, Input, Select, Skeleton } from "@/components/ui";
 import { formatEventDate, formatMoney, formatPhone } from "@/lib/format";
-import { hhmm, type Region, REGION_LABELS, type SearchResult, todayIso, useVenueSearch } from "@/lib/venues";
+import { hhmm, type Region, REGION_LABELS, type SearchResult, todayIso, useVenueCatalog, useVenueSearch } from "@/lib/venues";
 
 export default function VenueSearchPage() {
   const [date, setDate] = useState(todayIso());
@@ -25,6 +27,8 @@ export default function VenueSearchPage() {
   return (
     <>
       <PageTitle title="To'yxonalar" subtitle="Sanani tanlang — o'sha kuni bo'sh smenasi bor to'yxonalar chiqadi" />
+
+      <TopVenues region={region} />
 
       <Card className="grid gap-3 sm:grid-cols-[1.1fr_1fr_0.7fr_1.2fr]">
         <Field label="Marosim sanasi" htmlFor="s-date">
@@ -128,6 +132,7 @@ function ResultCard({ row, date, onPick }: { row: SearchResult; date: string; on
                 {venue.district && `, ${venue.district}`} · {venue.address}
               </span>
             </p>
+            <StatsLine stats={venue.stats} className="mt-1" />
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">narxi</p>
@@ -190,5 +195,23 @@ function ResultCard({ row, date, onPick }: { row: SearchResult; date: string; on
         </div>
       </div>
     </div>
+  );
+}
+
+/** Ad strip: best rated / most liked approved venues (scrolls sideways on phones). */
+function TopVenues({ region }: { region: Region | "" }) {
+  const { data } = useVenueCatalog({ region });
+  if (!data || data.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2" aria-label="Tavsiya etilgan to'yxonalar">
+      <h2 className="px-1 text-base font-bold">Tavsiya etilgan to&apos;yxonalar</h2>
+      <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+        {data.slice(0, 10).map((v, i) => (
+          <li key={v.id} className="w-64 shrink-0 snap-start">
+            <VenueAdCard venue={v} top={i === 0 && v.stats.rating_count > 0} />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

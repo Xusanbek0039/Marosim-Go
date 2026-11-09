@@ -6,6 +6,8 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 import { type BookingTarget, BookingModal } from "@/components/booking-modal";
+import { PhotoGrid } from "@/components/photo-grid";
+import { ReviewsSection, StatsLine } from "@/components/reviews";
 import { Card, cn, ErrorState, Skeleton } from "@/components/ui";
 import { formatEventDate, formatMoney, formatPhone } from "@/lib/format";
 import { usePathId } from "@/lib/path-id";
@@ -73,7 +75,10 @@ function VenueDetail() {
           <img src={cover} alt="" className="h-56 w-full object-cover sm:h-72" />
         )}
         <div className="flex flex-col gap-3 px-5 pb-5 sm:px-6 sm:pb-6">
-          <h1 className="text-2xl font-extrabold tracking-tight">{venue.name}</h1>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h1 className="text-2xl font-extrabold tracking-tight">{venue.name}</h1>
+            <StatsLine stats={venue.stats} className="text-sm" />
+          </div>
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPinIcon className="size-4 shrink-0" aria-hidden />
             {REGION_LABELS[venue.region]}
@@ -93,20 +98,13 @@ function VenueDetail() {
             )}
           </div>
           {venue.description && <p className="text-sm whitespace-pre-line text-foreground/85">{venue.description}</p>}
-          {venue.images.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {venue.images.map((img) => (
-                // eslint-disable-next-line @next/next/no-img-element -- proxied media
-                <img key={img.id} src={img.image} alt="" className="h-24 w-36 shrink-0 rounded-xl object-cover" />
-              ))}
-            </div>
-          )}
+          {venue.images.length > 1 && <PhotoGrid images={venue.images} title={venue.name} />}
         </div>
       </Card>
 
       <Card className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-bold">Bo&apos;sh kunlar</h2>
+          <h2 className="text-lg font-bold">To&apos;yxona grafigi — bo&apos;sh kunlar</h2>
           <div className="flex items-center gap-1">
             <button type="button" aria-label="Oldingi oy" onClick={() => shift(-1)} className="glass inline-flex size-9 items-center justify-center rounded-xl hover:bg-muted">
               <ChevronLeftIcon className="size-4" />
@@ -217,6 +215,8 @@ function VenueDetail() {
           </div>
         )}
       </Card>
+
+      <ReviewsSection kind="venue" id={venue.id} name={venue.name} />
 
       <BookingModal
         target={target}

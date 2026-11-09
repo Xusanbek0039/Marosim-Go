@@ -3,6 +3,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./api";
+import type { Stats } from "./reviews";
 
 // -------------------------------------------------------------------- types
 export type Region =
@@ -51,6 +52,7 @@ export interface PublicVenue {
   base_price: string;
   currency: "UZS";
   images: { id: string; image: string; position: number }[];
+  stats: Stats;
 }
 
 export interface SessionBrief {
@@ -179,6 +181,15 @@ export function useVenueSearch(params: SearchParams) {
         signal,
       ),
     enabled: Boolean(params.date),
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** Public catalog of approved venues, best rated first (the "ad" strip). */
+export function useVenueCatalog(params: { region?: Region | ""; q?: string } = {}) {
+  return useQuery({
+    queryKey: ["venues", "catalog", params] as const,
+    queryFn: ({ signal }) => api.get<PublicVenue[]>("/venues/", { region: params.region, q: params.q }, signal),
     placeholderData: keepPreviousData,
   });
 }

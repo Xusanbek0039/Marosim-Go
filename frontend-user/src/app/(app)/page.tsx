@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { toast } from "sonner";
 
+import { Recommended } from "@/components/recommended";
 import { PageTitle } from "@/components/shell";
 import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { ApiError } from "@/lib/api";
@@ -128,6 +129,8 @@ export default function HomePage() {
           ))}
         </motion.ul>
       )}
+
+      <Recommended />
     </>
   );
 }

@@ -8,6 +8,7 @@ export const APP = {
   nav: [
     { href: "/", label: "Marosimlarim" },
     { href: "/toyxonalar", label: "To'yxonalar" },
+    { href: "/studiyalar", label: "Studiyalar" },
     { href: "/bronlarim", label: "Bronlarim" },
     { href: "/obuna", label: "Obuna" },
     { href: "/yordam", label: "Yordam" },
