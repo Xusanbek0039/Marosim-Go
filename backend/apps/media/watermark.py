@@ -163,7 +163,8 @@ def _probe(src: str, http_headers: str | None = None) -> VideoInfo:
         data = json.loads(res.stdout)
         stream = data["streams"][0]
     except (ValueError, KeyError, IndexError):
-        raise WatermarkError("not_a_video") from None
+        detail = (res.stderr or "").strip().replace(http_headers or "\0", "")[-200:]
+        raise WatermarkError(f"not_a_video: {detail}" if detail else "not_a_video") from None
     w, h = int(stream["width"]), int(stream["height"])
     rotation = next((int(d.get("rotation", 0)) for d in stream.get("side_data_list", []) if "rotation" in d), 0)
     try:

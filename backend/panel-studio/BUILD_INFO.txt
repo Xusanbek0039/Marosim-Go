@@ -1,3 +1,3 @@
 MarosimGo Studio cabinet — static build
-Built: 2026-11-09T09:24:35.899Z
+Built: 2026-11-09T09:32:12.282Z
 Do not edit: regenerate with `npm run build:panel` in frontend-studio/.

@@ -33,6 +33,9 @@ logger = logging.getLogger(__name__)
 MAX_ATTEMPTS = 3
 #: A PROCESSING row older than this is considered abandoned (server restarted mid-job).
 STALE_AFTER = timedelta(hours=6)
+#: Pause before a FAILED row is tried again: right after an upload Drive may not serve the new file
+#: yet, and back-to-back retries used to burn every attempt within seconds.
+RETRY_AFTER = timedelta(seconds=30)
 WM_MIME = "video/mp4"
 
 _lock = threading.Lock()
@@ -49,13 +52,28 @@ def queue_for(media: CeremonyMedia) -> None:
         transaction.on_commit(kick)
 
 
+def _videos():
+    return CeremonyMedia.objects.filter(kind=MediaKind.VIDEO, status=MediaStatus.READY)
+
+
+def _retryable():
+    return _videos().filter(wm_status=WatermarkStatus.FAILED, wm_attempts__lt=MAX_ATTEMPTS)
+
+
 def _candidates():
-    stale = timezone.now() - STALE_AFTER
-    return CeremonyMedia.objects.filter(kind=MediaKind.VIDEO, status=MediaStatus.READY).filter(
+    now = timezone.now()
+    return _videos().filter(
         Q(wm_status=WatermarkStatus.PENDING)
-        | Q(wm_status=WatermarkStatus.FAILED, wm_attempts__lt=MAX_ATTEMPTS)
-        | Q(wm_status=WatermarkStatus.PROCESSING, wm_started_at__lt=stale)
+        | Q(wm_status=WatermarkStatus.FAILED, wm_attempts__lt=MAX_ATTEMPTS, wm_started_at__lt=now - RETRY_AFTER)
+        | Q(wm_status=WatermarkStatus.PROCESSING, wm_started_at__lt=now - STALE_AFTER)
     )
+
+
+def needs_work(rows) -> bool:
+    """Whether any of ``rows`` still waits for (or will retry) its watermarked copy."""
+    return rows.filter(
+        Q(wm_status=WatermarkStatus.PENDING) | Q(wm_status=WatermarkStatus.FAILED, wm_attempts__lt=MAX_ATTEMPTS)
+    ).exists()
 
 
 def _claim(media_id) -> CeremonyMedia | None:
@@ -142,7 +160,10 @@ def drain(limit: int | None = None) -> int:
     while limit is None or done < limit:
         media_id = _candidates().order_by("created_at").values_list("pk", flat=True).first()
         if media_id is None:
-            break
+            if not _retryable().exists():
+                break
+            time.sleep(RETRY_AFTER.total_seconds())  # a failed video becomes due again shortly
+            continue
         if process(media_id):
             done += 1
     return done

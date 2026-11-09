@@ -273,11 +273,32 @@ def test_failed_watermark_is_retried_then_given_up(gallery, wm_drive, monkeypatc
         raise watermark.WatermarkError("ffmpeg_failed: test")
 
     monkeypatch.setattr(watermark, "burn_video", boom)
+    monkeypatch.setattr(watermark_jobs, "RETRY_AFTER", timedelta(0))
     wm_drive.blobs = {"file-video": PHOTO}
     assert watermark_jobs.drain() == watermark_jobs.MAX_ATTEMPTS
     video.refresh_from_db()
     assert video.wm_status == WatermarkStatus.FAILED and video.wm_attempts == watermark_jobs.MAX_ATTEMPTS
     assert "ffmpeg_failed" in video.wm_error
+
+
+@pytest.mark.django_db
+def test_failed_watermark_waits_before_the_next_attempt(gallery, wm_drive, monkeypatch):
+    video = gallery["video"]
+    video.wm_status = WatermarkStatus.PENDING
+    video.save()
+
+    def boom(src, dst, work, **kw):
+        raise watermark.WatermarkError("not_a_video")
+
+    monkeypatch.setattr(watermark, "burn_video", boom)
+    wm_drive.blobs = {"file-video": PHOTO}
+    assert watermark_jobs.drain(limit=1) == 1
+    video.refresh_from_db()
+    assert video.wm_status == WatermarkStatus.FAILED and video.wm_attempts == 1
+    assert not watermark_jobs._candidates().filter(pk=video.pk).exists()  # not retried back-to-back
+    assert watermark_jobs.needs_work(type(video).objects.filter(pk=video.pk))
+    type(video).objects.filter(pk=video.pk).update(wm_started_at=timezone.now() - watermark_jobs.RETRY_AFTER * 2)
+    assert watermark_jobs._candidates().filter(pk=video.pk).exists()
 
 
 def test_stamp_image_adds_the_logo_in_the_corner():

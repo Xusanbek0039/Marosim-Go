@@ -206,7 +206,7 @@ class MyMediaViewSet(viewsets.GenericViewSet):
         ceremony, role = self._ceremony_and_role()
         rows = CeremonyMedia.objects.filter(ceremony=ceremony, status=MediaStatus.READY).order_by("completed_at", "id")
         clean = self._clean(role)
-        if not clean and rows.filter(kind=MediaKind.VIDEO, wm_status=WatermarkStatus.PENDING).exists():
+        if not clean and watermark_jobs.needs_work(rows.filter(kind=MediaKind.VIDEO)):
             watermark_jobs.kick()  # self-healing: a queued video starts processing when someone looks
         return Response(MyMediaSerializer(rows, many=True, context={"role": role, "clean": clean}).data)
 

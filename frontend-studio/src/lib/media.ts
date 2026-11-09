@@ -158,17 +158,28 @@ export async function uploadFile(
   onProgress(0, mediaId);
   if (!url) throw new Error("no_session");
 
+  const complete = () => api.post<UploadSession>(`${base(ceremonyId)}uploads/${mediaId}/complete/`);
   let offset = 0;
   let failures = 0;
+  let sentAll = false;
   while (true) {
     if (signal.aborted) throw new UploadAborted();
     try {
-      const res = await putChunk(url, file, offset, (sent) => onProgress(sent, mediaId), signal);
+      const res = await putChunk(url, file, offset, (sent) => {
+        if (sent >= file.size) sentAll = true;
+        onProgress(sent, mediaId);
+      }, signal);
       failures = 0;
       if (res.done) break;
       offset = res.received;
     } catch (err) {
       if (err instanceof UploadAborted) throw err;
+      // Every byte went out but Google's final response was unreadable (e.g. CORS for an origin the
+      // session was not opened with): the server checks the session itself, so ask it to finish.
+      if (sentAll) {
+        const done = await complete().catch(() => null);
+        if (done) return done.media;
+      }
       if (++failures > MAX_RETRIES) throw err;
       await sleep(1000 * 2 ** failures);
       const state = await probe(url, file.size).catch(() => null);
@@ -177,6 +188,5 @@ export async function uploadFile(
     }
   }
   onProgress(file.size, mediaId);
-  const done = await api.post<UploadSession>(`${base(ceremonyId)}uploads/${mediaId}/complete/`);
-  return done.media;
+  return (await complete()).media;
 }
