@@ -8,8 +8,9 @@ import { useState } from "react";
 
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useMe } from "@/features/auth/hooks";
+import { useCan, useMe } from "@/features/auth/hooks";
 import { useRequestsSummary } from "@/features/requests/api";
+import { useMySummary, useStaffSummary } from "@/features/support/api";
 import { formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { duration, spring } from "@/motion/tokens";
@@ -18,19 +19,37 @@ import { NAV_SECTIONS, type NavItem, canSee, isActive } from "./nav";
 
 export const SIDEBAR_WIDTH = { expanded: 272, collapsed: 84 } as const;
 
-function RequestsCount({ collapsed }: { collapsed: boolean }) {
-  const { data } = useRequestsSummary();
-  if (!data?.pending) return null;
+function CountPill({ count, collapsed, label }: { count?: number; collapsed: boolean; label: string }) {
+  if (!count) return null;
   return (
     <span
-      aria-label={`${data.pending} ta kutilayotgan so'rov`}
+      aria-label={`${count} ta ${label}`}
       className={cn(
         "z-10 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-bold leading-5 text-white tabular-nums",
         collapsed ? "absolute top-1 right-1" : "relative ml-auto",
       )}
     >
-      {data.pending > 99 ? "99+" : data.pending}
+      {count > 99 ? "99+" : count}
     </span>
+  );
+}
+
+function RequestsCount({ collapsed }: { collapsed: boolean }) {
+  const { data } = useRequestsSummary();
+  return <CountPill count={data?.pending} collapsed={collapsed} label="kutilayotgan so'rov" />;
+}
+
+/** Staff: tickets waiting for an answer; an admin without `support.view`: answers to their own tickets. */
+function SupportCount({ collapsed }: { collapsed: boolean }) {
+  const { data: me } = useMe();
+  const can = useCan();
+  const staff = me?.role === "SUPER_ADMIN" || can("support.view");
+  const inbox = useStaffSummary(staff);
+  const mine = useMySummary(!staff && me?.role === "ADMIN");
+  return staff ? (
+    <CountPill count={inbox.data?.open} collapsed={collapsed} label="javob kutayotgan xat" />
+  ) : (
+    <CountPill count={mine.data?.answered} collapsed={collapsed} label="javob kelgan xat" />
   );
 }
 
@@ -86,6 +105,7 @@ function NavLink({
         )}
       </AnimatePresence>
       {item.badge === "requests" && <RequestsCount collapsed={collapsed} />}
+      {item.badge === "support" && <SupportCount collapsed={collapsed} />}
     </Link>
   );
   return collapsed ? (

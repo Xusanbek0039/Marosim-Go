@@ -21,7 +21,9 @@ export type PermissionCode =
   | "subscriptions.update"
   | "subscriptions.plans"
   | "requests.view"
-  | "requests.media_delete";
+  | "requests.media_delete"
+  | "support.view"
+  | "support.monitor";
 
 export interface Me {
   id: string;

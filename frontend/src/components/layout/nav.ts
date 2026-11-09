@@ -10,6 +10,7 @@ import {
   HardDriveIcon,
   HistoryIcon,
   InboxIcon,
+  LifeBuoyIcon,
   ListTreeIcon,
   SmartphoneIcon,
   UserIcon,
@@ -33,7 +34,7 @@ export interface NavItem {
   /** Active only on this exact path (for section index pages). */
   exact?: boolean;
   /** Live counter shown next to the label (e.g. pending requests). */
-  badge?: "requests";
+  badge?: "requests" | "support";
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -45,6 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/subscriptions", label: "Obunalar", icon: GemIcon, requires: "subscriptions.view" },
   { href: "/requests", label: "So'rovlar", icon: InboxIcon, requires: "requests.view", badge: "requests" },
   { href: "/storage", label: "Google Drive", icon: HardDriveIcon, requires: "super" },
+  { href: "/support", label: "Yordam", icon: LifeBuoyIcon, badge: "support" },
   { href: "/settings", label: "Sozlamalar", icon: Settings2Icon },
 ];
 
