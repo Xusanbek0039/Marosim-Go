@@ -29,6 +29,11 @@
 | POST | `/api/v1/admin/subscriptions/{id}/approve/` | To'lovni qayd etib tasdiqlash | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
 | POST | `/api/v1/admin/subscriptions/{id}/cancel/` | Obunani bekor qilish | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
 | POST | `/api/v1/admin/subscriptions/{id}/reject/` | So'rovni rad etish | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/support/tickets/` | Kelgan yordam xatlari | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
+| GET | `/api/v1/admin/support/tickets/summary/` | Javob kutayotgan xatlar soni (javob bera oladiganlari) | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
+| GET | `/api/v1/admin/support/tickets/{id}/` | Yordam xati (yozishmalar, kim javob bergani) | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
+| POST | `/api/v1/admin/support/tickets/{id}/close/` | Xatni yopish | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
+| POST | `/api/v1/admin/support/tickets/{id}/messages/` | Javob yozish | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
 | GET | `/api/v1/admin/venues/` | To'yxonalar ro'yxati (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | POST | `/api/v1/admin/venues/` | To'yxona qo'shish (egasi bilan) | ADMIN, SUPER_ADMIN | `venues.create` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | GET | `/api/v1/admin/venues/{id}/` | To'yxona ma'lumotlari (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
@@ -116,6 +121,12 @@
 | PATCH | `/api/v1/studios/{id}/` | Studiyani tahrirlash | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | DELETE | `/api/v1/studios/{id}/` | Studiyani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `studios.delete` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | GET | `/api/v1/subscriptions/plans/` | Obuna tariflari | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/support/tickets/` | Mening yordam xatlarim | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
+| POST | `/api/v1/support/tickets/` | Yordam xati yuborish | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
+| GET | `/api/v1/support/tickets/summary/` | Xatlarim soni (javob kelganlar — menyu belgisi uchun) | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
+| GET | `/api/v1/support/tickets/{id}/` | Yordam xati (yozishmalar bilan) | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
+| POST | `/api/v1/support/tickets/{id}/close/` | Xatni yopish (muammo hal bo'ldi) | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
+| POST | `/api/v1/support/tickets/{id}/messages/` | Xatga qo'shimcha yozish (yopilgan xat qayta ochiladi) | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
 | GET | `/api/v1/users/` | Mijozlar ro'yxati (USER, STUDIO, VENUE_OWNER) | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | POST | `/api/v1/users/` | Mijoz qo'shish | ADMIN, SUPER_ADMIN | `users.create` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | GET | `/api/v1/users/{id}/` | Mijoz ma'lumotlari | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
@@ -167,7 +178,7 @@
 * `GET /api/v1/venues/{id}/` — To'yxona (ommaviy ma'lumot, zallar va smenalar)
 * `GET /api/v1/venues/{id}/availability/` — To'yxona bo'sh smenalari (kalendar)
 
-### USER (30)
+### USER (36)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -199,8 +210,14 @@
 * `POST /api/v1/me/venue-bookings/` — To'yxona smenasiga bron so'rovi yuborish
 * `GET /api/v1/me/venue-bookings/{id}/` — Bron tafsiloti
 * `POST /api/v1/me/venue-bookings/{id}/cancel/` — Bron / so'rovni bekor qilish
+* `GET /api/v1/support/tickets/` — Mening yordam xatlarim
+* `POST /api/v1/support/tickets/` — Yordam xati yuborish
+* `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
+* `GET /api/v1/support/tickets/{id}/` — Yordam xati (yozishmalar bilan)
+* `POST /api/v1/support/tickets/{id}/close/` — Xatni yopish (muammo hal bo'ldi)
+* `POST /api/v1/support/tickets/{id}/messages/` — Xatga qo'shimcha yozish (yopilgan xat qayta ochiladi)
 
-### STUDIO (21)
+### STUDIO (27)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -223,11 +240,23 @@
 * `DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/` — Ishtirokchini olib tashlash (deprecated)
 * `GET /api/v1/studios/me/` — Mening studiyalarim
 * `GET /api/v1/studios/me/ceremonies/` — Mening studiyamning marosimlari
+* `GET /api/v1/support/tickets/` — Mening yordam xatlarim
+* `POST /api/v1/support/tickets/` — Yordam xati yuborish
+* `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
+* `GET /api/v1/support/tickets/{id}/` — Yordam xati (yozishmalar bilan)
+* `POST /api/v1/support/tickets/{id}/close/` — Xatni yopish (muammo hal bo'ldi)
+* `POST /api/v1/support/tickets/{id}/messages/` — Xatga qo'shimcha yozish (yopilgan xat qayta ochiladi)
 
-### VENUE_OWNER (25)
+### VENUE_OWNER (31)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
+* `GET /api/v1/support/tickets/` — Mening yordam xatlarim
+* `POST /api/v1/support/tickets/` — Yordam xati yuborish
+* `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
+* `GET /api/v1/support/tickets/{id}/` — Yordam xati (yozishmalar bilan)
+* `POST /api/v1/support/tickets/{id}/close/` — Xatni yopish (muammo hal bo'ldi)
+* `POST /api/v1/support/tickets/{id}/messages/` — Xatga qo'shimcha yozish (yopilgan xat qayta ochiladi)
 * `GET /api/v1/venue-owner/venues/` — Mening to'yxonalarim
 * `POST /api/v1/venue-owner/venues/` — To'yxona yaratish (PRIVATE holatda)
 * `GET /api/v1/venue-owner/venues/{id}/` — To'yxona ma'lumotlari (egasi uchun)
@@ -252,7 +281,7 @@
 * `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
 * `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
-### ADMIN (41)
+### ADMIN (52)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
@@ -271,6 +300,11 @@
 * `POST /api/v1/admin/subscriptions/{id}/approve/` — To'lovni qayd etib tasdiqlash
 * `POST /api/v1/admin/subscriptions/{id}/cancel/` — Obunani bekor qilish
 * `POST /api/v1/admin/subscriptions/{id}/reject/` — So'rovni rad etish
+* `GET /api/v1/admin/support/tickets/` — Kelgan yordam xatlari
+* `GET /api/v1/admin/support/tickets/summary/` — Javob kutayotgan xatlar soni (javob bera oladiganlari)
+* `GET /api/v1/admin/support/tickets/{id}/` — Yordam xati (yozishmalar, kim javob bergani)
+* `POST /api/v1/admin/support/tickets/{id}/close/` — Xatni yopish
+* `POST /api/v1/admin/support/tickets/{id}/messages/` — Javob yozish
 * `GET /api/v1/admin/venues/` — To'yxonalar ro'yxati (panel)
 * `POST /api/v1/admin/venues/` — To'yxona qo'shish (egasi bilan)
 * `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
@@ -288,6 +322,12 @@
 * `GET /api/v1/studios/{id}/` — Studiya ma'lumotlari
 * `PATCH /api/v1/studios/{id}/` — Studiyani tahrirlash
 * `DELETE /api/v1/studios/{id}/` — Studiyani o'chirish (soft delete)
+* `GET /api/v1/support/tickets/` — Mening yordam xatlarim
+* `POST /api/v1/support/tickets/` — Yordam xati yuborish
+* `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
+* `GET /api/v1/support/tickets/{id}/` — Yordam xati (yozishmalar bilan)
+* `POST /api/v1/support/tickets/{id}/close/` — Xatni yopish (muammo hal bo'ldi)
+* `POST /api/v1/support/tickets/{id}/messages/` — Xatga qo'shimcha yozish (yopilgan xat qayta ochiladi)
 * `GET /api/v1/users/` — Mijozlar ro'yxati (USER, STUDIO, VENUE_OWNER)
 * `POST /api/v1/users/` — Mijoz qo'shish
 * `GET /api/v1/users/{id}/` — Mijoz ma'lumotlari
@@ -296,7 +336,7 @@
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (77)
+### SUPER_ADMIN (82)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
@@ -319,6 +359,11 @@
 * `POST /api/v1/admin/subscriptions/{id}/approve/` — To'lovni qayd etib tasdiqlash
 * `POST /api/v1/admin/subscriptions/{id}/cancel/` — Obunani bekor qilish
 * `POST /api/v1/admin/subscriptions/{id}/reject/` — So'rovni rad etish
+* `GET /api/v1/admin/support/tickets/` — Kelgan yordam xatlari
+* `GET /api/v1/admin/support/tickets/summary/` — Javob kutayotgan xatlar soni (javob bera oladiganlari)
+* `GET /api/v1/admin/support/tickets/{id}/` — Yordam xati (yozishmalar, kim javob bergani)
+* `POST /api/v1/admin/support/tickets/{id}/close/` — Xatni yopish
+* `POST /api/v1/admin/support/tickets/{id}/messages/` — Javob yozish
 * `GET /api/v1/admin/venues/` — To'yxonalar ro'yxati (panel)
 * `POST /api/v1/admin/venues/` — To'yxona qo'shish (egasi bilan)
 * `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
@@ -382,6 +427,8 @@
   * JWT talab qilinmaydi (Google brauzer redirect'i), lekin faqat ulashni boshlagan faol SUPER_ADMIN uchun yakunlanadi: bir martalik `state` + brauzerga bog'lovchi httpOnly cookie
 * `PATCH /api/v1/admin/subscription-plans/{id}/`
   * Yangi narx faqat keyingi so'rovlarga ta'sir qiladi.
+* `POST /api/v1/admin/support/tickets/{id}/messages/`
+  * Adminlarning xatlariga faqat SUPER_ADMIN javob beradi; o'z xatiga javob berilmaydi.
 * `PATCH /api/v1/admin/venues/{id}/`
   * publication_status o'zgarishi uchun qo'shimcha `venues.publish`
 * `POST /api/v1/admin/venues/{id}/images/`
@@ -495,6 +542,8 @@
   * Faqat ommaga chiqqan to'yxonaning faol smenasi, bugundan boshlab 2 yilgacha.
   * Smena band bo'lsa 409; bir vaqtda ko'pi bilan 10 ta ochiq so'rov.
   * So'rov smenani band qilmaydi — to'yxona tasdiqlaganda band bo'ladi.
+* `POST /api/v1/support/tickets/`
+  * ADMIN xati Super Admin'ga boradi; boshqalarniki — support.view ruxsati bor adminlarga.
 * `DELETE /api/v1/users/{id}/`
   * Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
 * `GET /api/v1/users/{id}/pinfl/`

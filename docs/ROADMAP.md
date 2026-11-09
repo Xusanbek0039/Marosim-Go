@@ -39,7 +39,7 @@ Qarorlar:
 | # | Bosqich | Holat |
 |---|---|---|
 | 1 | Media o'chirish so'rovlari: studiya → Admin/Super Admin tasdig'i, Drive savati, `requests.*` ruxsatlari, "So'rovlar" sahifasi | ✅ 2026-11-09 |
-| 2 | Yordam (support) xatlari: Admin, To'yxona, Studiya, User panellari; umumiy navbat; `support.*` ruxsatlari; Super Admin to'liq kuzatuv | ⏳ tasdiq kutilmoqda |
+| 2 | Yordam (support) xatlari: Admin, To'yxona, Studiya, User panellari; umumiy navbat; `support.*` ruxsatlari; Super Admin to'liq kuzatuv | ✅ 2026-11-09 |
 
 ## V5.0 — To'yxona va studiya bandlik tizimi ([VENUE_AVAILABILITY.md](VENUE_AVAILABILITY.md))
 

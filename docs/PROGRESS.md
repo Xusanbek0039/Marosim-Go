@@ -1,5 +1,16 @@
 # Progress
 
+## 2026-11-09 — Yordam (support) xatlari, 2-bosqich ✅
+
+Foydalanuvchi qarori: **umumiy navbat**. Foydalanuvchi / Studiya / To'yxona xatlari `support.view` ruxsati bor adminlarga va Super Admin'ga boradi; Admin xati faqat Super Admin'ga. Super Admin hammasini ko'radi (kim, qaysi studiya / to'yxonadan, kim javob bergan, kim yopgan); `support.monitor` bilan admin ham shunday ko'radi, lekin adminlar xatiga javob bera olmaydi.
+
+* **Backend** (`apps/support`): `SupportTicket` (OPEN / ANSWERED / CLOSED, `audience` STAFF / SUPER_ADMIN, yozilgan paytdagi studiya / to'yxona, `handled_by`, `closed_by`), `SupportMessage`. Migratsiya `support/0001`. Throttle `support_write` (60/soat).
+* **Ruxsatlar:** `support.view` (qabul qilish va javob berish), `support.monitor` (barcha xatlarni kuzatish, faqat o'qish).
+* **API:** muallif `/support/tickets/` (list, create, retrieve, `messages`, `close`, `summary`); xodim `/admin/support/tickets/` (list + filtrlar status / audience / author_role / studio / venue, qidiruv, retrieve, `messages`, `close`, `summary`). Mijozlarga javob bergan admin nomi emas, "MarosimGo yordam xizmati" ko'rinadi. Muallif yopilgan xatga yozsa, xat qayta ochiladi.
+* **Admin / Super Admin panel:** "Yordam" sahifasi: "Kelgan xatlar" (statistika, filtr, yozishma oynasi, javob, yopish) va adminlar uchun "Mening xatlarim" (Super Admin'ga yozish); menyuda javob kutayotganlar soni.
+* **frontend-studio, frontend-toyxona, frontend-user:** "Yordam" sahifasi: xatlar ro'yxati, yangi xat, yozishma, "Muammo hal bo'ldi".
+* **Testlar:** `tests/test_support.py` (5) + to'liq to'plam 1952 passed; 5 ta panel tsc / eslint / build toza. Brauzerda bosib ko'rilmadi.
+
 ## 2026-11-09 — Media o'chirish: so'rov → admin tasdig'i (1-bosqich) ✅
 
 Foydalanuvchi qarorlari: tugallanmagan yuklashni studiya **o'zi** o'chiradi; tayyor (READY) fayl faqat **so'rov orqali** — Admin (`requests.media_delete`) yoki Super Admin tasdiqlaydi; tasdiqlanganda fayl **Google Drive savatiga** o'tadi (~30 kun tiklash mumkin), butunlay o'chirilmaydi.
