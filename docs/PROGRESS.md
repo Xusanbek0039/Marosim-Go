@@ -1,5 +1,19 @@
 # Progress
 
+## 2026-11-09 — Landing: oilaviy dizayn, light / dark, 3D nikoh uzuklari ✅
+
+* Iliq "to'y" uslubi: oltin, anor, olxo'ri ranglari, suzani naqshlari, serif sarlavhalar; yangi bo'limlar "Oilaviy lahzalar" (mozaika) va "Bu xotira kim uchun", iqtibos.
+* Light / Dark: tizim sozlamasi bo'yicha, menyuda almashtirish tugmasi (localStorage, sahifa ochilishida miltillamaydi).
+* 3D: bir-biriga kirgan ikki nikoh uzugi (oltin + pushti oltin), yaltirash, uchqunlar; telefonlarda kamroq qirra.
+* Tekshiruv: Chrome headless — light / dark, desktop / mobil screenshotlar, konsolda xato yo'q; topilgan 2 ta kamchilik (mozaika bo'shlig'i, "+998" bo'linishi) tuzatildi.
+
+## 2026-11-09 — Landing: glass dizayn, 3D, animatsiya, robotlardan himoya ✅
+
+* **Dizayn** (`backend/landing/index.html`, tashqi kutubxona / CDN yo'q — CSP faqat `'self'`): shaffof (glass) kartalar, harakatlanuvchi aurora fon, loader, scroll progress, scroll bo'yicha paydo bo'lish, kartalarning 3D egilishi, sarlavha so'zma-so'z animatsiyasi; `prefers-reduced-motion` hurmat qilinadi.
+* **3D model:** o'zimiz yozgan canvas renderer — qirrali 8 burchakli girih yulduzi va atrofida aylanuvchi kublar, yorug'lik/soya, sichqonchaga ergashadi; ekrandan chiqsa yoki tab yashirilsa to'xtaydi.
+* **Robotlardan himoya:** `GET /public/partner-applications/challenge/` — imzolangan bir martalik topshiriq; brauzer SHA-256 proof-of-work yechadi (16 bit, ~0.1–0.5 s, toza JS — HTTP LAN'da ham ishlaydi); forma kamida 3 s ochiq bo'lishi kerak; token bir marta ishlatiladi; bitta raqamdan kuniga 3 ta ariza; honeypot va IP cheklovi saqlandi. Sozlamalar: `PARTNER_APPLY_POW_BITS`, `PARTNER_APPLY_MIN_SECONDS`, `THROTTLE_PARTNER_CHALLENGE`.
+* **Tekshiruv:** JS SHA-256 `hashlib` bilan mos; JS yechgan proof server tomonidan qabul qilindi; Chrome headless'da desktop / mobil screenshotlar; `tests/test_partner_applications.py` (7) + to'liq to'plam yashil.
+
 ## 2026-11-09 — Landing: hamkorlik arizasi; User / To'yxona static kabinetlar ✅
 
 * **Landing** (`backend/landing/index.html`, marosimgo.uz): "Hamkor bo'lish" bo'limi — Video studiya / To'yxona tanlanadi; ism, telefon (+998), nomi, viloyat, xabar. Yashirin honeypot maydoni, IP cheklovi (`partner_apply`, 5/soat), bot himoyasi.

@@ -118,6 +118,7 @@
 | GET | `/api/v1/monitoring/logs/` | So'rovlar jurnali | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | SUPER_ADMIN | — | JWT | — | OK |
 | POST | `/api/v1/public/partner-applications/` | Hamkorlik arizasi (studiya / to'yxona) — landing sahifadan | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/public/partner-applications/challenge/` | Bot tekshiruvi uchun bir martalik topshiriq (proof-of-work) | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/studios/` | Studiyalar ro'yxati | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | POST | `/api/v1/studios/` | Studiya qo'shish | ADMIN, SUPER_ADMIN | `studios.create` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | GET | `/api/v1/studios/me/` | Mening studiyalarim | STUDIO | — | JWT | Faqat so'rovchining faol a'zoliklari va ularning studiyalari. | OK |
@@ -168,7 +169,7 @@
 
 ## Rollar bo'yicha
 
-### PUBLIC (13)
+### PUBLIC (14)
 
 * `GET /api/v1/admin/storage/google/callback/` — Google OAuth callback (brauzer redirect)
 * `GET /api/v1/auth/csrf/` — CSRF cookie olish (web panel)
@@ -179,6 +180,7 @@
 * `GET /api/v1/health/live/` — Liveness — jarayon ishlayaptimi
 * `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
 * `POST /api/v1/public/partner-applications/` — Hamkorlik arizasi (studiya / to'yxona) — landing sahifadan
+* `GET /api/v1/public/partner-applications/challenge/` — Bot tekshiruvi uchun bir martalik topshiriq (proof-of-work)
 * `GET /api/v1/subscriptions/plans/` — Obuna tariflari
 * `GET /api/v1/venues/search/` — Sana bo'yicha bo'sh to'yxonalarni qidirish
 * `GET /api/v1/venues/{id}/` — To'yxona (ommaviy ma'lumot, zallar va smenalar)
@@ -557,7 +559,9 @@
   * Smena band bo'lsa 409; bir vaqtda ko'pi bilan 10 ta ochiq so'rov.
   * So'rov smenani band qilmaydi — to'yxona tasdiqlaganda band bo'ladi.
 * `POST /api/v1/public/partner-applications/`
-  * IP bo'yicha cheklangan (partner_apply); bot tekshiruvi; javobda shaxsiy ma'lumot yo'q.
+  * IP bo'yicha cheklangan (partner_apply); bir martalik proof-of-work topshiriq, kamida 3 s; bitta raqamdan kuniga 3 ta; javobda shaxsiy ma'lumot yo'q.
+* `GET /api/v1/public/partner-applications/challenge/`
+  * IP bo'yicha cheklangan (partner_challenge).
 * `POST /api/v1/support/tickets/`
   * ADMIN xati Super Admin'ga boradi; boshqalarniki — support.view ruxsati bor adminlarga.
 * `DELETE /api/v1/users/{id}/`
