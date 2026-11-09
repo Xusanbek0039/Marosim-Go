@@ -13,6 +13,8 @@ import type { Ceremony } from "@/lib/types";
 import { Badge, Button, Card, cn, EmptyState, ErrorState, Skeleton } from "./ui";
 
 const PARALLEL = 2;
+// crypto.randomUUID needs a secure context (HTTPS/localhost) and breaks over plain-HTTP LAN IPs.
+let jobSeq = 0;
 
 const STATUS: Record<MediaStatus, { label: string; tone: "neutral" | "brand" | "success" | "warning" | "danger" }> = {
   UPLOADING: { label: "Yuklanmoqda", tone: "brand" },
@@ -90,7 +92,7 @@ function useUploadQueue(ceremonyId: string) {
         toast.error(`${file.name}: bu fayl turi qo'llab-quvvatlanmaydi`);
         continue;
       }
-      fresh.push({ id: crypto.randomUUID(), file, mime, sent: 0, state: "queued", abort: new AbortController() });
+      fresh.push({ id: `job-${++jobSeq}`, file, mime, sent: 0, state: "queued", abort: new AbortController() });
     }
     if (!fresh.length) return;
     queue.current.push(...fresh);
