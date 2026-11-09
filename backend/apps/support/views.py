@@ -34,8 +34,10 @@ UUID_RE = "[0-9a-fA-F-]{36}"
 
 def _annotated(qs):
     last = SupportMessage.objects.filter(ticket=OuterRef("pk")).order_by("-created_at").values("body")[:1]
-    return qs.select_related("author", "studio", "venue", "handled_by", "closed_by").annotate(
-        message_count=Count("messages"), last_body=Subquery(last)
+    return (
+        qs.select_related("author", "studio", "venue", "handled_by", "closed_by")
+        .annotate(message_count=Count("messages"), last_body=Subquery(last))
+        .order_by("-last_message_at", "-created_at")  # GROUP BY drops Meta.ordering
     )
 
 
