@@ -22,6 +22,8 @@ import { shake } from "@/motion/tokens";
 const schema = z.object({
   name: z.string().trim().min(1, "Studiya nomini kiriting").max(150),
   address: z.string().trim().min(1, "Manzil kiritilishi shart").max(255),
+  phone_number: z.string().trim().max(32),
+  description: z.string().trim().max(2000),
   responsible_user_id: z.string().min(1, "Mas'ul shaxsni tanlang"),
   is_active: z.boolean(),
   profile_picture: z.custom<File | null | undefined>(),
@@ -55,7 +57,7 @@ export function StudioFormDialog({
 
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", address: "", responsible_user_id: "", is_active: true, profile_picture: undefined },
+    defaultValues: { name: "", address: "", phone_number: "", description: "", responsible_user_id: "", is_active: true, profile_picture: undefined },
   });
   const { errors } = form.formState;
 
@@ -66,11 +68,13 @@ export function StudioFormDialog({
         ? {
             name: studio.name,
             address: studio.address,
+            phone_number: studio.phone_number ?? "",
+            description: studio.description ?? "",
             responsible_user_id: studio.responsible_user.id,
             is_active: studio.is_active,
             profile_picture: undefined,
           }
-        : { name: "", address: "", responsible_user_id: "", is_active: true, profile_picture: undefined },
+        : { name: "", address: "", phone_number: "", description: "", responsible_user_id: "", is_active: true, profile_picture: undefined },
     );
   }, [open, studio, form]);
 
@@ -79,6 +83,8 @@ export function StudioFormDialog({
       const payload: Record<string, unknown> = {
         name: values.name,
         address: values.address,
+        phone_number: values.phone_number,
+        description: values.description,
         responsible_user_id: values.responsible_user_id,
         is_active: values.is_active,
       };
@@ -130,6 +136,18 @@ export function StudioFormDialog({
             placeholder="Masalan: Toshkent, Yunusobod 4-mavze"
             aria-invalid={Boolean(errors.address)}
             {...form.register("address")}
+          />
+        </Field>
+        <Field label="Telefon (mijozlar uchun)" htmlFor="studio-phone" error={errors.phone_number?.message}>
+          <Input id="studio-phone" inputMode="tel" placeholder="+998 90 123 45 67" aria-invalid={Boolean(errors.phone_number)} {...form.register("phone_number")} />
+        </Field>
+        <Field label="Tavsif (ommaviy profilda ko'rinadi)" htmlFor="studio-description" error={errors.description?.message}>
+          <textarea
+            id="studio-description"
+            rows={3}
+            maxLength={2000}
+            className="w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-brand"
+            {...form.register("description")}
           />
         </Field>
         <Field

@@ -16,6 +16,9 @@ export type PermissionCode =
   | "venues.update"
   | "venues.delete"
   | "venues.publish"
+  | "venues.schedule"
+  | "reviews.view"
+  | "reviews.moderate"
   | "subscriptions.view"
   | "subscriptions.create"
   | "subscriptions.update"
@@ -71,8 +74,11 @@ export interface Admin extends ManagedUser {
 export interface Studio {
   id: string;
   name: string;
+  description: string;
   profile_picture: string | null;
   address: string;
+  phone_number: string;
+  images: { id: string; image: string; position: number; created_at: string }[];
   responsible_user: UserSummary;
   is_active: boolean;
   created_at: string;
@@ -377,6 +383,63 @@ export interface AdminVenue {
     role: VenueMemberRole;
     is_active: boolean;
   }[];
+  created_at: string;
+  updated_at: string;
+}
+
+// ------------------------------------------------------------------ schedules
+export type BookingStatus = "REQUESTED" | "CONFIRMED" | "BLOCKED" | "REJECTED" | "CANCELLED";
+
+export interface HallSession {
+  id: string;
+  name: string;
+  starts_at: string;
+  ends_at: string;
+  is_active: boolean;
+}
+
+export interface VenueBooking {
+  id: string;
+  hall: { id: string; name: string };
+  session: { id: string; name: string; starts_at: string; ends_at: string };
+  date: string;
+  status: BookingStatus;
+  source: "USER" | "VENUE";
+  event_type: string;
+  guest_count: number | null;
+  requester: { id: string; full_name: string; phone_number: string } | null;
+  contact_name: string;
+  contact_phone: string;
+  note: string;
+  venue_note: string;
+  quoted_price: string | null;
+  created_at: string;
+}
+
+export interface VenueCalendar {
+  date_from: string;
+  date_to: string;
+  halls: { id: string; name: string; capacity: number; is_active: boolean; sessions: HallSession[] }[];
+  bookings: VenueBooking[];
+}
+
+export interface StudioCalendarEntry {
+  id: string;
+  title: string;
+  event_type: string;
+  event_date: string;
+  status: string;
+}
+
+// -------------------------------------------------------------------- reviews
+export interface AdminReview {
+  id: string;
+  target: { kind: "venue" | "studio"; id: string; name: string };
+  author: { id: string; full_name: string; phone_number: string | null };
+  rating: number;
+  text: string;
+  is_hidden: boolean;
+  moderated_at: string | null;
   created_at: string;
   updated_at: string;
 }
