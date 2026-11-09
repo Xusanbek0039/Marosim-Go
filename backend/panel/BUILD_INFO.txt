@@ -1,3 +1,3 @@
 MarosimGo Super Admin panel — static build
-Built: 2026-11-09T10:06:52.347Z
+Built: 2026-11-09T10:20:43.257Z
 Do not edit: regenerate with `npm run build:panel` in frontend/.
