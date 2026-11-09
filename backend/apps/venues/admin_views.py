@@ -257,7 +257,10 @@ class AdminVenueViewSet(viewsets.ModelViewSet):
         return Response(OwnerCalendarSerializer(data).data)
 
     @extend_schema(
-        methods=["GET"], summary="Zal smenalari (panel)", tags=["admin-venues"], responses=HallSessionSerializer(many=True)
+        methods=["GET"],
+        summary="Zal smenalari (panel)",
+        tags=["admin-venues"],
+        responses=HallSessionSerializer(many=True),
     )
     @action(
         detail=True,

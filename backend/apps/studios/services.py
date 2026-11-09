@@ -67,7 +67,9 @@ def add_portfolio_image(request, studio: Studio, upload) -> StudioImage:
 def delete_portfolio_image(request, image: StudioImage) -> None:
     image_id, studio_id, file = image.pk, image.studio_id, image.image
     image.delete()
-    record(request, AuditAction.DELETE, image, changes={"studio": str(studio_id)}, target_label=f"StudioImage {image_id}")
+    record(
+        request, AuditAction.DELETE, image, changes={"studio": str(studio_id)}, target_label=f"StudioImage {image_id}"
+    )
     transaction.on_commit(lambda: file.delete(save=False))
 
 

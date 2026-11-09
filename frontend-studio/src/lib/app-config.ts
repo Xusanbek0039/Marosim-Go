@@ -7,6 +7,7 @@ export const APP = {
   home: "/",
   nav: [
     { href: "/", label: "Marosimlar" },
+    { href: "/portfolio", label: "Portfolio" },
     { href: "/yordam", label: "Yordam" },
     { href: "/profile", label: "Profil" },
   ],

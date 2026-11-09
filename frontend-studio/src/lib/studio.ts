@@ -91,3 +91,42 @@ export function useRevoke(id: string) {
     },
   });
 }
+
+// ---------------------------------------------------------------- portfolio
+export interface PortfolioImage {
+  id: string;
+  image: string;
+  position: number;
+  created_at: string;
+}
+
+export const MAX_PORTFOLIO_IMAGES = 20;
+const portfolioKey = (studioId: string) => ["studio", "portfolio", studioId] as const;
+
+/** The studio's public portfolio (shown to customers on its profile). */
+export function usePortfolio(studioId: string) {
+  return useQuery({
+    queryKey: portfolioKey(studioId),
+    queryFn: () => api.get<PortfolioImage[]>(`/studios/me/${studioId}/images/`),
+  });
+}
+
+export function useUploadPortfolio(studioId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData();
+      form.append("image", file);
+      return api.post<PortfolioImage>(`/studios/me/${studioId}/images/`, form);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: portfolioKey(studioId) }),
+  });
+}
+
+export function useDeletePortfolio(studioId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (imageId: string) => api.delete(`/studios/me/${studioId}/images/${imageId}/`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: portfolioKey(studioId) }),
+  });
+}

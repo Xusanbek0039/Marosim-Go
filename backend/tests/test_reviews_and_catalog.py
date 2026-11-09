@@ -167,7 +167,10 @@ def test_panel_studio_calendar_and_portfolio(make_user, client_for, studio):
     viewer = client_for(admin_with(make_user, "studios.view"))
     res = viewer.get(f"{ADMIN_STUDIOS}{studio.pk}/calendar/", {"from": in_days(0), "to": in_days(30)})
     assert res.status_code == 200 and [r["title"] for r in res.data] == ["To'y"]
-    assert viewer.post(f"{ADMIN_STUDIOS}{studio.pk}/images/", {"image": image_file()}, format="multipart").status_code == 403
+    assert (
+        viewer.post(f"{ADMIN_STUDIOS}{studio.pk}/images/", {"image": image_file()}, format="multipart").status_code
+        == 403
+    )
     editor = client_for(admin_with(make_user, "studios.view", "studios.update"))
     res = editor.post(f"{ADMIN_STUDIOS}{studio.pk}/images/", {"image": image_file()}, format="multipart")
     assert res.status_code == 201
@@ -194,7 +197,10 @@ def test_panel_controls_every_venue_schedule(make_user, client_for, super_admin,
     assert viewer.get(f"{url}bookings/", {"status": "REQUESTED"}).data[0]["requester"]["id"] == str(couple.pk)
     assert viewer.get(f"{url}halls/{session.hall_id}/sessions/").status_code == 200
     assert viewer.post(f"{url}bookings/{booking_id}/confirm/").status_code == 403
-    assert viewer.post(f"{url}bookings/", {"session": str(session.pk), "date": in_days(11)}, format="json").status_code == 403
+    assert (
+        viewer.post(f"{url}bookings/", {"session": str(session.pk), "date": in_days(11)}, format="json").status_code
+        == 403
+    )
 
     scheduler = client_for(admin_with(make_user, "venues.view", "venues.schedule"))
     res = scheduler.post(f"{url}bookings/{booking_id}/confirm/")
@@ -207,7 +213,9 @@ def test_panel_controls_every_venue_schedule(make_user, client_for, super_admin,
     res = scheduler.patch(f"{url}halls/{session.hall_id}/sessions/{session.pk}/", {"name": "Oqshom"}, format="json")
     assert res.status_code == 200 and res.data["name"] == "Oqshom"
     res = scheduler.post(
-        f"{url}halls/{session.hall_id}/sessions/", {"name": "Tun", "starts_at": "23:30", "ends_at": "23:59"}, format="json"
+        f"{url}halls/{session.hall_id}/sessions/",
+        {"name": "Tun", "starts_at": "23:30", "ends_at": "23:59"},
+        format="json",
     )
     assert res.status_code == 201
     assert HallBooking.objects.get(pk=booking_id).decided_by is not None

@@ -2,7 +2,6 @@ from django.conf import settings
 from django.db import models
 
 from apps.accounts import phone as phone_utils
-
 from apps.core.models import BaseModel, SoftDeleteModel
 
 

@@ -12,6 +12,10 @@
 | GET | `/api/v1/admin/media-deletion-requests/{id}/` | O'chirish so'rovi tafsiloti | ADMIN, SUPER_ADMIN | `requests.view` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
 | POST | `/api/v1/admin/media-deletion-requests/{id}/approve/` | Tasdiqlash: fayl Drive savatiga o'tadi va ilovadan o'chadi | ADMIN, SUPER_ADMIN | `requests.media_delete` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
 | POST | `/api/v1/admin/media-deletion-requests/{id}/reject/` | Rad etish (fayl qoladi) | ADMIN, SUPER_ADMIN | `requests.media_delete` | JWT | Barcha studiyalarning so'rovlari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/reviews/` | Barcha sharhlar (moderatsiya) | ADMIN, SUPER_ADMIN | `reviews.view` | JWT | Barcha to'yxona va studiya sharhlari (yashirilganlari ham). | OK |
+| GET | `/api/v1/admin/reviews/{id}/` | Sharh tafsiloti | ADMIN, SUPER_ADMIN | `reviews.view` | JWT | Barcha to'yxona va studiya sharhlari (yashirilganlari ham). | OK |
+| PATCH | `/api/v1/admin/reviews/{id}/` | Sharhni yashirish / ko'rsatish | ADMIN, SUPER_ADMIN | `reviews.moderate` | JWT | Barcha to'yxona va studiya sharhlari (yashirilganlari ham). | OK |
+| DELETE | `/api/v1/admin/reviews/{id}/` | Sharhni o'chirish | ADMIN, SUPER_ADMIN | `reviews.moderate` | JWT | Barcha to'yxona va studiya sharhlari (yashirilganlari ham). | OK |
 | GET | `/api/v1/admin/storage/google/callback/` | Google OAuth callback (brauzer redirect) | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/admin/storage/google/connect/` | Google Drive'ni ulashni boshlash | SUPER_ADMIN | — | JWT | — | OK |
 | POST | `/api/v1/admin/storage/google/disconnect/` | Google Drive'ni uzish | SUPER_ADMIN | — | JWT | — | OK |
@@ -43,8 +47,18 @@
 | GET | `/api/v1/admin/venues/{id}/` | To'yxona ma'lumotlari (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | PATCH | `/api/v1/admin/venues/{id}/` | To'yxonani tahrirlash / bloklash / holat | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | DELETE | `/api/v1/admin/venues/{id}/` | To'yxonani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `venues.delete` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| GET | `/api/v1/admin/venues/{id}/bookings/` | Bronlar va so'rovlar (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/bookings/` | Jadvalga yozuv qo'shish (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| PATCH | `/api/v1/admin/venues/{id}/bookings/{booking_id}/` | Yozuv tafsilotlarini tahrirlash (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/bookings/{booking_id}/cancel/` | Yozuvni bekor qilish (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/bookings/{booking_id}/confirm/` | So'rovni tasdiqlash (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/bookings/{booking_id}/reject/` | So'rovni rad etish (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| GET | `/api/v1/admin/venues/{id}/calendar/` | To'yxona jadvali: zallar, smenalar va yozuvlar (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | POST | `/api/v1/admin/venues/{id}/halls/` | Zal qo'shish (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | PATCH | `/api/v1/admin/venues/{id}/halls/{hall_id}/` | Zalni tahrirlash (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| GET | `/api/v1/admin/venues/{id}/halls/{hall_id}/sessions/` | Zal smenalari (panel) | ADMIN, SUPER_ADMIN | `venues.view` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| POST | `/api/v1/admin/venues/{id}/halls/{hall_id}/sessions/` | Zalga smena qo'shish (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
+| PATCH | `/api/v1/admin/venues/{id}/halls/{hall_id}/sessions/{session_id}/` | Smenani tahrirlash / o'chirish-yoqish (panel) | ADMIN, SUPER_ADMIN | `venues.schedule` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | POST | `/api/v1/admin/venues/{id}/images/` | Galereyaga rasm qo'shish (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | DELETE | `/api/v1/admin/venues/{id}/images/{image_id}/` | Galereyadan rasmni o'chirish (panel) | ADMIN, SUPER_ADMIN | `venues.update` | JWT | Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi. | OK |
 | GET | `/api/v1/admins/` | Adminlar ro'yxati | SUPER_ADMIN | — | JWT | Faqat ADMIN rolidagi, o'chirilmagan hisoblar (get_queryset). | OK |
@@ -119,13 +133,27 @@
 | GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | SUPER_ADMIN | — | JWT | — | OK |
 | POST | `/api/v1/public/partner-applications/` | Hamkorlik arizasi (studiya / to'yxona) — landing sahifadan | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/public/partner-applications/challenge/` | Bot tekshiruvi uchun bir martalik topshiriq (proof-of-work) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/public/studios/` | Studiyalar (ommaviy katalog, reyting bo'yicha) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/public/studios/{id}/` | Studiya (ommaviy profil va portfolio) | PUBLIC | — | NONE | — | OK |
+| GET | `/api/v1/public/studios/{id}/schedule/` | Studiya band kunlari (kalendar) | PUBLIC | — | NONE | — | OK |
+| POST | `/api/v1/public/studios/{target_id}/like/` | Like bosish | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
+| DELETE | `/api/v1/public/studios/{target_id}/like/` | Like'ni olib tashlash | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
+| GET | `/api/v1/public/studios/{target_id}/reviews/` | Sharhlar, reyting va like soni | PUBLIC | — | NONE | — | OK |
+| PUT | `/api/v1/public/studios/{target_id}/reviews/mine/` | Baho va izoh qoldirish / yangilash | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
+| DELETE | `/api/v1/public/studios/{target_id}/reviews/mine/` | O'z sharhimni o'chirish | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
 | GET | `/api/v1/studios/` | Studiyalar ro'yxati | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | POST | `/api/v1/studios/` | Studiya qo'shish | ADMIN, SUPER_ADMIN | `studios.create` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | GET | `/api/v1/studios/me/` | Mening studiyalarim | STUDIO | — | JWT | Faqat so'rovchining faol a'zoliklari va ularning studiyalari. | OK |
 | GET | `/api/v1/studios/me/ceremonies/` | Mening studiyamning marosimlari | STUDIO | — | JWT | STUDIO: faqat faol a'zolik bo'lgan studiyalarning marosimlari; SUPER_ADMIN: barchasi. | OK |
+| GET | `/api/v1/studios/me/{studio_id}/images/` | Studiya portfoliosi | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; yuklash/o'chirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
+| POST | `/api/v1/studios/me/{studio_id}/images/` | Portfolioga rasm qo'shish | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; yuklash/o'chirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
+| DELETE | `/api/v1/studios/me/{studio_id}/images/{image_id}/` | Portfoliodan rasmni o'chirish | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; yuklash/o'chirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
 | GET | `/api/v1/studios/{id}/` | Studiya ma'lumotlari | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | PATCH | `/api/v1/studios/{id}/` | Studiyani tahrirlash | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | DELETE | `/api/v1/studios/{id}/` | Studiyani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `studios.delete` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| GET | `/api/v1/studios/{id}/calendar/` | Studiya jadvali: oraliqdagi marosimlar (panel) | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| POST | `/api/v1/studios/{id}/images/` | Portfolioga rasm qo'shish (panel) | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
+| DELETE | `/api/v1/studios/{id}/images/{image_id}/` | Portfoliodan rasmni o'chirish (panel) | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | GET | `/api/v1/subscriptions/plans/` | Obuna tariflari | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/support/tickets/` | Mening yordam xatlarim | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
 | POST | `/api/v1/support/tickets/` | Yordam xati yuborish | USER, STUDIO, VENUE_OWNER, ADMIN | — | JWT | Faqat o'zi yozgan xatlar (boshqalarniki 404). | OK |
@@ -163,13 +191,19 @@
 | GET | `/api/v1/venue-owner/venues/{id}/members/` | To'yxona a'zolari | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | POST | `/api/v1/venue-owner/venues/{id}/members/` | A'zo qo'shish (telefon raqam bo'yicha) | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
 | PATCH | `/api/v1/venue-owner/venues/{id}/members/{membership_id}/` | A'zoning rolini / faolligini o'zgartirish | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
+| GET | `/api/v1/venues/` | To'yxonalar katalogi (reyting va like bo'yicha) | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/venues/search/` | Sana bo'yicha bo'sh to'yxonalarni qidirish | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/venues/{id}/` | To'yxona (ommaviy ma'lumot, zallar va smenalar) | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/venues/{id}/availability/` | To'yxona bo'sh smenalari (kalendar) | PUBLIC | — | NONE | — | OK |
+| POST | `/api/v1/venues/{target_id}/like/` | Like bosish | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
+| DELETE | `/api/v1/venues/{target_id}/like/` | Like'ni olib tashlash | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
+| GET | `/api/v1/venues/{target_id}/reviews/` | Sharhlar, reyting va like soni | PUBLIC | — | NONE | — | OK |
+| PUT | `/api/v1/venues/{target_id}/reviews/mine/` | Baho va izoh qoldirish / yangilash | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
+| DELETE | `/api/v1/venues/{target_id}/reviews/mine/` | O'z sharhimni o'chirish | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
 
 ## Rollar bo'yicha
 
-### PUBLIC (14)
+### PUBLIC (20)
 
 * `GET /api/v1/admin/storage/google/callback/` — Google OAuth callback (brauzer redirect)
 * `GET /api/v1/auth/csrf/` — CSRF cookie olish (web panel)
@@ -181,12 +215,18 @@
 * `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
 * `POST /api/v1/public/partner-applications/` — Hamkorlik arizasi (studiya / to'yxona) — landing sahifadan
 * `GET /api/v1/public/partner-applications/challenge/` — Bot tekshiruvi uchun bir martalik topshiriq (proof-of-work)
+* `GET /api/v1/public/studios/` — Studiyalar (ommaviy katalog, reyting bo'yicha)
+* `GET /api/v1/public/studios/{id}/` — Studiya (ommaviy profil va portfolio)
+* `GET /api/v1/public/studios/{id}/schedule/` — Studiya band kunlari (kalendar)
+* `GET /api/v1/public/studios/{target_id}/reviews/` — Sharhlar, reyting va like soni
 * `GET /api/v1/subscriptions/plans/` — Obuna tariflari
+* `GET /api/v1/venues/` — To'yxonalar katalogi (reyting va like bo'yicha)
 * `GET /api/v1/venues/search/` — Sana bo'yicha bo'sh to'yxonalarni qidirish
 * `GET /api/v1/venues/{id}/` — To'yxona (ommaviy ma'lumot, zallar va smenalar)
 * `GET /api/v1/venues/{id}/availability/` — To'yxona bo'sh smenalari (kalendar)
+* `GET /api/v1/venues/{target_id}/reviews/` — Sharhlar, reyting va like soni
 
-### USER (36)
+### USER (44)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -218,14 +258,22 @@
 * `POST /api/v1/me/venue-bookings/` — To'yxona smenasiga bron so'rovi yuborish
 * `GET /api/v1/me/venue-bookings/{id}/` — Bron tafsiloti
 * `POST /api/v1/me/venue-bookings/{id}/cancel/` — Bron / so'rovni bekor qilish
+* `POST /api/v1/public/studios/{target_id}/like/` — Like bosish
+* `DELETE /api/v1/public/studios/{target_id}/like/` — Like'ni olib tashlash
+* `PUT /api/v1/public/studios/{target_id}/reviews/mine/` — Baho va izoh qoldirish / yangilash
+* `DELETE /api/v1/public/studios/{target_id}/reviews/mine/` — O'z sharhimni o'chirish
 * `GET /api/v1/support/tickets/` — Mening yordam xatlarim
 * `POST /api/v1/support/tickets/` — Yordam xati yuborish
 * `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
 * `GET /api/v1/support/tickets/{id}/` — Yordam xati (yozishmalar bilan)
 * `POST /api/v1/support/tickets/{id}/close/` — Xatni yopish (muammo hal bo'ldi)
 * `POST /api/v1/support/tickets/{id}/messages/` — Xatga qo'shimcha yozish (yopilgan xat qayta ochiladi)
+* `POST /api/v1/venues/{target_id}/like/` — Like bosish
+* `DELETE /api/v1/venues/{target_id}/like/` — Like'ni olib tashlash
+* `PUT /api/v1/venues/{target_id}/reviews/mine/` — Baho va izoh qoldirish / yangilash
+* `DELETE /api/v1/venues/{target_id}/reviews/mine/` — O'z sharhimni o'chirish
 
-### STUDIO (27)
+### STUDIO (30)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -248,6 +296,9 @@
 * `DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/` — Ishtirokchini olib tashlash (deprecated)
 * `GET /api/v1/studios/me/` — Mening studiyalarim
 * `GET /api/v1/studios/me/ceremonies/` — Mening studiyamning marosimlari
+* `GET /api/v1/studios/me/{studio_id}/images/` — Studiya portfoliosi
+* `POST /api/v1/studios/me/{studio_id}/images/` — Portfolioga rasm qo'shish
+* `DELETE /api/v1/studios/me/{studio_id}/images/{image_id}/` — Portfoliodan rasmni o'chirish
 * `GET /api/v1/support/tickets/` — Mening yordam xatlarim
 * `POST /api/v1/support/tickets/` — Yordam xati yuborish
 * `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
@@ -289,13 +340,17 @@
 * `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
 * `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
-### ADMIN (56)
+### ADMIN (73)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
 * `GET /api/v1/admin/media-deletion-requests/{id}/` — O'chirish so'rovi tafsiloti
 * `POST /api/v1/admin/media-deletion-requests/{id}/approve/` — Tasdiqlash: fayl Drive savatiga o'tadi va ilovadan o'chadi
 * `POST /api/v1/admin/media-deletion-requests/{id}/reject/` — Rad etish (fayl qoladi)
+* `GET /api/v1/admin/reviews/` — Barcha sharhlar (moderatsiya)
+* `GET /api/v1/admin/reviews/{id}/` — Sharh tafsiloti
+* `PATCH /api/v1/admin/reviews/{id}/` — Sharhni yashirish / ko'rsatish
+* `DELETE /api/v1/admin/reviews/{id}/` — Sharhni o'chirish
 * `GET /api/v1/admin/subscription-plans/` — Tariflar (barchasi)
 * `POST /api/v1/admin/subscription-plans/` — Tarif qo'shish
 * `PATCH /api/v1/admin/subscription-plans/{id}/` — Tarif narxi / muddati / limitini o'zgartirish
@@ -322,8 +377,18 @@
 * `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
 * `PATCH /api/v1/admin/venues/{id}/` — To'yxonani tahrirlash / bloklash / holat
 * `DELETE /api/v1/admin/venues/{id}/` — To'yxonani o'chirish (soft delete)
+* `GET /api/v1/admin/venues/{id}/bookings/` — Bronlar va so'rovlar (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/` — Jadvalga yozuv qo'shish (panel)
+* `PATCH /api/v1/admin/venues/{id}/bookings/{booking_id}/` — Yozuv tafsilotlarini tahrirlash (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/{booking_id}/cancel/` — Yozuvni bekor qilish (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/{booking_id}/confirm/` — So'rovni tasdiqlash (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/{booking_id}/reject/` — So'rovni rad etish (panel)
+* `GET /api/v1/admin/venues/{id}/calendar/` — To'yxona jadvali: zallar, smenalar va yozuvlar (panel)
 * `POST /api/v1/admin/venues/{id}/halls/` — Zal qo'shish (panel)
 * `PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash (panel)
+* `GET /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/` — Zal smenalari (panel)
+* `POST /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/` — Zalga smena qo'shish (panel)
+* `PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/{session_id}/` — Smenani tahrirlash / o'chirish-yoqish (panel)
 * `POST /api/v1/admin/venues/{id}/images/` — Galereyaga rasm qo'shish (panel)
 * `DELETE /api/v1/admin/venues/{id}/images/{image_id}/` — Galereyadan rasmni o'chirish (panel)
 * `GET /api/v1/auth/me/` — Mening profilim
@@ -334,6 +399,9 @@
 * `GET /api/v1/studios/{id}/` — Studiya ma'lumotlari
 * `PATCH /api/v1/studios/{id}/` — Studiyani tahrirlash
 * `DELETE /api/v1/studios/{id}/` — Studiyani o'chirish (soft delete)
+* `GET /api/v1/studios/{id}/calendar/` — Studiya jadvali: oraliqdagi marosimlar (panel)
+* `POST /api/v1/studios/{id}/images/` — Portfolioga rasm qo'shish (panel)
+* `DELETE /api/v1/studios/{id}/images/{image_id}/` — Portfoliodan rasmni o'chirish (panel)
 * `GET /api/v1/support/tickets/` — Mening yordam xatlarim
 * `POST /api/v1/support/tickets/` — Yordam xati yuborish
 * `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
@@ -348,13 +416,17 @@
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (86)
+### SUPER_ADMIN (103)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
 * `GET /api/v1/admin/media-deletion-requests/{id}/` — O'chirish so'rovi tafsiloti
 * `POST /api/v1/admin/media-deletion-requests/{id}/approve/` — Tasdiqlash: fayl Drive savatiga o'tadi va ilovadan o'chadi
 * `POST /api/v1/admin/media-deletion-requests/{id}/reject/` — Rad etish (fayl qoladi)
+* `GET /api/v1/admin/reviews/` — Barcha sharhlar (moderatsiya)
+* `GET /api/v1/admin/reviews/{id}/` — Sharh tafsiloti
+* `PATCH /api/v1/admin/reviews/{id}/` — Sharhni yashirish / ko'rsatish
+* `DELETE /api/v1/admin/reviews/{id}/` — Sharhni o'chirish
 * `GET /api/v1/admin/storage/google/connect/` — Google Drive'ni ulashni boshlash
 * `POST /api/v1/admin/storage/google/disconnect/` — Google Drive'ni uzish
 * `GET /api/v1/admin/storage/google/status/` — Google Drive ulanish holati
@@ -385,8 +457,18 @@
 * `GET /api/v1/admin/venues/{id}/` — To'yxona ma'lumotlari (panel)
 * `PATCH /api/v1/admin/venues/{id}/` — To'yxonani tahrirlash / bloklash / holat
 * `DELETE /api/v1/admin/venues/{id}/` — To'yxonani o'chirish (soft delete)
+* `GET /api/v1/admin/venues/{id}/bookings/` — Bronlar va so'rovlar (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/` — Jadvalga yozuv qo'shish (panel)
+* `PATCH /api/v1/admin/venues/{id}/bookings/{booking_id}/` — Yozuv tafsilotlarini tahrirlash (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/{booking_id}/cancel/` — Yozuvni bekor qilish (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/{booking_id}/confirm/` — So'rovni tasdiqlash (panel)
+* `POST /api/v1/admin/venues/{id}/bookings/{booking_id}/reject/` — So'rovni rad etish (panel)
+* `GET /api/v1/admin/venues/{id}/calendar/` — To'yxona jadvali: zallar, smenalar va yozuvlar (panel)
 * `POST /api/v1/admin/venues/{id}/halls/` — Zal qo'shish (panel)
 * `PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/` — Zalni tahrirlash (panel)
+* `GET /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/` — Zal smenalari (panel)
+* `POST /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/` — Zalga smena qo'shish (panel)
+* `PATCH /api/v1/admin/venues/{id}/halls/{hall_id}/sessions/{session_id}/` — Smenani tahrirlash / o'chirish-yoqish (panel)
 * `POST /api/v1/admin/venues/{id}/images/` — Galereyaga rasm qo'shish (panel)
 * `DELETE /api/v1/admin/venues/{id}/images/{image_id}/` — Galereyadan rasmni o'chirish (panel)
 * `GET /api/v1/admins/` — Adminlar ro'yxati
@@ -429,6 +511,9 @@
 * `GET /api/v1/studios/{id}/` — Studiya ma'lumotlari
 * `PATCH /api/v1/studios/{id}/` — Studiyani tahrirlash
 * `DELETE /api/v1/studios/{id}/` — Studiyani o'chirish (soft delete)
+* `GET /api/v1/studios/{id}/calendar/` — Studiya jadvali: oraliqdagi marosimlar (panel)
+* `POST /api/v1/studios/{id}/images/` — Portfolioga rasm qo'shish (panel)
+* `DELETE /api/v1/studios/{id}/images/{image_id}/` — Portfoliodan rasmni o'chirish (panel)
 * `GET /api/v1/users/` — Mijozlar ro'yxati (USER, STUDIO, VENUE_OWNER)
 * `POST /api/v1/users/` — Mijoz qo'shish
 * `GET /api/v1/users/{id}/` — Mijoz ma'lumotlari
@@ -562,6 +647,25 @@
   * IP bo'yicha cheklangan (partner_apply); bir martalik proof-of-work topshiriq, kamida 3 s; bitta raqamdan kuniga 3 ta; javobda shaxsiy ma'lumot yo'q.
 * `GET /api/v1/public/partner-applications/challenge/`
   * IP bo'yicha cheklangan (partner_challenge).
+* `GET /api/v1/public/studios/`
+  * Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.
+* `GET /api/v1/public/studios/{id}/`
+  * Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.
+* `GET /api/v1/public/studios/{id}/schedule/`
+  * Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.
+* `POST /api/v1/public/studios/{target_id}/like/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `DELETE /api/v1/public/studios/{target_id}/like/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `GET /api/v1/public/studios/{target_id}/reviews/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+  * Yashirilgan sharhlar ko'rinmaydi.
+* `PUT /api/v1/public/studios/{target_id}/reviews/mine/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `DELETE /api/v1/public/studios/{target_id}/reviews/mine/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `POST /api/v1/studios/{id}/images/`
+  * Ko'pi bilan 20 ta rasm, har biri 5 MB gacha
 * `POST /api/v1/support/tickets/`
   * ADMIN xati Super Admin'ga boradi; boshqalarniki — support.view ruxsati bor adminlarga.
 * `DELETE /api/v1/users/{id}/`
@@ -645,12 +749,25 @@
   * A'zolik roli `MANAGE_MEMBERS` imkoniyatiga ega bo'lishi shart (OWNER/MANAGER…, docs/VENUE_AVAILABILITY.md).
   * Admin bloklagan to'yxona (is_active=false) a'zolar uchun faqat o'qiladi.
   * Oxirgi faol OWNER olib tashlanmaydi.
+* `GET /api/v1/venues/`
+  * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
 * `GET /api/v1/venues/search/`
   * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
 * `GET /api/v1/venues/{id}/`
   * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
 * `GET /api/v1/venues/{id}/availability/`
   * Faqat admin tasdiqlagan (APPROVED) va faol to'yxonalar; mijozlar haqida ma'lumot qaytmaydi.
+* `POST /api/v1/venues/{target_id}/like/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `DELETE /api/v1/venues/{target_id}/like/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `GET /api/v1/venues/{target_id}/reviews/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+  * Yashirilgan sharhlar ko'rinmaydi.
+* `PUT /api/v1/venues/{target_id}/reviews/mine/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
+* `DELETE /api/v1/venues/{target_id}/reviews/mine/`
+  * Faqat ommaga ochiq (faol, tasdiqlangan) to'yxona / faol studiya; boshqasi 404.
 
 ## Rejalashtirilgan (PLANNED — hali ishlamaydi)
 
