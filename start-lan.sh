@@ -5,10 +5,15 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 PORTS="8000,8001,8002,3002,3003"
 
 # Windows keeps node/python children alive after the bash parent dies (the venv python.exe is only
-# a launcher), so free the ports by the PID that actually listens on them.
+# a launcher), so free the ports by the PID that actually listens on them. Python on Windows lets
+# several runserver processes share one port (old code keeps answering), and Get-NetTCPConnection
+# does not always list them — so also stop every earlier server of this project by its command line.
 free_ports() {
   powershell -NoProfile -Command "Get-NetTCPConnection -State Listen -LocalPort $PORTS -ErrorAction SilentlyContinue |
-    ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }" >/dev/null 2>&1
+    ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }
+    Get-CimInstance Win32_Process | Where-Object {
+      \$_.CommandLine -like '*manage.py runserver 0.0.0.0:800*' -or \$_.CommandLine -like '*next*start -H 0.0.0.0 -p 300*'
+    } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force -ErrorAction SilentlyContinue }" >/dev/null 2>&1
 }
 free_ports
 trap 'free_ports; exit 0' INT TERM
