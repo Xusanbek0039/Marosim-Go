@@ -121,3 +121,43 @@ export function useCreateTicket() {
   });
 }
 
+
+// ------------------------------------------------------------ partner applications (landing page)
+export type ApplicationKind = "STUDIO" | "VENUE";
+export type ApplicationStatus = "NEW" | "IN_REVIEW" | "APPROVED" | "REJECTED";
+
+export interface PartnerApplication {
+  id: string;
+  kind: ApplicationKind;
+  status: ApplicationStatus;
+  full_name: string;
+  phone_number: string;
+  business_name: string;
+  region: string;
+  region_label: string;
+  message: string;
+  staff_note: string;
+  handled_by_name: string | null;
+  handled_at: string | null;
+  created_at: string;
+}
+
+export const APPLICATION_KIND: Record<ApplicationKind, string> = { STUDIO: "Video studiya", VENUE: "To'yxona" };
+export const APPLICATION_STATUS: Record<ApplicationStatus, { label: string; className: string }> = {
+  NEW: { label: "Yangi", className: "bg-amber-500/16 text-amber-700 dark:text-amber-300" },
+  IN_REVIEW: { label: "Ko'rib chiqilmoqda", className: "bg-blue-500/14 text-blue-700 dark:text-blue-300" },
+  APPROVED: { label: "Qabul qilindi", className: "bg-emerald-500/16 text-emerald-700 dark:text-emerald-300" },
+  REJECTED: { label: "Rad etildi", className: "bg-red-500/14 text-red-700 dark:text-red-300" },
+};
+
+/** `/admin/support/applications/` — staff with `support.view`. */
+export const applicationsResource = createResource<PartnerApplication>("admin/support/applications");
+
+export function useApplicationsSummary(enabled = true) {
+  return useQuery({
+    queryKey: ["admin/support/applications", "summary"] as const,
+    queryFn: () => api.get<{ new: number; in_review: number }>("/admin/support/applications/summary/"),
+    enabled,
+    refetchInterval: 60_000,
+  });
+}

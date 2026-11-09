@@ -153,6 +153,7 @@ REST_FRAMEWORK = {
         "token_refresh": env.str("THROTTLE_REFRESH", default="30/min"),
         "pinfl_reveal": env.str("THROTTLE_PINFL_REVEAL", default="20/hour"),
         "support_write": env.str("THROTTLE_SUPPORT_WRITE", default="60/hour"),
+        "partner_apply": env.str("THROTTLE_PARTNER_APPLY", default="5/hour"),
     },
     "NUM_PROXIES": NUM_PROXIES or None,
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -295,6 +296,8 @@ SPECTACULAR_SETTINGS = {
         "MediaDeletionStatusEnum": "apps.media.models.DeletionRequestStatus",
         "SupportTicketStatusEnum": "apps.support.models.TicketStatus",
         "SupportAudienceEnum": "apps.support.models.TicketAudience",
+        "PartnerApplicationStatusEnum": "apps.support.models.ApplicationStatus",
+        "PartnerApplicationKindEnum": "apps.support.models.ApplicationKind",
         "StorageConnectionStatusEnum": "apps.storage.models.ConnectionStatus",
         "VenueRegionEnum": "apps.venues.models.Region",
         "VenueTypeEnum": "apps.venues.models.VenueType",
@@ -396,7 +399,7 @@ PANEL_HOST_SITES = {
             "marosimgo.uz": "landing",
             "www.marosimgo.uz": "landing",
             "localhost": "superadmin",
-            "127.0.0.1": "superadmin",
+            "127.0.0.1": "landing",  # http://127.0.0.1:8000/ = the marosimgo.uz landing page
         },
     ).items()
 }

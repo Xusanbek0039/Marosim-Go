@@ -29,6 +29,10 @@
 | POST | `/api/v1/admin/subscriptions/{id}/approve/` | To'lovni qayd etib tasdiqlash | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
 | POST | `/api/v1/admin/subscriptions/{id}/cancel/` | Obunani bekor qilish | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
 | POST | `/api/v1/admin/subscriptions/{id}/reject/` | So'rovni rad etish | ADMIN, SUPER_ADMIN | `subscriptions.update` | JWT | Barcha foydalanuvchilarning obunalari (faqat ruxsati borlar). | OK |
+| GET | `/api/v1/admin/support/applications/` | Hamkorlik arizalari (studiya / to'yxona) | ADMIN, SUPER_ADMIN | `support.view` | JWT | Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN). | OK |
+| GET | `/api/v1/admin/support/applications/summary/` | Yangi arizalar soni | ADMIN, SUPER_ADMIN | `support.view` | JWT | Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN). | OK |
+| GET | `/api/v1/admin/support/applications/{id}/` | Ariza tafsiloti | ADMIN, SUPER_ADMIN | `support.view` | JWT | Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN). | OK |
+| PATCH | `/api/v1/admin/support/applications/{id}/` | Ariza holati va izohi | ADMIN, SUPER_ADMIN | `support.view` | JWT | Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN). | OK |
 | GET | `/api/v1/admin/support/tickets/` | Kelgan yordam xatlari | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
 | GET | `/api/v1/admin/support/tickets/summary/` | Javob kutayotgan xatlar soni (javob bera oladiganlari) | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
 | GET | `/api/v1/admin/support/tickets/{id}/` | Yordam xati (yozishmalar, kim javob bergani) | ADMIN, SUPER_ADMIN | `support.view` | JWT | SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish). | OK |
@@ -113,6 +117,7 @@
 | GET | `/api/v1/monitoring/endpoints/` | API endpointlar katalogi (OpenAPI'dan avtomatik) | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/logs/` | So'rovlar jurnali | SUPER_ADMIN | — | JWT | — | OK |
 | GET | `/api/v1/monitoring/overview/` | API statistikasi (real so'rovlar asosida) | SUPER_ADMIN | — | JWT | — | OK |
+| POST | `/api/v1/public/partner-applications/` | Hamkorlik arizasi (studiya / to'yxona) — landing sahifadan | PUBLIC | — | NONE | — | OK |
 | GET | `/api/v1/studios/` | Studiyalar ro'yxati | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | POST | `/api/v1/studios/` | Studiya qo'shish | ADMIN, SUPER_ADMIN | `studios.create` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | GET | `/api/v1/studios/me/` | Mening studiyalarim | STUDIO | — | JWT | Faqat so'rovchining faol a'zoliklari va ularning studiyalari. | OK |
@@ -163,7 +168,7 @@
 
 ## Rollar bo'yicha
 
-### PUBLIC (12)
+### PUBLIC (13)
 
 * `GET /api/v1/admin/storage/google/callback/` — Google OAuth callback (brauzer redirect)
 * `GET /api/v1/auth/csrf/` — CSRF cookie olish (web panel)
@@ -173,6 +178,7 @@
 * `POST /api/v1/auth/register/` — Ro'yxatdan o'tish (telefon + parol)
 * `GET /api/v1/health/live/` — Liveness — jarayon ishlayaptimi
 * `GET /api/v1/health/ready/` — Readiness — bog'liqliklar (database, cache) tayyormi
+* `POST /api/v1/public/partner-applications/` — Hamkorlik arizasi (studiya / to'yxona) — landing sahifadan
 * `GET /api/v1/subscriptions/plans/` — Obuna tariflari
 * `GET /api/v1/venues/search/` — Sana bo'yicha bo'sh to'yxonalarni qidirish
 * `GET /api/v1/venues/{id}/` — To'yxona (ommaviy ma'lumot, zallar va smenalar)
@@ -281,7 +287,7 @@
 * `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
 * `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
-### ADMIN (52)
+### ADMIN (56)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
@@ -300,6 +306,10 @@
 * `POST /api/v1/admin/subscriptions/{id}/approve/` — To'lovni qayd etib tasdiqlash
 * `POST /api/v1/admin/subscriptions/{id}/cancel/` — Obunani bekor qilish
 * `POST /api/v1/admin/subscriptions/{id}/reject/` — So'rovni rad etish
+* `GET /api/v1/admin/support/applications/` — Hamkorlik arizalari (studiya / to'yxona)
+* `GET /api/v1/admin/support/applications/summary/` — Yangi arizalar soni
+* `GET /api/v1/admin/support/applications/{id}/` — Ariza tafsiloti
+* `PATCH /api/v1/admin/support/applications/{id}/` — Ariza holati va izohi
 * `GET /api/v1/admin/support/tickets/` — Kelgan yordam xatlari
 * `GET /api/v1/admin/support/tickets/summary/` — Javob kutayotgan xatlar soni (javob bera oladiganlari)
 * `GET /api/v1/admin/support/tickets/{id}/` — Yordam xati (yozishmalar, kim javob bergani)
@@ -336,7 +346,7 @@
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (82)
+### SUPER_ADMIN (86)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
@@ -359,6 +369,10 @@
 * `POST /api/v1/admin/subscriptions/{id}/approve/` — To'lovni qayd etib tasdiqlash
 * `POST /api/v1/admin/subscriptions/{id}/cancel/` — Obunani bekor qilish
 * `POST /api/v1/admin/subscriptions/{id}/reject/` — So'rovni rad etish
+* `GET /api/v1/admin/support/applications/` — Hamkorlik arizalari (studiya / to'yxona)
+* `GET /api/v1/admin/support/applications/summary/` — Yangi arizalar soni
+* `GET /api/v1/admin/support/applications/{id}/` — Ariza tafsiloti
+* `PATCH /api/v1/admin/support/applications/{id}/` — Ariza holati va izohi
 * `GET /api/v1/admin/support/tickets/` — Kelgan yordam xatlari
 * `GET /api/v1/admin/support/tickets/summary/` — Javob kutayotgan xatlar soni (javob bera oladiganlari)
 * `GET /api/v1/admin/support/tickets/{id}/` — Yordam xati (yozishmalar, kim javob bergani)
@@ -542,6 +556,8 @@
   * Faqat ommaga chiqqan to'yxonaning faol smenasi, bugundan boshlab 2 yilgacha.
   * Smena band bo'lsa 409; bir vaqtda ko'pi bilan 10 ta ochiq so'rov.
   * So'rov smenani band qilmaydi — to'yxona tasdiqlaganda band bo'ladi.
+* `POST /api/v1/public/partner-applications/`
+  * IP bo'yicha cheklangan (partner_apply); bot tekshiruvi; javobda shaxsiy ma'lumot yo'q.
 * `POST /api/v1/support/tickets/`
   * ADMIN xati Super Admin'ga boradi; boshqalarniki — support.view ruxsati bor adminlarga.
 * `DELETE /api/v1/users/{id}/`

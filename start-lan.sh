@@ -19,13 +19,15 @@ free_ports
 trap 'free_ports; exit 0' INT TERM
 
 # Each port serves one panel + the API (as on production, where the subdomain picks the panel):
-# 8000 = Super Admin, 8001 = Admin, 8002 = Studio, 3002 = User, 3003 = To'yxona.
+# 8000 = Super Admin (http://127.0.0.1:8000/ = the marosimgo.uz landing page), 8001 = Admin,
+# 8002 = Studio, 3002 = User, 3003 = To'yxona.
 # User / To'yxona are static builds now (npm run build:panel in frontend-user / frontend-toyxona).
+# serve <port> <panel> [panel for 127.0.0.1]
 serve() {
-  (cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=$2,localhost=$2,127.0.0.1=$2" \
+  (cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=$2,localhost=$2,127.0.0.1=${3:-$2}" \
     venv/Scripts/python manage.py runserver "0.0.0.0:$1" --insecure --noreload) &
 }
-serve 8000 superadmin
+serve 8000 superadmin landing
 serve 8001 admin
 serve 8002 studio
 serve 3002 userlogin

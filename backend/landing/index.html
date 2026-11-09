@@ -154,12 +154,41 @@ section.block{padding:104px 0}
 .fact h3{font-size:20px;letter-spacing:-.015em;font-weight:700}
 .fact p{margin-top:6px;color:var(--band-muted);font-size:16px}
 
+/* partner application form */
+.apply{display:grid;grid-template-columns:.85fr 1.15fr;gap:56px;align-items:start}
+.apply-copy ul{margin-top:28px;padding:0;list-style:none;display:grid;gap:14px}
+.apply-copy li{display:flex;gap:12px;align-items:flex-start;font-size:16.5px}
+.apply-copy li svg{flex:none;margin-top:3px;color:var(--turquoise)}
+.form{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:0 30px 70px -40px color-mix(in srgb,var(--ink) 45%,transparent);display:grid;gap:18px;position:relative}
+.form .row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.field{display:grid;gap:7px;align-content:start}
+.field label,.form legend{font-size:14px;font-weight:700;color:var(--muted)}
+.form fieldset{border:0;padding:0;display:grid;gap:10px}
+.field input,.field select,.field textarea{width:100%;font:500 16px/1.4 inherit;font-family:inherit;color:var(--ink);background:var(--porcelain);border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;transition:border-color .2s}
+.field textarea{min-height:110px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--cobalt)}
+.field [aria-invalid="true"]{border-color:var(--pomegranate)}
+.phone{display:flex;align-items:stretch}
+.phone span{display:grid;place-items:center;padding:0 14px;border:1.5px solid var(--line);border-right:0;border-radius:14px 0 0 14px;background:var(--pale);font-weight:700}
+.phone input{border-radius:0 14px 14px 0}
+.err{font-size:13.5px;color:var(--pomegranate);font-weight:600}
+.err:empty{display:none}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.form .btn{justify-self:start}
+.form .btn[disabled]{opacity:.6;cursor:wait;transform:none}
+.form-note{font-size:14px;color:var(--muted)}
+.done{display:none;text-align:center;padding:24px 8px;gap:14px}
+.done svg{margin:0 auto;color:var(--turquoise)}
+.done h3{font-size:24px;letter-spacing:-.02em}
+.done p{color:var(--muted)}
+.form.sent>*{display:none}.form.sent>.done{display:grid}
+
 footer{padding:56px 0 40px;color:var(--muted);font-size:15px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
 
 /* --------------------------------------------------------------- responsive */
 @media (max-width:960px){
-  .hero .wrap,.share{grid-template-columns:1fr}
+  .hero .wrap,.share,.apply{grid-template-columns:1fr}
   .girih{max-width:380px;order:-1}
   .hero{padding-top:24px}
   .journey{grid-template-columns:1fr;gap:0}
@@ -177,7 +206,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
   .top nav{display:none}
   section.block{padding:72px 0}
   .trust{margin:0 8px;border-radius:28px;padding:64px 0}
-  .demo{padding:22px;border-radius:22px}
+  .demo,.form{padding:22px;border-radius:22px}
+  .form .row{grid-template-columns:1fr}
   .seat-label{font-size:10px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -196,6 +226,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
       <a href="#ulashish">Ulashish</a>
       <a href="#kimlar">Kimlar uchun</a>
       <a href="#ishonch">Xavfsizlik</a>
+      <a href="#hamkor">Hamkor bo'lish</a>
     </nav>
   </div>
 </header>
@@ -208,7 +239,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
         <p class="lead">MarosimGo to'yxona, video studiya va oilani bir joyga bog'laydi. Zalni band qilasiz, studiya marosimni yozib yuklaydi, siz esa videoni xavfsiz ko'rasiz va yaqinlaringiz bilan muddatli ulashasiz.</p>
         <div class="actions">
           <a class="btn btn-main" href="#yol">Qanday ishlashini ko'rish</a>
-          <a class="btn btn-ghost" href="#ulashish">Ulashishni sinab ko'rish</a>
+          <a class="btn btn-ghost" href="#hamkor">Studiya yoki to'yxona qo'shish</a>
         </div>
       </div>
       <svg class="girih" viewBox="-200 -200 400 400" role="img" aria-label="Sakkiz qirrali girih yulduzi — o'rtada video belgisi">
@@ -340,6 +371,83 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
       </div>
     </div>
   </section>
+  <section class="block" id="hamkor">
+    <div class="wrap apply">
+      <div class="apply-copy">
+        <h2>Studiyangiz yoki to'yxonangizni qo'shing</h2>
+        <p class="intro">Ariza qoldiring: MarosimGo jamoasi siz bilan bog'lanadi, kabinetingizni ochib beradi va birinchi marosimni birga sozlaymiz.</p>
+        <ul>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Studiyalar: katta videolarni to'g'ridan-to'g'ri yuklash, mijozni telefon orqali taklif qilish</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>To'yxonalar: zallar, smenalar va bronlar bitta jadvalda</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Ariza bepul, jamoamiz o'zi qo'ng'iroq qiladi</li>
+        </ul>
+      </div>
+
+      <form class="form" id="apply-form" novalidate>
+        <fieldset>
+          <legend>Siz kimsiz?</legend>
+          <div class="chips" role="group" aria-label="Ariza turi">
+            <button class="chip" type="button" data-kind="STUDIO" aria-pressed="true">Video studiya</button>
+            <button class="chip" type="button" data-kind="VENUE" aria-pressed="false">To'yxona</button>
+          </div>
+        </fieldset>
+        <div class="row">
+          <div class="field">
+            <label for="a-name">Ism va familiya</label>
+            <input id="a-name" name="full_name" autocomplete="name" maxlength="150" required>
+            <p class="err" data-for="full_name"></p>
+          </div>
+          <div class="field">
+            <label for="a-phone">Telefon</label>
+            <div class="phone"><span>+998</span><input id="a-phone" name="phone_number" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="90 123 45 67" maxlength="12" required></div>
+            <p class="err" data-for="phone_number"></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="a-business" id="a-business-label">Studiya nomi</label>
+            <input id="a-business" name="business_name" maxlength="200" required>
+            <p class="err" data-for="business_name"></p>
+          </div>
+          <div class="field">
+            <label for="a-region">Viloyat</label>
+            <select id="a-region" name="region">
+              <option value="">Tanlang</option>
+              <option value="TASHKENT_CITY">Toshkent shahri</option>
+              <option value="TASHKENT">Toshkent viloyati</option>
+              <option value="ANDIJAN">Andijon viloyati</option>
+              <option value="BUKHARA">Buxoro viloyati</option>
+              <option value="FERGANA">Farg'ona viloyati</option>
+              <option value="JIZZAKH">Jizzax viloyati</option>
+              <option value="KHOREZM">Xorazm viloyati</option>
+              <option value="NAMANGAN">Namangan viloyati</option>
+              <option value="NAVOI">Navoiy viloyati</option>
+              <option value="KASHKADARYA">Qashqadaryo viloyati</option>
+              <option value="KARAKALPAKSTAN">Qoraqalpog'iston Respublikasi</option>
+              <option value="SAMARKAND">Samarqand viloyati</option>
+              <option value="SIRDARYO">Sirdaryo viloyati</option>
+              <option value="SURKHANDARYA">Surxondaryo viloyati</option>
+            </select>
+            <p class="err" data-for="region"></p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="a-message">Qo'shimcha ma'lumot (ixtiyoriy)</label>
+          <textarea id="a-message" name="message" maxlength="2000" placeholder="Masalan: oyiga nechta marosim, zallar soni, qachon bog'lanish qulay"></textarea>
+          <p class="err" data-for="message"></p>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="a-website">Sayt</label><input id="a-website" name="website" tabindex="-1" autocomplete="off"></div>
+        <p class="err" data-for="_form" role="alert"></p>
+        <button class="btn btn-main" type="submit">Ariza yuborish</button>
+        <p class="form-note">Ma'lumotlaringiz faqat siz bilan bog'lanish uchun ishlatiladi.</p>
+        <div class="done" role="status" tabindex="-1">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>
+          <h3>Arizangiz qabul qilindi</h3>
+          <p>Rahmat! Tez orada ko'rsatgan raqamingizga qo'ng'iroq qilamiz.</p>
+        </div>
+      </form>
+    </div>
+  </section>
 </main>
 
 <footer>
@@ -411,6 +519,53 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;
     render();
   }));
   render();
+  // partner application form: POST /api/v1/public/partner-applications/
+  const form = document.getElementById("apply-form");
+  const businessLabel = document.getElementById("a-business-label");
+  let kind = "STUDIO";
+  form.querySelectorAll("[data-kind]").forEach((chip) => chip.addEventListener("click", () => {
+    kind = chip.dataset.kind;
+    form.querySelectorAll("[data-kind]").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
+    businessLabel.textContent = kind === "VENUE" ? "To'yxona nomi" : "Studiya nomi";
+  }));
+  const showErrors = (errors) => {
+    form.querySelectorAll(".err").forEach((el) => { el.textContent = ""; });
+    form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
+    Object.entries(errors).forEach(([field, messages]) => {
+      const box = form.querySelector('.err[data-for="' + field + '"]') || form.querySelector('.err[data-for="_form"]');
+      box.textContent = [].concat(messages).join(" ");
+      if (form.elements[field]) form.elements[field].setAttribute("aria-invalid", "true");
+    });
+  };
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    const digits = data.phone_number.replace(/\D/g, "");
+    const local = {};
+    if (!data.full_name.trim()) local.full_name = "Ismingizni yozing.";
+    if (digits.length !== 9) local.phone_number = "9 ta raqam kiriting, masalan 90 123 45 67.";
+    if (!data.business_name.trim()) local.business_name = kind === "VENUE" ? "To'yxona nomini yozing." : "Studiya nomini yozing.";
+    showErrors(local);
+    if (Object.keys(local).length) return;
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true; button.textContent = "Yuborilmoqda...";
+    try {
+      const res = await fetch("/api/v1/public/partner-applications/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(Object.assign({}, data, { kind: kind, phone_number: "+998" + digits })),
+      });
+      if (res.ok) { form.classList.add("sent"); form.querySelector(".done").focus(); return; }
+      const body = await res.json().catch(() => ({}));
+      const error = body.error || {};
+      if (res.status === 429) showErrors({ _form: "Juda ko'p urinish. Birozdan keyin qayta yuboring." });
+      else showErrors(error.details || { _form: error.message || "Yuborib bo'lmadi. Qayta urinib ko'ring." });
+    } catch (err) {
+      showErrors({ _form: "Internet aloqasini tekshirib, qayta urinib ko'ring." });
+    } finally {
+      button.disabled = false; button.textContent = "Ariza yuborish";
+    }
+  });
 })();
 </script>
 </body>

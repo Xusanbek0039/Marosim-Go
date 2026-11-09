@@ -77,3 +77,42 @@ class SupportMessage(BaseModel):
 
     def __str__(self) -> str:
         return f"message {self.pk} on {self.ticket_id}"
+
+
+class ApplicationKind(models.TextChoices):
+    STUDIO = "STUDIO", "Video studiya"
+    VENUE = "VENUE", "To'yxona"
+
+
+class ApplicationStatus(models.TextChoices):
+    NEW = "NEW", "Yangi"
+    IN_REVIEW = "IN_REVIEW", "Ko'rib chiqilmoqda"
+    APPROVED = "APPROVED", "Qabul qilindi"
+    REJECTED = "REJECTED", "Rad etildi"
+
+
+class PartnerApplication(BaseModel):
+    """A studio or venue that wants to join, sent from the marosimgo.uz landing page (no account yet).
+
+    Staff with ``support.view`` see them on the "Yordam" page, call back and create the account by hand.
+    """
+
+    kind = models.CharField(max_length=10, choices=ApplicationKind.choices)
+    full_name = models.CharField(max_length=150)
+    phone_number = models.CharField(max_length=20)
+    business_name = models.CharField(max_length=200)
+    region = models.CharField(max_length=20, blank=True)
+    message = models.TextField(max_length=2000, blank=True)
+    status = models.CharField(max_length=12, choices=ApplicationStatus.choices, default=ApplicationStatus.NEW)
+    staff_note = models.CharField(max_length=1000, blank=True)
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    handled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["status", "created_at"])]
+
+    def __str__(self) -> str:
+        return f"{self.kind} {self.business_name} ({self.status})"

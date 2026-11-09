@@ -1,5 +1,13 @@
 # Progress
 
+## 2026-11-09 — Landing: hamkorlik arizasi; User / To'yxona static kabinetlar ✅
+
+* **Landing** (`backend/landing/index.html`, marosimgo.uz): "Hamkor bo'lish" bo'limi — Video studiya / To'yxona tanlanadi; ism, telefon (+998), nomi, viloyat, xabar. Yashirin honeypot maydoni, IP cheklovi (`partner_apply`, 5/soat), bot himoyasi.
+* **API:** ochiq `POST /public/partner-applications/` (javobda shaxsiy ma'lumot yo'q); xodimlar `/admin/support/applications/` (list, filtr kind / status / region, qidiruv, PATCH holat + izoh, `summary`) — `support.view`. Model `PartnerApplication`, migratsiya `support/0002`.
+* **Admin / Super Admin → Yordam:** "Hamkorlik arizalari" tabi (holat, izoh, telefonga qo'ng'iroq havolasi); menyu belgisida yangi arizalar ham sanaladi.
+* **Domenlar:** `userlogin.marosimgo.uz` (`backend/panel-user/`) va `toyxona.marosimgo.uz` (`backend/panel-toyxona/`) — `npm run build:panel`, Node.js kerak emas. `start-lan.sh` beshala portda Django ishlatadi; `http://127.0.0.1:8000/` = landing.
+* **Testlar:** `tests/test_partner_applications.py` (3) + to'liq to'plam 2006 passed. Brauzerda bosib ko'rilmadi.
+
 ## 2026-11-09 — Yordam (support) xatlari, 2-bosqich ✅
 
 Foydalanuvchi qarori: **umumiy navbat**. Foydalanuvchi / Studiya / To'yxona xatlari `support.view` ruxsati bor adminlarga va Super Admin'ga boradi; Admin xati faqat Super Admin'ga. Super Admin hammasini ko'radi (kim, qaysi studiya / to'yxonadan, kim javob bergan, kim yopgan); `support.monitor` bilan admin ham shunday ko'radi, lekin adminlar xatiga javob bera olmaydi.

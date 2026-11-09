@@ -724,6 +724,38 @@
         "PATCH /api/v1/admins/{id}/",
         "POST /api/v1/admins/"
       ]
+    },
+    {
+      "revision": 17,
+      "date": "2026-11-09",
+      "note": "Hamkorlik arizalari: ochiq POST /public/partner-applications/ (landing), xodimlar /admin/support/applications/ (support.view)",
+      "added": [
+        "GET /api/v1/admin/support/applications/",
+        "GET /api/v1/admin/support/applications/summary/",
+        "GET /api/v1/admin/support/applications/{id}/",
+        "PATCH /api/v1/admin/support/applications/{id}/",
+        "POST /api/v1/public/partner-applications/"
+      ],
+      "removed": [],
+      "changed": {},
+      "breaking": [],
+      "schema_changed": []
+    },
+    {
+      "revision": 18,
+      "date": "2026-11-09",
+      "note": "Hamkorlik arizasi javobi hujjatlandi",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "POST /api/v1/public/partner-applications/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "POST /api/v1/public/partner-applications/"
+      ]
     }
   ]
 }

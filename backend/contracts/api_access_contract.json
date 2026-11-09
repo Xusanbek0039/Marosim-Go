@@ -367,6 +367,69 @@
       "operation_id": "admin_subscriptions_retrieve",
       "schema_fingerprint": "a145ad42b7a3c6fb"
     },
+    "GET /api/v1/admin/support/applications/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_applications_list",
+      "schema_fingerprint": "2fc0a2084c668ffb"
+    },
+    "GET /api/v1/admin/support/applications/summary/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_applications_summary_retrieve",
+      "schema_fingerprint": "e1a0848ff11bb94e"
+    },
+    "GET /api/v1/admin/support/applications/{id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_applications_retrieve",
+      "schema_fingerprint": "8b10cd485bd781fd"
+    },
     "GET /api/v1/admin/support/tickets/": {
       "allowed_roles": [
         "ADMIN",
@@ -1463,6 +1526,27 @@
       "operation_id": "admin_subscription_settings_partial_update",
       "schema_fingerprint": "7c436178610244f1"
     },
+    "PATCH /api/v1/admin/support/applications/{id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "Barcha arizalar (support.view ruxsati bor adminlar va SUPER_ADMIN).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_applications_partial_update",
+      "schema_fingerprint": "049faf5420edd46f"
+    },
     "PATCH /api/v1/admin/venues/{id}/": {
       "allowed_roles": [
         "ADMIN",
@@ -2426,6 +2510,22 @@
       "deprecated": false,
       "operation_id": "me_venue_bookings_cancel_create",
       "schema_fingerprint": "abf39e10c79ba5b9"
+    },
+    "POST /api/v1/public/partner-applications/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "IP bo'yicha cheklangan (partner_apply); bot tekshiruvi; javobda shaxsiy ma'lumot yo'q."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_partner_applications_create",
+      "schema_fingerprint": "bd476d70f38f13f1"
     },
     "POST /api/v1/studios/": {
       "allowed_roles": [

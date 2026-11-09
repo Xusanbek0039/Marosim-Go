@@ -21,6 +21,7 @@ from apps.subscriptions.views import (
     MySubscriptionViewSet,
     PlanListViewSet,
 )
+from apps.support.applications import PublicApplicationViewSet, StaffApplicationViewSet
 from apps.support.views import MySupportTicketViewSet, StaffSupportTicketViewSet
 from apps.venues.admin_views import AdminVenueViewSet
 from apps.venues.public_views import MyVenueBookingViewSet, PublicVenueViewSet
@@ -45,6 +46,8 @@ router.register("me/venue-bookings", MyVenueBookingViewSet, basename="my-venue-b
 router.register("admin/media-deletion-requests", AdminDeletionRequestViewSet, basename="admin-media-deletion-request")
 router.register("support/tickets", MySupportTicketViewSet, basename="support-ticket")
 router.register("admin/support/tickets", StaffSupportTicketViewSet, basename="admin-support-ticket")
+router.register("admin/support/applications", StaffApplicationViewSet, basename="admin-partner-application")
+router.register("public/partner-applications", PublicApplicationViewSet, basename="public-partner-application")
 
 urlpatterns = [
     path("auth/", include("apps.accounts.auth_urls")),

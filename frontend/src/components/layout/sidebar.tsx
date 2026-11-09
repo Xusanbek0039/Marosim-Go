@@ -10,7 +10,7 @@ import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCan, useMe } from "@/features/auth/hooks";
 import { useRequestsSummary } from "@/features/requests/api";
-import { useMySummary, useStaffSummary } from "@/features/support/api";
+import { useApplicationsSummary, useMySummary, useStaffSummary } from "@/features/support/api";
 import { formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { duration, spring } from "@/motion/tokens";
@@ -45,9 +45,14 @@ function SupportCount({ collapsed }: { collapsed: boolean }) {
   const can = useCan();
   const staff = me?.role === "SUPER_ADMIN" || can("support.view");
   const inbox = useStaffSummary(staff);
+  const applications = useApplicationsSummary(staff);
   const mine = useMySummary(!staff && me?.role === "ADMIN");
   return staff ? (
-    <CountPill count={inbox.data?.open} collapsed={collapsed} label="javob kutayotgan xat" />
+    <CountPill
+      count={(inbox.data?.open ?? 0) + (applications.data?.new ?? 0)}
+      collapsed={collapsed}
+      label="javob kutayotgan xat yoki yangi ariza"
+    />
   ) : (
     <CountPill count={mine.data?.answered} collapsed={collapsed} label="javob kelgan xat" />
   );

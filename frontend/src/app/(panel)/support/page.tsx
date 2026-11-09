@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, InboxIcon, MailCheckIcon, MailQuestionIcon, PlusIcon, SendIcon, UserRoundPenIcon } from "lucide-react";
+import { CastleIcon, CheckIcon, ClipboardListIcon, InboxIcon, MailCheckIcon, MailQuestionIcon, PhoneIcon, PlusIcon, SendIcon, UserRoundPenIcon, VideoIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -16,8 +16,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCan, useMe } from "@/features/auth/hooks";
 import {
+  APPLICATION_KIND,
+  APPLICATION_STATUS,
+  type ApplicationKind,
+  applicationsResource,
+  type ApplicationStatus,
   AUTHOR_ROLES,
   myTickets,
+  type PartnerApplication,
   STATUS,
   staffTickets,
   type Ticket,
@@ -348,7 +354,174 @@ function MineTab() {
   );
 }
 
-type Tab = "inbox" | "mine";
+// ================================================================ partner applications (landing page)
+function ApplicationBadge({ status }: { status: ApplicationStatus }) {
+  const s = APPLICATION_STATUS[status];
+  return <span className={cn("inline-flex h-6 items-center rounded-full px-2.5 text-xs font-bold", s.className)}>{s.label}</span>;
+}
+
+function ApplicationDialog({ row, onClose }: { row: PartnerApplication | null; onClose: () => void }) {
+  const update = applicationsResource.useUpdate();
+  const [status, setStatus] = useState<ApplicationStatus | "">("");
+  const [note, setNote] = useState<string | null>(null);
+  const close = () => {
+    setStatus("");
+    setNote(null);
+    onClose();
+  };
+  const value = { status: status || row?.status, note: note ?? row?.staff_note ?? "" };
+  return (
+    <MotionDialog
+      open={Boolean(row)}
+      onOpenChange={(o) => !o && close()}
+      title={row ? `${row.business_name} — ${APPLICATION_KIND[row.kind]}` : ""}
+      description={row ? `Yuborilgan: ${formatDateTime(row.created_at)}` : undefined}
+      footer={
+        <>
+          <Button variant="outline" className="h-11 flex-1" onClick={close}>
+            Yopish
+          </Button>
+          <Button
+            className="h-11 flex-1"
+            disabled={update.isPending}
+            onClick={() =>
+              row &&
+              update.mutate(
+                { id: row.id, values: { status: value.status, staff_note: value.note } },
+                { onSuccess: () => (toast.success("Saqlandi"), close()), onError: (e) => toast.error(errorText(e)) },
+              )
+            }
+          >
+            <CheckIcon /> Saqlash
+          </Button>
+        </>
+      }
+    >
+      {row && (
+        <div className="flex flex-col gap-4 text-sm">
+          <div className="grid gap-3 rounded-2xl bg-muted/60 p-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground">Murojaatchi</p>
+              <p className="font-semibold">{row.full_name}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground">Telefon</p>
+              <a href={`tel:${row.phone_number}`} className="inline-flex items-center gap-1.5 font-semibold text-cyan-700 hover:underline dark:text-cyan-300">
+                <PhoneIcon className="size-3.5" aria-hidden /> {formatPhone(row.phone_number)}
+              </a>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground">Viloyat</p>
+              <p className="font-semibold">{row.region_label || "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground">Ko&apos;rib chiqqan</p>
+              <p className="font-semibold">{row.handled_by_name ? `${row.handled_by_name}, ${formatDateTime(row.handled_at)}` : "—"}</p>
+            </div>
+          </div>
+          {row.message && <p className="whitespace-pre-wrap rounded-2xl border border-border p-3">{row.message}</p>}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="ap-status">Holat</Label>
+            <select
+              id="ap-status"
+              className="h-11 w-full rounded-xl border border-input bg-white/60 px-3 text-sm outline-none focus-visible:border-ring dark:bg-slate-950/40"
+              value={value.status}
+              onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
+            >
+              {(Object.keys(APPLICATION_STATUS) as ApplicationStatus[]).map((k) => (
+                <option key={k} value={k}>
+                  {APPLICATION_STATUS[k].label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="ap-note">Izoh (faqat xodimlar ko&apos;radi)</Label>
+            <Textarea id="ap-note" maxLength={1000} value={value.note} onChange={(e) => setNote(e.target.value)} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Qabul qilsangiz, hisobni qo&apos;lda oching: {row.kind === "STUDIO" ? "Studiyalar" : "To'yxonalar"} sahifasi → yangi qo&apos;shish.
+          </p>
+        </div>
+      )}
+    </MotionDialog>
+  );
+}
+
+function ApplicationsTab() {
+  const list = useListState({ ordering: "-created_at" });
+  const { data, error, isPending, refetch } = applicationsResource.useList(list.params);
+  const [open, setOpen] = useState<PartnerApplication | null>(null);
+  const filters = [
+    { key: "kind", label: "Turi", options: (Object.keys(APPLICATION_KIND) as ApplicationKind[]).map((k) => ({ value: k, label: APPLICATION_KIND[k] })) },
+    {
+      key: "status",
+      label: "Holat",
+      options: (Object.keys(APPLICATION_STATUS) as ApplicationStatus[]).map((k) => ({ value: k, label: APPLICATION_STATUS[k].label })),
+    },
+  ];
+  return (
+    <div className="flex flex-col gap-4">
+      <ListToolbar
+        search={list.search}
+        onSearch={list.setSearch}
+        placeholder="Nomi, ism, telefon yoki xabar"
+        filters={filters}
+        values={list.filters}
+        onFilter={list.setFilter}
+        ordering={{
+          value: list.ordering,
+          options: [
+            { value: "-created_at", label: "Eng yangilari" },
+            { value: "created_at", label: "Eng eskilari" },
+          ],
+          onChange: list.setOrdering,
+        }}
+      />
+      <GlassCard className="p-0 sm:p-0">
+        {isPending ? (
+          <div className="p-5">
+            <RowsSkeleton />
+          </div>
+        ) : error ? (
+          <ErrorState error={error} onRetry={() => refetch()} />
+        ) : data.results.length === 0 ? (
+          <EmptyState title={list.hasQuery ? "Hech narsa topilmadi" : "Ariza yo'q"} description="Studiya va to'yxonalar marosimgo.uz sahifasidagi «Hamkor bo'lish» formasidan ariza yuboradi." />
+        ) : (
+          <ul className="divide-y divide-border/70">
+            {data.results.map((a) => (
+              <li key={a.id}>
+                <button type="button" onClick={() => setOpen(a)} className="flex w-full flex-wrap items-center gap-x-5 gap-y-1 px-5 py-4 text-left transition hover:bg-muted/50">
+                  {a.kind === "STUDIO" ? <VideoIcon className="size-5 shrink-0 text-cyan-600" aria-hidden /> : <CastleIcon className="size-5 shrink-0 text-amber-600" aria-hidden />}
+                  <div className="min-w-48 flex-1">
+                    <p className="truncate font-semibold">{a.business_name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {APPLICATION_KIND[a.kind]} · {a.region_label || "viloyat ko'rsatilmagan"}
+                    </p>
+                  </div>
+                  <div className="w-48 min-w-0">
+                    <p className="truncate text-sm font-semibold">{a.full_name}</p>
+                    <p className="text-xs text-muted-foreground tabular-nums">{formatPhone(a.phone_number)}</p>
+                  </div>
+                  <div className="w-44 text-sm">
+                    <ApplicationBadge status={a.status} />
+                    <p className="mt-1 text-xs text-muted-foreground">{formatDateTime(a.created_at)}</p>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </GlassCard>
+      {data && data.total_pages > 1 && (
+        <Pagination page={data.page} totalPages={data.total_pages} count={data.count} pageSize={data.page_size} onPage={list.setPage} />
+      )}
+      <ApplicationDialog row={open} onClose={() => setOpen(null)} />
+    </div>
+  );
+}
+
+type Tab = "inbox" | "applications" | "mine";
 
 function SupportContent() {
   const { data: me } = useMe();
@@ -357,26 +530,26 @@ function SupportContent() {
   const inbox = isSuper || can("support.view");
   const mine = me?.role === "ADMIN";
   const [tab, setTab] = useState<Tab>(inbox ? "inbox" : "mine");
-  const current: Tab = !inbox ? "mine" : !mine ? "inbox" : tab;
+  const current: Tab = !inbox ? "mine" : !mine && tab === "mine" ? "inbox" : tab;
+  const tabs = [
+    ...(inbox
+      ? [
+          { value: "inbox" as const, label: "Kelgan xatlar", icon: InboxIcon },
+          { value: "applications" as const, label: "Hamkorlik arizalari", icon: ClipboardListIcon },
+        ]
+      : []),
+    ...(mine ? [{ value: "mine" as const, label: "Mening xatlarim", icon: UserRoundPenIcon }] : []),
+  ];
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Yordam"
-        crumb={isSuper ? "Barcha yordam xatlari: kim, qayerdan, kim javob bergan" : "Yordam xatlari"}
+        crumb={isSuper ? "Barcha yordam xatlari va arizalar: kim, qayerdan, kim javob bergan" : "Yordam xatlari"}
       />
-      {inbox && mine && (
-        <AnimatedTabs
-          layoutId="support-tab"
-          value={current}
-          onChange={setTab}
-          tabs={[
-            { value: "inbox", label: "Kelgan xatlar", icon: InboxIcon },
-            { value: "mine", label: "Mening xatlarim", icon: UserRoundPenIcon },
-          ]}
-        />
-      )}
+      {tabs.length > 1 && <AnimatedTabs layoutId="support-tab" value={current} onChange={setTab} tabs={tabs} />}
       {current === "inbox" && <InboxTab seesAdmins={isSuper || can("support.monitor")} />}
+      {current === "applications" && <ApplicationsTab />}
       {current === "mine" && <MineTab />}
     </div>
   );

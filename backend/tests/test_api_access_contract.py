@@ -290,6 +290,15 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_support_staff_queue",
     ),
+    **dict.fromkeys(
+        [
+            "admin_support_applications_list",
+            "admin_support_applications_summary_retrieve",
+            "admin_support_applications_retrieve",
+            "admin_support_applications_partial_update",
+        ],
+        "ownership_partner_applications",
+    ),
     # couple / guest media (Phase E) — tests live in tests/test_media_sharing.py
     **dict.fromkeys(
         [
@@ -391,10 +400,12 @@ from . import test_media_upload as _media_tests  # noqa: E402
 ownership_media_scope_is_own_studio = _media_tests.test_upload_scope_and_roles
 
 from . import test_media_deletion as _deletion_tests  # noqa: E402
+from . import test_partner_applications as _application_tests  # noqa: E402
 from . import test_support as _support_tests  # noqa: E402
 
 ownership_support_own_tickets = _support_tests.test_authors_see_only_their_own_tickets_and_can_close_and_reopen
 ownership_support_staff_queue = _support_tests.test_admin_tickets_go_to_super_admin_only
+ownership_partner_applications = _application_tests.test_staff_with_support_view_review_applications
 
 ownership_media_deletion_is_own_studio = (
     _deletion_tests.test_studio_dismisses_unfinished_upload_and_session_is_cancelled
