@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from apps.accounts import phone as phone_utils
+
 from apps.core.models import BaseModel, SoftDeleteModel
 
 
@@ -19,6 +21,8 @@ class Studio(BaseModel, SoftDeleteModel):
     description = models.TextField(max_length=2000, blank=True)
     profile_picture = models.ImageField(upload_to=studio_upload_to, null=True, blank=True)
     address = models.CharField(max_length=255)
+    #: Public contact number of the studio (E.164), shown on its public profile.
+    phone_number = models.CharField(max_length=16, blank=True, validators=[phone_utils.validate_e164])
     responsible_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="responsible_studios"
     )
@@ -30,6 +34,25 @@ class Studio(BaseModel, SoftDeleteModel):
 
     def __str__(self) -> str:
         return self.name
+
+
+#: Portfolio size limit (same as a venue gallery).
+MAX_PORTFOLIO_IMAGES = 20
+
+
+class StudioImage(BaseModel):
+    """Portfolio image of a studio (its work), shown on the public studio profile."""
+
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to=studio_upload_to)
+    position = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["position", "created_at"]
+        indexes = [models.Index(fields=["studio", "position"])]
+
+    def __str__(self) -> str:
+        return f"{self.studio_id} #{self.position}"
 
 
 class StudioMembership(BaseModel):

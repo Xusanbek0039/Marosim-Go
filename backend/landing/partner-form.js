@@ -46,37 +46,40 @@
   const check = document.getElementById("bot-check");
   const checkText = check.querySelector("span");
   const businessLabel = document.getElementById("a-business-label");
-  let kind = "STUDIO", pending = null;
+  let kind = "STUDIO", pending = null, submitting = false, retryAfter = 0;
 
   const setCheck = (state, text) => { check.dataset.state = state; checkText.textContent = text; };
   function prepare() {
+    if (pending) return pending;
     setCheck("working", "Robot emasligingiz tekshirilmoqda...");
-    pending = fetch(API + "challenge/", { headers: { Accept: "application/json" }, cache: "no-store" })
+    pending = fetch(API + "challenge/", { headers: { Accept: "application/json" }, cache: "no-store", signal: AbortSignal.timeout(15000) })
       .then((r) => (r.ok ? r.json() : Promise.reject(r)))
       .then(async (ch) => {
+        if (typeof ch.token !== "string" || ch.token.length > 500 || !Number.isInteger(ch.difficulty) || ch.difficulty < 0 || ch.difficulty > 20 || !Number.isFinite(ch.min_seconds) || ch.min_seconds < 0 || ch.min_seconds > 60) throw new Error("Invalid challenge");
         const issued = Date.now();
         const proof = await solve(ch.token, ch.difficulty);
         setCheck("ok", "Tekshiruvdan o'tdingiz");
         return { token: ch.token, proof, readyAt: issued + ch.min_seconds * 1000 + 250 };
       })
-      .catch(() => { setCheck("idle", "Tekshiruvni boshlab bo'lmadi — yuborishda qayta urinamiz"); pending = null; return null; });
+      .catch(() => { setCheck("idle", "Ulanishni tekshirib bo‘lmadi. Yuborishda qayta urinamiz."); pending = null; retryAfter = Date.now() + 15000; return null; });
     return pending;
   }
   if ("IntersectionObserver" in window) {
     new IntersectionObserver((e, o) => { if (e[0].isIntersecting) { o.disconnect(); if (!pending) prepare(); } }, { rootMargin: "300px" }).observe(form);
   }
-  form.addEventListener("focusin", () => { if (!pending) prepare(); });
+  form.addEventListener("focusin", () => { if (!pending && Date.now() > retryAfter) prepare(); });
 
   form.querySelectorAll("[data-kind]").forEach((chip) => chip.addEventListener("click", () => {
     kind = chip.dataset.kind;
     form.querySelectorAll("[data-kind]").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
-    businessLabel.textContent = kind === "VENUE" ? "To'yxona nomi" : "Studiya nomi";
+    businessLabel.textContent = kind === "VENUE" ? "To‘yxona nomi " : "Studiya nomi ";
+    const requiredMark = document.createElement("span"); requiredMark.textContent = "*"; businessLabel.append(requiredMark);
   }));
   const showErrors = (errors) => {
     form.querySelectorAll(".err[data-for]").forEach((el) => { el.textContent = ""; });
     form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
     Object.entries(errors).forEach(([field, messages]) => {
-      const box = form.querySelector('.err[data-for="' + field + '"]') || form.querySelector('.err[data-for="_form"]');
+      const box = [...form.querySelectorAll('.err[data-for]')].find(el => el.dataset.for === field) || form.querySelector('.err[data-for="_form"]');
       box.textContent = [].concat(messages).join(" ");
       if (form.elements[field]) form.elements[field].setAttribute("aria-invalid", "true");
     });
@@ -95,8 +98,13 @@
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(Object.assign({}, data, { kind, phone_number: "+998" + digits, challenge: pass.token, proof: pass.proof })),
+      signal: AbortSignal.timeout(20000),
     });
-    if (res.ok) return { ok: true };
+    if (res.status === 201) {
+      const receipt = await res.json().catch(() => null);
+      if (receipt?.received === true) return { ok: true };
+      return { ok: false, status: res.status, error: { message: "Server javobi kutilgan formatda emas. Qayta urinib ko‘ring." } };
+    }
     const body = await res.json().catch(() => ({}));
     const error = body.error || {};
     if (res.status === 403 && error.code === "bot_check_failed" && !retried) { prepare(); return send(data, digits, true); }
@@ -105,26 +113,31 @@
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    if (submitting) return;
     const data = Object.fromEntries(new FormData(form));
-    const digits = data.phone_number.replace(/\D/g, "");
+    let digits = data.phone_number.replace(/\D/g, "");
+    if (digits.length === 12 && digits.startsWith("998")) digits = digits.slice(3);
+    data.full_name = data.full_name.trim(); data.business_name = data.business_name.trim(); data.message = data.message.trim();
     const local = {};
     if (!data.full_name.trim()) local.full_name = "Ismingizni yozing.";
     if (digits.length !== 9) local.phone_number = "9 ta raqam kiriting, masalan 90 123 45 67.";
     if (!data.business_name.trim()) local.business_name = kind === "VENUE" ? "To'yxona nomini yozing." : "Studiya nomini yozing.";
     showErrors(local);
-    if (Object.keys(local).length) return;
+    if (Object.keys(local).length) { form.elements[Object.keys(local)[0]].focus(); return; }
+    submitting = true; form.setAttribute("aria-busy", "true");
     busy(true, "Yuborilmoqda...");
     try {
       const result = await send(data, digits, false);
-      if (result.ok) { form.classList.add("sent"); form.querySelector(".done").focus(); return; }
+      if (result.ok) { form.classList.add("sent"); form.querySelector(".form-content").hidden = true; form.querySelector(".done").hidden = false; form.querySelector(".done").focus(); return; }
       if (result.status === 429) showErrors({ _form: "Juda ko'p urinish. Birozdan keyin qayta yuboring." });
       else showErrors(result.error.details || { _form: result.error.message || "Yuborib bo'lmadi. Qayta urinib ko'ring." });
       prepare(); // a fresh one-time token for the next try
     } catch (err) {
-      showErrors({ _form: "Internet aloqasini tekshirib, qayta urinib ko'ring." });
+      showErrors({ _form: "Server bilan bog‘lanib bo‘lmadi. Internet aloqasini tekshirib, qayta urinib ko‘ring." });
       pending = null;
     } finally {
       busy(false);
+      submitting = false; form.removeAttribute("aria-busy");
     }
   });
 })();

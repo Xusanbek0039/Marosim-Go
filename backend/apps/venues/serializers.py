@@ -4,6 +4,9 @@ from rest_framework import serializers
 from apps.accounts.models import Role, User
 from apps.accounts.serializers import PhoneNumberField
 from apps.core.uploads import process_image
+from apps.reviews.models import TargetKind
+from apps.reviews.serializers import StatsSerializer
+from apps.reviews.services import empty_stats, stats_map
 
 from . import scheduling, services
 from .models import (
@@ -393,6 +396,7 @@ class PublicVenueSerializer(serializers.ModelSerializer):
     """What anyone may see about an approved venue — the business, never its customers."""
 
     images = VenueImageSerializer(many=True, read_only=True)
+    stats = serializers.SerializerMethodField()
 
     class Meta:
         model = Venue
@@ -413,8 +417,17 @@ class PublicVenueSerializer(serializers.ModelSerializer):
             "base_price",
             "currency",
             "images",
+            "stats",
         ]
         read_only_fields = fields
+
+    @extend_schema_field(StatsSerializer)
+    def get_stats(self, venue) -> dict:
+        """Rating / likes; list views pass a precomputed ``stats`` map in the context (no N+1)."""
+        stats = self.context.get("stats")
+        if stats is None:
+            stats = stats_map(TargetKind.VENUE, [venue.pk])
+        return stats.get(venue.pk, empty_stats())
 
 
 class PublicSlotSerializer(_SessionBriefSerializer):

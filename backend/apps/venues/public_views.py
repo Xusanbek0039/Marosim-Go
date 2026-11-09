@@ -4,6 +4,7 @@ Public endpoints show only approved + active venues (``scheduling.public_venues`
 a slot is free — never who holds it, contact data of customers or internal notes.
 """
 
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
@@ -14,6 +15,8 @@ from rest_framework.response import Response
 
 from apps.accounts.access import AccessNote
 from apps.ceremonies.permissions import IsClientUser
+from apps.reviews.models import TargetKind
+from apps.reviews.services import stats_map
 
 from . import scheduling
 from .models import HallBooking, HallSession, Region, Venue
@@ -21,6 +24,7 @@ from .serializers import (
     MyBookingCreateSerializer,
     MyBookingSerializer,
     PublicVenueDetailSerializer,
+    PublicVenueSerializer,
     VenueAvailabilitySerializer,
     VenueSearchResultSerializer,
 )
@@ -87,7 +91,32 @@ class PublicVenueViewSet(viewsets.GenericViewSet):
             ]
             free = sum(1 for _, slots in halls for _, ok in slots if ok)
             rows.append({"venue": venue, "halls": hall_rows, "free_slots": free})
-        return Response(VenueSearchResultSerializer(rows[:100], many=True, context={"request": request}).data)
+        rows = rows[:100]
+        stats = stats_map(TargetKind.VENUE, [row["venue"].pk for row in rows])
+        context = {"request": request, "stats": stats}
+        return Response(VenueSearchResultSerializer(rows, many=True, context=context).data)
+
+    @extend_schema(
+        summary="To'yxonalar katalogi (reyting va like bo'yicha)",
+        tags=["venues"],
+        parameters=[
+            OpenApiParameter("region", str, enum=Region.values),
+            OpenApiParameter("q", str, description="Nomi / manzili / tumani"),
+        ],
+        responses=PublicVenueSerializer(many=True),
+    )
+    def list(self, request):
+        venues = self.get_queryset()
+        region = request.query_params.get("region", "")
+        if region in Region.values:
+            venues = venues.filter(region=region)
+        q = request.query_params.get("q", "").strip()
+        if q:
+            venues = venues.filter(Q(name__icontains=q) | Q(address__icontains=q) | Q(district__icontains=q))
+        venues = list(venues[:200])
+        stats = stats_map(TargetKind.VENUE, [v.pk for v in venues])
+        venues.sort(key=lambda v: (-(stats[v.pk]["rating_avg"] or 0), -stats[v.pk]["like_count"], v.name))
+        return Response(PublicVenueSerializer(venues, many=True, context={"request": request, "stats": stats}).data)
 
     @extend_schema(
         summary="To'yxona (ommaviy ma'lumot, zallar va smenalar)",

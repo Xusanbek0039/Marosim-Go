@@ -9,7 +9,8 @@ import django_filters
 from django.db import transaction
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -20,13 +21,35 @@ from apps.accounts.access import AccessNote
 from apps.accounts.permissions import HasAdminPermission
 from apps.audit.services import AuditAction, diff, record, snapshot
 
-from . import services
-from .models import PublicationStatus, Region, Venue, VenueHall, VenueImage, VenueMembership
-from .serializers import AdminVenueSerializer, VenueHallSerializer, VenueImageSerializer, VenueImageUploadSerializer
+from . import scheduling, services
+from .models import (
+    OPEN_STATUSES,
+    BookingStatus,
+    HallSession,
+    PublicationStatus,
+    Region,
+    Venue,
+    VenueHall,
+    VenueImage,
+    VenueMembership,
+)
+from .serializers import (
+    AdminVenueSerializer,
+    BookingDecisionSerializer,
+    HallSessionSerializer,
+    OwnerBookingCreateSerializer,
+    OwnerBookingSerializer,
+    OwnerBookingUpdateSerializer,
+    OwnerCalendarSerializer,
+    VenueHallSerializer,
+    VenueImageSerializer,
+    VenueImageUploadSerializer,
+)
 from .views import UUID_RE
 
 ALL_VENUES = "Barcha o'chirilmagan to'yxonalar (get_queryset); to'yxona hisoblari bu API'ga kira olmaydi."
 PUBLISH = "venues.publish"
+SCHEDULE = "venues.schedule"
 
 
 class VenueFilter(django_filters.FilterSet):
@@ -56,6 +79,17 @@ class AdminVenueViewSet(viewsets.ModelViewSet):
         "update_hall": "venues.update",
         "images": "venues.update",
         "delete_image": "venues.update",
+        # schedule: venues.view sees every venue's calendar, changes need venues.schedule
+        "calendar": "venues.view",
+        "bookings": "venues.view",
+        "hall_sessions": "venues.view",
+        "create_booking": SCHEDULE,
+        "update_booking": SCHEDULE,
+        "confirm_booking": SCHEDULE,
+        "reject_booking": SCHEDULE,
+        "cancel_booking": SCHEDULE,
+        "add_hall_session": SCHEDULE,
+        "update_hall_session": SCHEDULE,
     }
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     lookup_value_regex = UUID_RE
@@ -192,3 +226,208 @@ class AdminVenueViewSet(viewsets.ModelViewSet):
         venue = self.get_object()
         services.delete_gallery_image(request, get_object_or_404(VenueImage, pk=image_id, venue=venue))
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # ----------------------------------------------------------- schedule
+    # Same rules as the owner's calendar (``scheduling``), but for every venue: the panel sees and
+    # fixes any venue's schedule (e.g. a stuck request); every change is audited under the admin.
+    def _hall(self, venue, hall_id):
+        return get_object_or_404(VenueHall, pk=hall_id, venue=venue, deleted_at__isnull=True)
+
+    def _booking(self, venue, booking_id):
+        return get_object_or_404(scheduling.owner_bookings(venue), pk=booking_id)
+
+    @extend_schema(
+        summary="To'yxona jadvali: zallar, smenalar va yozuvlar (panel)",
+        tags=["admin-venues"],
+        parameters=[
+            OpenApiParameter("from", OpenApiTypes.DATE, required=True),
+            OpenApiParameter("to", OpenApiTypes.DATE, required=True, description="Ko'pi bilan 62 kun."),
+        ],
+        responses=OwnerCalendarSerializer,
+    )
+    @action(detail=True, methods=["get"], pagination_class=None, filter_backends=[])
+    def calendar(self, request, pk=None):
+        venue = self.get_object()
+        start, end = scheduling.parse_range(request.query_params)
+        halls = venue.halls.filter(deleted_at__isnull=True).prefetch_related(
+            Prefetch("sessions", queryset=HallSession.objects.order_by("starts_at"))
+        )
+        bookings = scheduling.owner_bookings(venue).filter(date__gte=start, date__lte=end, status__in=OPEN_STATUSES)
+        data = {"date_from": start, "date_to": end, "halls": halls, "bookings": bookings}
+        return Response(OwnerCalendarSerializer(data).data)
+
+    @extend_schema(
+        methods=["GET"], summary="Zal smenalari (panel)", tags=["admin-venues"], responses=HallSessionSerializer(many=True)
+    )
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=rf"halls/(?P<hall_id>{UUID_RE})/sessions",
+        url_name="hall-sessions",
+        pagination_class=None,
+        filter_backends=[],
+    )
+    def hall_sessions(self, request, pk=None, hall_id=None):
+        hall = self._hall(self.get_object(), hall_id)
+        return Response(HallSessionSerializer(hall.sessions.order_by("starts_at"), many=True).data)
+
+    @extend_schema(
+        methods=["POST"],
+        summary="Zalga smena qo'shish (panel)",
+        tags=["admin-venues"],
+        request=HallSessionSerializer,
+        responses={201: HallSessionSerializer},
+    )
+    @hall_sessions.mapping.post
+    def add_hall_session(self, request, pk=None, hall_id=None):
+        hall = self._hall(self.get_object(), hall_id)
+        serializer = HallSessionSerializer(data=request.data, context={"hall": hall})
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            session = serializer.save(hall=hall)
+            record(request, AuditAction.CREATE, session, changes=dict(serializer.data))
+        return Response(HallSessionSerializer(session).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Smenani tahrirlash / o'chirish-yoqish (panel)",
+        tags=["admin-venues"],
+        request=HallSessionSerializer,
+        responses=HallSessionSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path=rf"halls/(?P<hall_id>{UUID_RE})/sessions/(?P<session_id>{UUID_RE})",
+        url_name="update-hall-session",
+        filter_backends=[],
+    )
+    def update_hall_session(self, request, pk=None, hall_id=None, session_id=None):
+        hall = self._hall(self.get_object(), hall_id)
+        session = get_object_or_404(HallSession, pk=session_id, hall=hall)
+        serializer = HallSessionSerializer(session, data=request.data, partial=True, context={"hall": hall})
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            session = serializer.save()
+            record(request, AuditAction.UPDATE, session, changes=dict(serializer.data))
+        return Response(HallSessionSerializer(session).data)
+
+    @extend_schema(
+        methods=["GET"],
+        summary="Bronlar va so'rovlar (panel)",
+        tags=["admin-venues"],
+        parameters=[
+            OpenApiParameter("status", str, description="REQUESTED / CONFIRMED / BLOCKED / REJECTED / CANCELLED"),
+            OpenApiParameter("from", OpenApiTypes.DATE),
+            OpenApiParameter("to", OpenApiTypes.DATE),
+        ],
+        responses=OwnerBookingSerializer(many=True),
+    )
+    @action(detail=True, methods=["get"], pagination_class=None, filter_backends=[])
+    def bookings(self, request, pk=None):
+        rows = scheduling.owner_bookings(self.get_object())
+        params = request.query_params
+        if params.get("status") in BookingStatus.values:
+            rows = rows.filter(status=params["status"])
+        if params.get("from"):
+            rows = rows.filter(date__gte=scheduling.parse_date(params["from"], "from"))
+        if params.get("to"):
+            rows = rows.filter(date__lte=scheduling.parse_date(params["to"], "to"))
+        rows = rows.order_by("date", "session__starts_at")[:500]
+        return Response(OwnerBookingSerializer(rows, many=True).data)
+
+    @extend_schema(
+        methods=["POST"],
+        summary="Jadvalga yozuv qo'shish (panel)",
+        tags=["admin-venues"],
+        request=OwnerBookingCreateSerializer,
+        responses={201: OwnerBookingSerializer},
+    )
+    @bookings.mapping.post
+    def create_booking(self, request, pk=None):
+        venue = self.get_object()
+        serializer = OwnerBookingCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = dict(serializer.validated_data)
+        session = get_object_or_404(
+            HallSession, pk=data.pop("session"), hall__venue=venue, hall__deleted_at__isnull=True
+        )
+        booking = scheduling.venue_create_entry(request, session, data.pop("date"), **data)
+        return Response(OwnerBookingSerializer(booking).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        summary="Yozuv tafsilotlarini tahrirlash (panel)",
+        tags=["admin-venues"],
+        request=OwnerBookingUpdateSerializer,
+        responses=OwnerBookingSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["patch"],
+        url_path=rf"bookings/(?P<booking_id>{UUID_RE})",
+        url_name="update-booking",
+        filter_backends=[],
+    )
+    def update_booking(self, request, pk=None, booking_id=None):
+        booking = self._booking(self.get_object(), booking_id)
+        serializer = OwnerBookingUpdateSerializer(booking, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            booking = serializer.save()
+            record(request, AuditAction.UPDATE, booking, changes={"fields": sorted(serializer.validated_data)})
+        return Response(OwnerBookingSerializer(booking).data)
+
+    def _decide(self, request, booking_id, fn):
+        venue = self.get_object()
+        booking = self._booking(venue, booking_id)
+        body = BookingDecisionSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        booking = fn(booking, body.validated_data.get("venue_note", ""))
+        return Response(OwnerBookingSerializer(scheduling.owner_bookings(venue).get(pk=booking.pk)).data)
+
+    @extend_schema(
+        summary="So'rovni tasdiqlash (panel)",
+        tags=["admin-venues"],
+        request=BookingDecisionSerializer,
+        responses=OwnerBookingSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=rf"bookings/(?P<booking_id>{UUID_RE})/confirm",
+        url_name="confirm-booking",
+        filter_backends=[],
+    )
+    def confirm_booking(self, request, pk=None, booking_id=None):
+        return self._decide(request, booking_id, lambda b, _note: scheduling.confirm(request, b))
+
+    @extend_schema(
+        summary="So'rovni rad etish (panel)",
+        tags=["admin-venues"],
+        request=BookingDecisionSerializer,
+        responses=OwnerBookingSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=rf"bookings/(?P<booking_id>{UUID_RE})/reject",
+        url_name="reject-booking",
+        filter_backends=[],
+    )
+    def reject_booking(self, request, pk=None, booking_id=None):
+        return self._decide(request, booking_id, lambda b, note: scheduling.reject(request, b, note))
+
+    @extend_schema(
+        summary="Yozuvni bekor qilish (panel)",
+        tags=["admin-venues"],
+        request=BookingDecisionSerializer,
+        responses=OwnerBookingSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=rf"bookings/(?P<booking_id>{UUID_RE})/cancel",
+        url_name="cancel-booking",
+        filter_backends=[],
+    )
+    def cancel_booking(self, request, pk=None, booking_id=None):
+        return self._decide(request, booking_id, lambda b, _note: scheduling.cancel(request, b, by_requester=False))
