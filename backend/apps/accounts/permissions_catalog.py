@@ -15,6 +15,8 @@ class PermissionDef:
 
 
 ADMIN_PERMISSIONS: tuple[PermissionDef, ...] = (
+    PermissionDef("platform.view", "platform", "Rollar imkoniyatlarini ko'rish"),
+    PermissionDef("platform.manage", "platform", "Rollar imkoniyatlarini yoqish / o'chirish"),
     PermissionDef("dashboard.view", "dashboard", "Dashboardni ko'rish"),
     PermissionDef("users.view", "users", "Foydalanuvchilarni ko'rish"),
     PermissionDef("users.create", "users", "Foydalanuvchi qo'shish"),
@@ -53,6 +55,7 @@ ALL_CODES: tuple[str, ...] = tuple(p.code for p in ADMIN_PERMISSIONS)
 DEFAULT_ADMIN_PERMISSIONS: tuple[str, ...] = ("dashboard.view",)
 
 MODULE_LABELS = {
+    "platform": "Platforma boshqaruvi",
     "dashboard": "Dashboard",
     "users": "Foydalanuvchilar",
     "studios": "Studiyalar",

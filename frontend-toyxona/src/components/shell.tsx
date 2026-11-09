@@ -8,6 +8,8 @@ import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
+import { PaidBadge } from "./paid-badge";
+
 import { APP } from "@/lib/app-config";
 import { useLogout, useMe } from "@/lib/auth";
 
@@ -66,7 +68,7 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
         <Link href={APP.home} aria-label={`${APP.name} — bosh sahifa`}>
           <Logo />
         </Link>
-        <nav aria-label="Asosiy menyu" className="ml-2 hidden items-center gap-1 sm:flex">
+        <nav aria-label="Asosiy menyu" className="ml-2 hidden items-center gap-1 md:flex">
           {nav.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
@@ -95,7 +97,7 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
           <ThemeToggle />
           <Link href="/profile" className="flex items-center gap-2 rounded-xl p-1 pr-2 hover:bg-muted" aria-label="Profil">
             {me ? <Avatar first={me.first_name} last={me.last_name} src={me.profile_picture} className="size-8 text-xs" /> : <UserIcon className="size-5" />}
-            <span className="hidden max-w-32 truncate text-sm font-semibold md:inline">{me?.first_name || "Profil"}</span>
+            <span className="hidden max-w-32 truncate text-sm font-semibold md:inline">{me?.first_name || "Profil"} <PaidBadge verified={me?.is_verified} /></span>
           </Link>
           <button
             type="button"
@@ -115,14 +117,14 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
         </div>
       </header>
       {nav.length > 1 && (
-        <nav aria-label="Mobil menyu" className="glass flex gap-1 rounded-2xl p-1 sm:hidden">
+        <nav aria-label="Mobil menyu" className="glass flex gap-1 overflow-x-auto rounded-2xl p-1 md:hidden">
           {nav.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn("flex-1 rounded-xl py-2 text-center text-sm font-semibold", active ? "brand-gradient text-white" : "text-muted-foreground")}
+                className={cn("min-w-max flex-1 rounded-xl px-3 py-2 text-center text-sm font-semibold", active ? "brand-gradient text-white" : "text-muted-foreground")}
               >
                 {item.label}
               </Link>

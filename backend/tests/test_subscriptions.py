@@ -154,7 +154,7 @@ def test_my_subscriptions_scope_is_own(make_user, client_for, plain_user):
     stranger = client_for(other)
     assert stranger.get(MINE).data == []
     assert stranger.post(f"{MINE}{req.pk}/cancel/").status_code == 404
-    assert client_for(make_user(Role.STUDIO)).get(MINE).status_code == 403
+    assert client_for(make_user(Role.STUDIO)).get(MINE).data == []
     admin = client_for(admin_with(make_user, "subscriptions.view"))
     assert admin.get(f"{ADMIN}{req.pk}/").data["user"]["id"] == str(plain_user.pk)
 

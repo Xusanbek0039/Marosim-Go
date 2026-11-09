@@ -17,7 +17,7 @@ from rest_framework.exceptions import ValidationError
 from apps.accounts.models import Role
 from apps.audit.services import AuditAction, record
 
-from .models import Subscription, SubscriptionPlan, SubscriptionStatus
+from .models import PlanAudience, Subscription, SubscriptionPlan, SubscriptionStatus
 
 AUDITED = ["user", "plan", "status", "price", "starts_at", "ends_at", "paid_amount", "payment_method"]
 
@@ -34,7 +34,12 @@ def add_months(moment: datetime.datetime, months: int) -> datetime.datetime:
 def running(user, at: datetime.datetime | None = None):
     at = at or timezone.now()
     return Subscription.objects.filter(
-        user=user, status=SubscriptionStatus.ACTIVE, starts_at__lte=at, ends_at__gt=at
+        user=user,
+        studio__isnull=True,
+        venue__isnull=True,
+        status=SubscriptionStatus.ACTIVE,
+        starts_at__lte=at,
+        ends_at__gt=at,
     ).order_by("-ends_at")
 
 
@@ -56,10 +61,20 @@ def viewer_limit(user) -> int:
     return max(sub.max_viewers, free) if sub else free
 
 
-def paid_until(user) -> datetime.datetime | None:
+def target_filter(user, studio=None, venue=None) -> dict:
+    if studio is not None:
+        return {"studio": studio}
+    if venue is not None:
+        return {"venue": venue}
+    return {"user": user, "studio__isnull": True, "venue__isnull": True}
+
+
+def paid_until(user, studio=None, venue=None) -> datetime.datetime | None:
     """End of the last queued ACTIVE period (renewals stack after it)."""
     last = (
-        Subscription.objects.filter(user=user, status=SubscriptionStatus.ACTIVE, ends_at__gt=timezone.now())
+        Subscription.objects.filter(
+            **target_filter(user, studio, venue), status=SubscriptionStatus.ACTIVE, ends_at__gt=timezone.now()
+        )
         .order_by("-ends_at")
         .values_list("ends_at", flat=True)
         .first()
@@ -85,6 +100,49 @@ def _ensure_client(user) -> None:
         raise ValidationError({"user_id": ["Obuna faqat mijoz (USER) hisoblariga beriladi."]})
 
 
+def ensure_target(user, plan, studio=None, venue=None) -> None:
+    """A business purchase belongs to one business, never to all businesses of a payer."""
+    if not user or not user.is_active or user.is_deleted:
+        raise ValidationError({"user_id": ["Faol hisob talab qilinadi."]})
+    if plan.audience == PlanAudience.USER:
+        _ensure_client(user)
+        valid = studio is None and venue is None
+    elif plan.audience == PlanAudience.STUDIO:
+        valid = (
+            user.role == Role.STUDIO
+            and studio is not None
+            and venue is None
+            and studio.is_active
+            and not studio.is_deleted
+            and studio.responsible_user_id == user.pk
+        )
+    else:
+        from apps.venues.models import MembershipRole
+
+        valid = (
+            user.role == Role.VENUE_OWNER
+            and venue is not None
+            and studio is None
+            and venue.is_active
+            and not venue.is_deleted
+            and venue.memberships.filter(user=user, is_active=True, role=MembershipRole.OWNER).exists()
+        )
+    if not valid:
+        raise ValidationError({"plan": ["Tarif turiga mos, o'zingizga tegishli studiya yoki to'yxonani tanlang."]})
+
+
+def business_verified(*, studio=None, venue=None) -> bool:
+    if studio is None and venue is None:
+        return False
+    target = studio if studio is not None else venue
+    if not target.is_active or target.is_deleted:
+        return False
+    now = timezone.now()
+    return Subscription.objects.filter(
+        **target_filter(None, studio, venue), status=SubscriptionStatus.ACTIVE, starts_at__lte=now, ends_at__gt=now
+    ).exists()
+
+
 def _terms(plan: SubscriptionPlan) -> dict:
     return {
         "plan": plan,
@@ -96,20 +154,23 @@ def _terms(plan: SubscriptionPlan) -> dict:
 
 
 @transaction.atomic
-def request_subscription(request, user, plan: SubscriptionPlan, user_note: str = "") -> Subscription:
-    _ensure_client(user)
+def request_subscription(
+    request, user, plan: SubscriptionPlan, user_note: str = "", *, studio=None, venue=None
+) -> Subscription:
+    _lock_target(user, studio, venue)
+    ensure_target(user, plan, studio, venue)
     if not plan.is_active:
         raise ValidationError({"plan": ["Bu tarif hozir sotuvda emas."]})
-    if Subscription.objects.select_for_update().filter(user=user, status=SubscriptionStatus.PENDING).exists():
+    if Subscription.objects.filter(**target_filter(user, studio, venue), status=SubscriptionStatus.PENDING).exists():
         raise ValidationError({"plan": ["Sizda tasdiq kutayotgan so'rov bor. Avval uni bekor qiling."]})
-    sub = Subscription.objects.create(user=user, user_note=user_note, **_terms(plan))
+    sub = Subscription.objects.create(user=user, studio=studio, venue=venue, user_note=user_note, **_terms(plan))
     record(request, AuditAction.CREATE, sub, changes={"plan": plan.code, "price": str(plan.price)})
     return sub
 
 
 def _activate(sub: Subscription, by, payment: dict) -> None:
     now = timezone.now()
-    starts = max(now, paid_until(sub.user) or now)
+    starts = max(now, paid_until(sub.user, sub.studio, sub.venue) or now)
     sub.status = SubscriptionStatus.ACTIVE
     sub.starts_at = starts
     sub.ends_at = add_months(starts, sub.duration_months)
@@ -126,7 +187,8 @@ def approve(request, sub: Subscription, **payment) -> Subscription:
     sub = Subscription.objects.select_for_update().get(pk=sub.pk)
     if sub.status != SubscriptionStatus.PENDING:
         raise ValidationError({"status": ["Faqat kutilayotgan so'rovni tasdiqlash mumkin."]})
-    _lock_user(sub.user_id)
+    _lock_target(sub.user, sub.studio, sub.venue)
+    ensure_target(sub.user, sub.plan, sub.studio, sub.venue)
     _activate(sub, request.user, payment)
     sub.save()
     record(
@@ -136,11 +198,13 @@ def approve(request, sub: Subscription, **payment) -> Subscription:
 
 
 @transaction.atomic
-def grant(request, user, plan: SubscriptionPlan, **payment) -> Subscription:
+def grant(request, user, plan: SubscriptionPlan, *, studio=None, venue=None, **payment) -> Subscription:
     """An admin sells a subscription directly (e.g. paid in cash at the office)."""
-    _ensure_client(user)
-    _lock_user(user.pk)
-    sub = Subscription(user=user, user_note="", **_terms(plan))
+    _lock_target(user, studio, venue)
+    ensure_target(user, plan, studio, venue)
+    if not plan.is_active:
+        raise ValidationError({"plan": ["Bu tarif hozir sotuvda emas."]})
+    sub = Subscription(user=user, studio=studio, venue=venue, user_note="", **_terms(plan))
     _activate(sub, request.user, payment)
     sub.save()
     record(request, AuditAction.CREATE, sub, changes={"plan": plan.code, "status": "ACTIVE", "granted": True})
@@ -175,8 +239,12 @@ def cancel(request, sub: Subscription, *, by_user: bool, admin_note: str = "") -
     return sub
 
 
-def _lock_user(user_id) -> None:
+def _lock_target(user, studio=None, venue=None) -> None:
     """Serialise period stacking for one user (two approvals cannot both start 'now')."""
     from apps.accounts.models import User
 
-    User.objects.select_for_update().filter(pk=user_id).first()
+    target = studio if studio is not None else venue
+    if target is not None:
+        type(target).objects.select_for_update().get(pk=target.pk)
+    else:
+        User.objects.select_for_update().get(pk=user.pk)

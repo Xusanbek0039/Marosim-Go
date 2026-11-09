@@ -5,6 +5,7 @@ from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 
 from apps.core.uploads import process_image
+from apps.subscriptions.badges import PaidBadgeSerializer
 
 from . import permissions_catalog as catalog
 from . import phone as phone_utils
@@ -49,7 +50,7 @@ def run_password_validators(password: str, candidate: User, field: str = "passwo
         raise serializers.ValidationError({field: exc.messages}) from None
 
 
-class UserSummarySerializer(serializers.ModelSerializer):
+class UserSummarySerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """Compact, safe representation used inside other resources (studios, dashboard)."""
 
     full_name = serializers.CharField(read_only=True)
@@ -58,6 +59,7 @@ class UserSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "is_verified",
             "id",
             "phone_number",
             "email",
@@ -73,7 +75,7 @@ class UserSummarySerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class MeSerializer(serializers.ModelSerializer):
+class MeSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """The caller's own profile. PINFL is only ever exposed masked."""
 
     full_name = serializers.CharField(read_only=True)
@@ -83,6 +85,7 @@ class MeSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "is_verified",
             "id",
             "phone_number",
             "is_phone_verified",
@@ -181,7 +184,7 @@ class RegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError({"phone_number": [DUPLICATE_PHONE]}) from None
 
 
-class ManagedUserSerializer(serializers.ModelSerializer):
+class ManagedUserSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """Create/update/read accounts managed by the panel.
 
     ``pinfl`` and ``password`` are write-only; reads only ever expose ``pinfl_masked``.
@@ -208,6 +211,7 @@ class ManagedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "is_verified",
             "id",
             "phone_number",
             "is_phone_verified",
@@ -275,6 +279,12 @@ class ManagedUserSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         creating = self.instance is None
+        if self.instance and attrs.get("role", self.instance.role) != self.instance.role:
+            if self.instance.responsible_studios.filter(is_active=True, deleted_at__isnull=True).exists():
+                raise serializers.ValidationError({"role": ["Avval studiya egaligini boshqa shaxsga o'tkazing."]})
+            if self.instance.venue_memberships.filter(is_active=True, role="OWNER", venue__is_active=True,
+                                                       venue__deleted_at__isnull=True).exists():
+                raise serializers.ValidationError({"role": ["Avval to'yxona egaligini boshqa shaxsga o'tkazing."]})
         if creating:
             missing = {
                 name: "Bu maydon to'ldirilishi shart."

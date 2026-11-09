@@ -3,6 +3,7 @@
 export type Role = "SUPER_ADMIN" | "ADMIN" | "STUDIO" | "VENUE_OWNER" | "USER";
 
 export interface Me {
+  is_verified: boolean;
   id: string;
   phone_number: string;
   is_phone_verified: boolean;

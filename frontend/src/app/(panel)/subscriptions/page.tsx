@@ -34,6 +34,7 @@ import {
   useSummary,
   useUpdatePlan,
   useUpdateSettings,
+  useCreatePlan,
 } from "@/features/subscriptions/api";
 import { useListState } from "@/features/use-list-state";
 import { api, ApiError } from "@/lib/api/client";
@@ -214,7 +215,7 @@ function GrantDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
       toast.error(errorText(e, "Qidirib bo'lmadi (users.view ruxsati kerak)"));
     }
   };
-  const plan = plans.data?.find((p) => p.id === planId);
+  const plan = plans.data?.filter((p) => p.audience === "USER").find((p) => p.id === planId);
 
   return (
     <MotionDialog
@@ -291,7 +292,7 @@ function GrantDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
         <div className="flex flex-col gap-2">
           <Label>Tarif</Label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {(plans.data ?? []).filter((p) => p.is_active).map((p) => (
+            {(plans.data ?? []).filter((p) => p.is_active && p.audience === "USER").map((p) => (
               <button
                 key={p.id}
                 type="button"
@@ -348,7 +349,7 @@ function SubscriptionsTab() {
                 </div>
                 <div className="w-36">
                   <p className="font-semibold">{s.plan.name}</p>
-                  <p className="text-xs text-muted-foreground">{s.max_viewers} kishi</p>
+                  <p className="text-xs text-muted-foreground">{s.studio_name || s.venue_name || `${s.max_viewers} kishi`}</p>
                 </div>
                 <div className="w-36 tabular-nums">
                   <p className="font-semibold">{formatMoney(s.paid_amount ?? s.price)}</p>
@@ -413,7 +414,7 @@ function PlanRow({ plan, editable }: { plan: Plan; editable: boolean }) {
   return (
     <li className={cn("grid items-end gap-3 px-5 py-4 sm:grid-cols-[1fr_1fr_0.7fr_0.7fr_auto]", !plan.is_active && "opacity-60")}>
       <div className="flex flex-col gap-1.5">
-        <Label className="text-xs">Nomi ({plan.code})</Label>
+        <Label className="text-xs">Nomi ({plan.code} ? {plan.audience})</Label>
         <Input disabled={!editable} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
       </div>
       <div className="flex flex-col gap-1.5">
@@ -450,6 +451,27 @@ function PlanRow({ plan, editable }: { plan: Plan; editable: boolean }) {
   );
 }
 
+function CreatePlanForm() {
+  const create = useCreatePlan();
+  const [form, setForm] = useState({ code: "", name: "", audience: "USER" as Plan["audience"], price: "", duration_months: "1", max_viewers: "10" });
+  return <form className="m-5 grid gap-3 rounded-2xl border border-border p-4 sm:grid-cols-2" onSubmit={(e) => {
+    e.preventDefault();
+    create.mutate({ ...form, duration_months: Number(form.duration_months), max_viewers: form.audience === "USER" ? Number(form.max_viewers) : 1 }, {
+      onSuccess: () => { toast.success("Tarif qo'shildi"); setForm({ ...form, code: "", name: "", price: "" }); },
+      onError: (error) => toast.error(errorText(error, "Tarif qo'shilmadi")),
+    });
+  }}>
+    <h3 className="font-bold sm:col-span-2">Yangi tarif</h3>
+    <label className="text-sm">Kim uchun<select className={nativeSelect} value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value as Plan["audience"] })}><option value="USER">Foydalanuvchi</option><option value="STUDIO">Studiya galichkasi</option><option value="VENUE">To&apos;yxona galichkasi</option></select></label>
+    <label className="text-sm">Kod<Input required maxLength={20} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="Masalan STUDIO_M3" /></label>
+    <label className="text-sm">Nomi<Input required maxLength={60} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
+    <label className="text-sm">Narx (so&apos;m)<Input required type="number" min="0" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} /></label>
+    <label className="text-sm">Muddat (oy)<Input required type="number" min="1" max="120" value={form.duration_months} onChange={(e) => setForm({ ...form, duration_months: e.target.value })} /></label>
+    {form.audience === "USER" && <label className="text-sm">Ulashish limiti<Input required type="number" min="1" max="1000" value={form.max_viewers} onChange={(e) => setForm({ ...form, max_viewers: e.target.value })} /></label>}
+    <Button type="submit" disabled={create.isPending} className="sm:col-span-2"><PlusIcon /> Tarif qo&apos;shish</Button>
+  </form>;
+}
+
 function PlansTab() {
   const can = useCan();
   const plans = usePlans();
@@ -463,6 +485,7 @@ function PlansTab() {
           {!editable && " Tahrirlash uchun `subscriptions.plans` ruxsati kerak."}
         </p>
       </div>
+      {editable && <CreatePlanForm />}
       {plans.isPending ? (
         <div className="p-5">
           <RowsSkeleton rows={4} />

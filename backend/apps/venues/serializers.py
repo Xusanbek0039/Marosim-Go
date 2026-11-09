@@ -7,6 +7,7 @@ from apps.core.uploads import process_image
 from apps.reviews.models import TargetKind
 from apps.reviews.serializers import StatsSerializer
 from apps.reviews.services import empty_stats, stats_map
+from apps.subscriptions.badges import PaidBadgeSerializer
 
 from . import scheduling, services
 from .models import (
@@ -95,7 +96,7 @@ class VenueHallSerializer(serializers.ModelSerializer):
         )
     ]
 )
-class OwnerVenueSerializer(serializers.ModelSerializer):
+class OwnerVenueSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """A venue as seen by its own members. ``is_active`` / ``publication_status`` are read-only here."""
 
     phone_number = PhoneNumberField(required=False, allow_blank=True)
@@ -108,6 +109,7 @@ class OwnerVenueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Venue
         fields = [
+            "is_verified",
             "id",
             "name",
             "description",
@@ -392,7 +394,7 @@ class OwnerCalendarSerializer(serializers.Serializer):
 
 
 # -------------------------------------------------------------- public
-class PublicVenueSerializer(serializers.ModelSerializer):
+class PublicVenueSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """What anyone may see about an approved venue — the business, never its customers."""
 
     images = VenueImageSerializer(many=True, read_only=True)
@@ -401,6 +403,7 @@ class PublicVenueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Venue
         fields = [
+            "is_verified",
             "id",
             "name",
             "description",

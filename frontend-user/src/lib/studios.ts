@@ -6,6 +6,7 @@ import { api } from "./api";
 import type { Stats } from "./reviews";
 
 export interface PublicStudio {
+  is_verified: boolean;
   id: string;
   name: string;
   description: string;

@@ -1,5 +1,7 @@
 "use client";
 
+import { PaidBadge } from "@/components/paid-badge";
+
 import { ArrowLeftIcon, CameraIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useState } from "react";
@@ -54,7 +56,7 @@ function StudioDetail() {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" aria-hidden />
           <div className="absolute inset-x-5 bottom-4 flex flex-wrap items-end justify-between gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight text-white drop-shadow sm:text-3xl">{studio.name}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-white drop-shadow sm:text-3xl">{studio.name} <PaidBadge verified={studio.is_verified} /></h1>
             <StatsLine stats={studio.stats} light className="rounded-full bg-slate-950/45 px-3 py-1.5 backdrop-blur" />
           </div>
         </div>

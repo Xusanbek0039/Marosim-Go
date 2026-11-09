@@ -32,6 +32,7 @@ from . import bot_protection, lockout
 from . import phone as phone_utils
 from .access import AccessNote
 from .authentication import enforce_csrf
+from .features import ensure_feature
 from .models import User
 from .serializers import (
     LoginSerializer,
@@ -133,6 +134,7 @@ class RegisterView(PublicAuthView):
         responses={201: TokenPairSerializer},
     )
     def post(self, request):
+        ensure_feature(request, self)
         bot_protection.verify(request)
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -36,6 +36,7 @@ export type BookingEventType =
 export type BookingStatus = "REQUESTED" | "CONFIRMED" | "BLOCKED" | "REJECTED" | "CANCELLED";
 
 export interface PublicVenue {
+  is_verified: boolean;
   id: string;
   name: string;
   description: string;

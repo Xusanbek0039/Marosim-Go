@@ -1,5 +1,7 @@
 "use client";
 
+import { PaidBadge } from "@/components/paid-badge";
+
 import { ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon, PhoneIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -76,7 +78,7 @@ function VenueDetail() {
         )}
         <div className="flex flex-col gap-3 px-5 pb-5 sm:px-6 sm:pb-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h1 className="text-2xl font-extrabold tracking-tight">{venue.name}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight">{venue.name} <PaidBadge verified={venue.is_verified} /></h1>
             <StatsLine stats={venue.stats} className="text-sm" />
           </div>
           <p className="flex items-center gap-1.5 text-sm text-muted-foreground">

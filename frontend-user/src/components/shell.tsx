@@ -8,6 +8,8 @@ import { useTheme } from "next-themes";
 import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
+import { PaidBadge } from "./paid-badge";
+
 import { APP } from "@/lib/app-config";
 import { useLogout, useMe } from "@/lib/auth";
 
@@ -95,7 +97,7 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
           <ThemeToggle />
           <Link href="/profile" className="flex items-center gap-2 rounded-xl p-1 pr-2 hover:bg-muted" aria-label="Profil">
             {me ? <Avatar first={me.first_name} last={me.last_name} src={me.profile_picture} className="size-8 text-xs" /> : <UserIcon className="size-5" />}
-            <span className="hidden max-w-32 truncate text-sm font-semibold md:inline">{me?.first_name || "Profil"}</span>
+            <span className="hidden max-w-32 truncate text-sm font-semibold md:inline">{me?.first_name || "Profil"} <PaidBadge verified={me?.is_verified} /></span>
           </Link>
           <button
             type="button"

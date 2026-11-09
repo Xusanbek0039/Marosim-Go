@@ -6,6 +6,7 @@ These only decide *who may call* an endpoint. *Which rows* they see is enforced 
 
 from rest_framework.permissions import BasePermission
 
+from apps.accounts.features import ensure_feature
 from apps.accounts.models import Role
 
 
@@ -23,7 +24,7 @@ class IsStudioMember(BasePermission):
     message = "Bu amal faqat studiya hisoblari uchun."
 
     def has_permission(self, request, view):
-        return is_studio_member(request.user)
+        return is_studio_member(request.user) and ensure_feature(request, view)
 
     def access_grant(self, view):
         from apps.accounts.access import Grant
@@ -36,7 +37,9 @@ class IsStudioMemberOrSuperAdmin(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return (_alive(user) and user.role == Role.SUPER_ADMIN) or is_studio_member(user)
+        return ((_alive(user) and user.role == Role.SUPER_ADMIN) or is_studio_member(user)) and ensure_feature(
+            request, view
+        )
 
     def access_grant(self, view):
         from apps.accounts.access import Grant
@@ -51,7 +54,7 @@ class IsClientUser(BasePermission):
 
     def has_permission(self, request, view):
         user = request.user
-        return _alive(user) and user.role == Role.USER
+        return _alive(user) and user.role == Role.USER and ensure_feature(request, view)
 
     def access_grant(self, view):
         from apps.accounts.access import Grant

@@ -7,6 +7,7 @@ documented in each view's ``access_notes``.
 
 from rest_framework.permissions import BasePermission
 
+from apps.accounts.features import ensure_feature
 from apps.accounts.models import Role
 
 
@@ -17,7 +18,7 @@ class IsVenueAccount(BasePermission):
         user = request.user
         return bool(
             user and user.is_authenticated and user.is_active and not user.is_deleted and user.role == Role.VENUE_OWNER
-        )
+        ) and ensure_feature(request, view)
 
     def access_grant(self, view):
         from apps.accounts.access import Grant

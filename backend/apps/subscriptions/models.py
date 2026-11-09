@@ -25,7 +25,14 @@ from apps.core.models import BaseModel
 MONEY = {"max_digits": 14, "decimal_places": 2}
 
 
+class PlanAudience(models.TextChoices):
+    USER = "USER", "Foydalanuvchi obunasi"
+    STUDIO = "STUDIO", "Studiya galichkasi"
+    VENUE = "VENUE", "To'yxona galichkasi"
+
+
 class SubscriptionPlan(BaseModel):
+    audience = models.CharField(max_length=10, choices=PlanAudience.choices, default=PlanAudience.USER)
     code = models.CharField(max_length=20, unique=True)
     name = models.CharField(max_length=60)
     duration_months = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
@@ -68,6 +75,12 @@ class Subscription(BaseModel):
     """One purchase. Plan terms are copied at request time so a later price change never moves it."""
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="subscriptions")
+    studio = models.ForeignKey(
+        "studios.Studio", on_delete=models.PROTECT, null=True, blank=True, related_name="subscriptions"
+    )
+    venue = models.ForeignKey(
+        "venues.Venue", on_delete=models.PROTECT, null=True, blank=True, related_name="subscriptions"
+    )
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.PROTECT, related_name="subscriptions")
     status = models.CharField(max_length=10, choices=SubscriptionStatus.choices, default=SubscriptionStatus.PENDING)
     price = models.DecimalField(**MONEY)
@@ -97,7 +110,22 @@ class Subscription(BaseModel):
         ]
         constraints = [
             models.UniqueConstraint(
-                fields=["user"], condition=Q(status="PENDING"), name="subscriptions_one_pending_per_user"
+                fields=["user"],
+                condition=Q(status="PENDING", studio__isnull=True, venue__isnull=True),
+                name="subscriptions_one_pending_per_user",
+            ),
+            models.UniqueConstraint(
+                fields=["studio"],
+                condition=Q(status="PENDING", studio__isnull=False),
+                name="subscriptions_one_pending_per_studio",
+            ),
+            models.UniqueConstraint(
+                fields=["venue"],
+                condition=Q(status="PENDING", venue__isnull=False),
+                name="subscriptions_one_pending_per_venue",
+            ),
+            models.CheckConstraint(
+                condition=Q(studio__isnull=True) | Q(venue__isnull=True), name="subscriptions_single_target"
             ),
             models.CheckConstraint(
                 condition=Q(status__in=[s.value for s in SubscriptionStatus]), name="subscriptions_status_valid"

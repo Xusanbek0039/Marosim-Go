@@ -7,6 +7,7 @@ from apps.core.uploads import process_image
 from apps.reviews.models import TargetKind
 from apps.reviews.serializers import StatsSerializer
 from apps.reviews.services import empty_stats, stats_map
+from apps.subscriptions.badges import PaidBadgeSerializer
 
 from .models import Studio, StudioImage
 
@@ -22,7 +23,7 @@ class StudioImageUploadSerializer(serializers.Serializer):
     image = serializers.ImageField()
 
 
-class StudioSerializer(serializers.ModelSerializer):
+class StudioSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     responsible_user = UserSummarySerializer(read_only=True)
     responsible_user_id = serializers.PrimaryKeyRelatedField(
         source="responsible_user",
@@ -39,6 +40,7 @@ class StudioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Studio
         fields = [
+            "is_verified",
             "id",
             "name",
             "description",
@@ -77,7 +79,7 @@ class StudioSerializer(serializers.ModelSerializer):
 
 
 # ------------------------------------------------------------------ public
-class PublicStudioSerializer(serializers.ModelSerializer):
+class PublicStudioSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """What customers see about a studio: the business and its portfolio, never its staff or clients."""
 
     images = StudioImageSerializer(many=True, read_only=True)
@@ -85,7 +87,17 @@ class PublicStudioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Studio
-        fields = ["id", "name", "description", "profile_picture", "address", "phone_number", "images", "stats"]
+        fields = [
+            "is_verified",
+            "id",
+            "name",
+            "description",
+            "profile_picture",
+            "address",
+            "phone_number",
+            "images",
+            "stats",
+        ]
         read_only_fields = fields
 
     @extend_schema_field(StatsSerializer)

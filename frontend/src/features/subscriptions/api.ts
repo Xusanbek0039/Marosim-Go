@@ -10,6 +10,7 @@ export type SubscriptionState = "PENDING" | "ACTIVE" | "SCHEDULED" | "EXPIRED" |
 export type PaymentMethod = "CARD_TRANSFER" | "CASH" | "CLICK" | "PAYME" | "BANK" | "OTHER";
 
 export interface Plan {
+  audience: "USER" | "STUDIO" | "VENUE";
   id: string;
   code: string;
   name: string;
@@ -22,6 +23,10 @@ export interface Plan {
 }
 
 export interface AdminSubscription {
+  studio: string | null;
+  venue: string | null;
+  studio_name: string | null;
+  venue_name: string | null;
   id: string;
   user: { id: string; full_name: string; phone_number: string };
   plan: { id: string; code: string; name: string };
@@ -123,6 +128,14 @@ export function useUpdatePlan() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...body }: Partial<Plan> & { id: string }) => api.patch<Plan>(`/admin/subscription-plans/${id}/`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.plans }),
+  });
+}
+
+export function useCreatePlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { code: string; name: string; audience: Plan["audience"]; price: string; duration_months: number; max_viewers: number }) => api.post<Plan>("/admin/subscription-plans/", body),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.plans }),
   });
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { PaidBadge } from "@/components/paid-badge";
+
 import { CheckIcon, CrownIcon, DownloadIcon, ImageOffIcon, UsersIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -50,7 +52,7 @@ export default function SubscriptionPage() {
           {s.active ? (
             <>
               <p className="text-lg font-bold">
-                {s.active.plan.name} obuna faol <Badge tone="success">Faol</Badge>
+                {s.active.plan.name} obuna faol <PaidBadge verified={s.is_verified} /> <Badge tone="success">Faol</Badge>
               </p>
               <p className="text-sm text-muted-foreground">
                 {day(s.active.ends_at)} gacha
@@ -79,7 +81,7 @@ export default function SubscriptionPage() {
               key={p.id}
               type="button"
               onClick={() => setSelected(p.id)}
-              disabled={Boolean(s.pending)}
+              disabled={Boolean(s.pending) || !s.purchase_enabled}
               className={cn(
                 "glass relative flex flex-col gap-3 rounded-3xl p-5 text-left transition hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-60",
                 selected === p.id && "ring-2 ring-brand",
@@ -90,6 +92,7 @@ export default function SubscriptionPage() {
               <p className="text-2xl font-extrabold tracking-tight">{formatMoney(p.price)}</p>
               <p className="text-xs text-muted-foreground">oyiga ≈ {formatMoney(perMonth(p))}</p>
               <ul className="flex flex-col gap-1.5 text-sm">
+                <Perk icon={CheckIcon}>Profil galichkasi</Perk>
                 <Perk icon={ImageOffIcon}>Logosiz video va rasmlar</Perk>
                 <Perk icon={DownloadIcon}>Yuklab olish</Perk>
                 <Perk icon={UsersIcon}>{p.max_viewers} kishiga ruxsat</Perk>
@@ -99,7 +102,8 @@ export default function SubscriptionPage() {
         })}
       </div>
 
-      {plan && !s.pending && <RequestForm plan={plan} instructions={s.payment_instructions} onDone={() => setSelected(null)} />}
+      {!s.purchase_enabled && <Card>Sotib olish vaqtincha o&apos;chirilgan.</Card>}
+      {plan && !s.pending && s.purchase_enabled && <RequestForm plan={plan} instructions={s.payment_instructions} onDone={() => setSelected(null)} />}
 
       <Card className="flex flex-col gap-2 text-sm text-muted-foreground">
         <p>

@@ -1,6 +1,8 @@
 export type Role = "SUPER_ADMIN" | "ADMIN" | "STUDIO" | "VENUE_OWNER" | "USER";
 
 export type PermissionCode =
+  | "platform.view"
+  | "platform.manage"
   | "dashboard.view"
   | "users.view"
   | "users.create"
@@ -29,6 +31,7 @@ export type PermissionCode =
   | "support.monitor";
 
 export interface Me {
+  is_verified: boolean;
   id: string;
   /** E.164 login identifier; null only for legacy accounts that were never assigned one. */
   phone_number: string | null;
@@ -47,6 +50,7 @@ export interface Me {
 }
 
 export interface UserSummary {
+  is_verified: boolean;
   id: string;
   phone_number: string | null;
   email: string | null;
@@ -72,6 +76,7 @@ export interface Admin extends ManagedUser {
 }
 
 export interface Studio {
+  is_verified: boolean;
   id: string;
   name: string;
   description: string;

@@ -41,6 +41,8 @@ export interface SubscriptionStatus {
   pending: MySubscription | null;
   paid_until: string | null;
   clean_access: boolean;
+  is_verified: boolean;
+  purchase_enabled: boolean;
   viewer_limit: number;
   payment_instructions: string;
   plans: Plan[];

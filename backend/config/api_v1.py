@@ -3,6 +3,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from apps.accounts.policy_views import PlatformPolicyView
 from apps.accounts.views import AdminViewSet, UserViewSet
 from apps.ceremonies.views import (
     CeremonyViewSet,
@@ -55,6 +56,11 @@ router.register("admin/support/applications", StaffApplicationViewSet, basename=
 router.register("public/partner-applications", PublicApplicationViewSet, basename="public-partner-application")
 
 urlpatterns = [
+    path(
+        "admin/platform-policy/",
+        PlatformPolicyView.as_view({"get": "retrieve", "patch": "partial_update"}),
+        name="platform-policy",
+    ),
     path("auth/", include("apps.accounts.auth_urls")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("monitoring/", include("apps.monitoring.urls")),

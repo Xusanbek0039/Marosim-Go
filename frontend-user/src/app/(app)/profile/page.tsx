@@ -1,5 +1,7 @@
 "use client";
 
+import { PaidBadge } from "@/components/paid-badge";
+
 import { CheckCircle2Icon, ShieldAlertIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -63,7 +65,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <Avatar first={me.first_name} last={me.last_name} src={me.profile_picture} className="size-16 text-lg" />
             <div className="min-w-0">
-              <p className="truncate text-lg font-bold">{me.full_name || "Ism kiritilmagan"}</p>
+              <p className="truncate text-lg font-bold">{me.full_name || "Ism kiritilmagan"} <PaidBadge verified={me.is_verified} /></p>
               <p className="text-sm text-muted-foreground tabular-nums">{formatPhone(me.phone_number)}</p>
             </div>
           </div>

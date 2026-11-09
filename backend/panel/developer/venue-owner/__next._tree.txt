@@ -1,9 +1,9 @@
 :HL["/_next/static/chunks/00ovbya56-fuc.css","style"]
-:HL["/_next/static/chunks/1p6j6rretgz-e.css","style"]
+:HL["/_next/static/chunks/1d0h_lu03ii2r.css","style"]
 :HL["/_next/static/media/9f5a2b9f13a4ecbb-s.p.35a5cae5tspm2.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/media/d8aeca813a9ab546-s.p.18rizl4rsrl42.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 4:[["children",{"s":"__PAGE__","h":160}]]
 3:[["children",{"s":{"n":"section","t":"d","k":"venue-owner","s":["changelog","endpoints","mobile"]},"h":96,"c":"$Q4"}]]
 2:[["children",{"s":"developer","h":96,"c":"$Q3"}]]
 1:[["children",{"s":"(panel)","h":96,"c":"$Q2"}]]
-0:{"b":"xLUigJppramfUAliUxDt0","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"dx2ObmzhFUVnsNbNg_JSL","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

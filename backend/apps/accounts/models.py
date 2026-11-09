@@ -24,6 +24,21 @@ class Role(models.TextChoices):
 CLIENT_ROLES = (Role.USER, Role.STUDIO, Role.VENUE_OWNER)
 
 
+class PlatformPolicy(models.Model):
+    """Singleton. Missing keys remain enabled so existing installations keep their behavior."""
+
+    disabled_features = models.JSONField(default=list, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Platforma imkoniyatlari"
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
 def avatar_upload_to(instance, filename):
     return f"avatars/{filename}"
 

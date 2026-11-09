@@ -90,6 +90,12 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
 
     @staticmethod
     def _ensure_not_studio_owner(user, verb: str) -> None:
+        if user.venue_memberships.filter(
+            is_active=True, role="OWNER", venue__deleted_at__isnull=True, venue__is_active=True
+        ).exists():
+            raise Conflict(
+                f"{verb} mumkin emas: bu shaxs faol to'yxona egasi. Avval egalikni boshqa shaxsga o'tkazing."
+            )
         if user.responsible_studios.filter(deleted_at__isnull=True, is_active=True).exists():
             raise Conflict(
                 f"{verb} mumkin emas: bu shaxs faol studiyaning mas'ul shaxsi. Avval studiyani boshqa shaxsga "

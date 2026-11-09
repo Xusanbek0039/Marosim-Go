@@ -1,5 +1,7 @@
 "use client";
 
+import { PaidBadge } from "@/components/paid-badge";
+
 import { BuildingIcon, CameraIcon, ChevronRightIcon, MapPinIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -27,7 +29,7 @@ export function StudioAdCard({ studio, top }: { studio: PublicStudio; top?: bool
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent" aria-hidden />
         {top && <span className="absolute top-3 left-3 rounded-full bg-amber-500 px-2.5 py-1 text-xs font-bold text-white shadow">★ Eng yaxshi</span>}
         <div className="absolute inset-x-4 bottom-3 flex items-end justify-between gap-2">
-          <p className="truncate text-lg font-extrabold text-white drop-shadow">{studio.name}</p>
+          <p className="truncate text-lg font-extrabold text-white drop-shadow">{studio.name} <PaidBadge verified={studio.is_verified} /></p>
           <StatsLine stats={studio.stats} light className="shrink-0 rounded-full bg-slate-950/45 px-2.5 py-1 backdrop-blur" />
         </div>
       </div>
@@ -71,7 +73,7 @@ export function VenueAdCard({ venue, top }: { venue: PublicVenue; top?: boolean 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent" aria-hidden />
         {top && <span className="absolute top-3 left-3 rounded-full bg-amber-500 px-2.5 py-1 text-xs font-bold text-white shadow">★ Eng yaxshi</span>}
         <div className="absolute inset-x-4 bottom-3 flex items-end justify-between gap-2">
-          <p className="truncate text-base font-extrabold text-white drop-shadow">{venue.name}</p>
+          <p className="truncate text-base font-extrabold text-white drop-shadow">{venue.name} <PaidBadge verified={venue.is_verified} /></p>
           <StatsLine stats={venue.stats} light className="shrink-0 rounded-full bg-slate-950/45 px-2.5 py-1 backdrop-blur" />
         </div>
       </div>
