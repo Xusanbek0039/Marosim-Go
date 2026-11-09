@@ -756,6 +756,25 @@
       "schema_changed": [
         "POST /api/v1/public/partner-applications/"
       ]
+    },
+    {
+      "revision": 19,
+      "date": "2026-11-09",
+      "note": "Hamkorlik arizasi: bot himoyasi — GET challenge/ (proof-of-work, kamida 3 s, bir martalik), telefon bo'yicha kunlik cheklov",
+      "added": [
+        "GET /api/v1/public/partner-applications/challenge/"
+      ],
+      "removed": [],
+      "changed": {
+        "POST /api/v1/public/partner-applications/": [
+          "conditions",
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "POST /api/v1/public/partner-applications/"
+      ]
     }
   ]
 }

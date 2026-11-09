@@ -1098,6 +1098,22 @@
       "operation_id": "monitoring_overview_retrieve",
       "schema_fingerprint": "b2d7170153b0b9a5"
     },
+    "GET /api/v1/public/partner-applications/challenge/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "IP bo'yicha cheklangan (partner_challenge)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_partner_applications_challenge_retrieve",
+      "schema_fingerprint": "b6c9a2217bd87cac"
+    },
     "GET /api/v1/studios/": {
       "allowed_roles": [
         "ADMIN",
@@ -2520,12 +2536,12 @@
       "role_requirements": {},
       "ownership_scope": null,
       "conditions": [
-        "IP bo'yicha cheklangan (partner_apply); bot tekshiruvi; javobda shaxsiy ma'lumot yo'q."
+        "IP bo'yicha cheklangan (partner_apply); bir martalik proof-of-work topshiriq, kamida 3 s; bitta raqamdan kuniga 3 ta; javobda shaxsiy ma'lumot yo'q."
       ],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_partner_applications_create",
-      "schema_fingerprint": "bd476d70f38f13f1"
+      "schema_fingerprint": "0266a258e225d4e3"
     },
     "POST /api/v1/studios/": {
       "allowed_roles": [
