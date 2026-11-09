@@ -367,6 +367,69 @@
       "operation_id": "admin_subscriptions_retrieve",
       "schema_fingerprint": "a145ad42b7a3c6fb"
     },
+    "GET /api/v1/admin/support/tickets/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_tickets_list",
+      "schema_fingerprint": "ef0e229c40080961"
+    },
+    "GET /api/v1/admin/support/tickets/summary/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_tickets_summary_retrieve",
+      "schema_fingerprint": "c405e269aeb36197"
+    },
+    "GET /api/v1/admin/support/tickets/{id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_tickets_retrieve",
+      "schema_fingerprint": "091bf450818b9903"
+    },
     "GET /api/v1/admin/venues/": {
       "allowed_roles": [
         "ADMIN",
@@ -421,7 +484,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_list",
-      "schema_fingerprint": "35de021aa33b9310"
+      "schema_fingerprint": "7833a357e3dbe487"
     },
     "GET /api/v1/admins/permissions/": {
       "allowed_roles": [
@@ -449,7 +512,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_retrieve",
-      "schema_fingerprint": "0f08bfb010605c44"
+      "schema_fingerprint": "8bbbb526a7a53bae"
     },
     "GET /api/v1/admins/{id}/pinfl/": {
       "allowed_roles": [
@@ -1056,6 +1119,57 @@
       "operation_id": "subscriptions_plans_list",
       "schema_fingerprint": "5b1dae90b2d7ced5"
     },
+    "GET /api/v1/support/tickets/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER",
+        "ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat o'zi yozgan xatlar (boshqalarniki 404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "support_tickets_list",
+      "schema_fingerprint": "f43123c0661bd8bd"
+    },
+    "GET /api/v1/support/tickets/summary/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER",
+        "ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat o'zi yozgan xatlar (boshqalarniki 404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "support_tickets_summary_retrieve",
+      "schema_fingerprint": "c405e269aeb36197"
+    },
+    "GET /api/v1/support/tickets/{id}/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER",
+        "ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat o'zi yozgan xatlar (boshqalarniki 404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "support_tickets_retrieve",
+      "schema_fingerprint": "091bf450818b9903"
+    },
     "GET /api/v1/users/": {
       "allowed_roles": [
         "ADMIN",
@@ -1405,7 +1519,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_partial_update",
-      "schema_fingerprint": "f505643e774b7c9d"
+      "schema_fingerprint": "f6d4919691efe99d"
     },
     "PATCH /api/v1/auth/me/": {
       "allowed_roles": [
@@ -1749,6 +1863,50 @@
       "operation_id": "admin_subscriptions_reject_create",
       "schema_fingerprint": "8a11a7645d5aa44d"
     },
+    "POST /api/v1/admin/support/tickets/{id}/close/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_tickets_close_create",
+      "schema_fingerprint": "fce0d5dfd97dd822"
+    },
+    "POST /api/v1/admin/support/tickets/{id}/messages/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "support.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "support.view"
+        ]
+      },
+      "ownership_scope": "SUPER_ADMIN — barchasi; ADMIN (support.view) — foydalanuvchi / studiya / to'yxona xatlari; support.monitor bilan — adminlarning Super Admin'ga xatlari ham (faqat o'qish).",
+      "conditions": [
+        "Adminlarning xatlariga faqat SUPER_ADMIN javob beradi; o'z xatiga javob berilmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_support_tickets_messages_create",
+      "schema_fingerprint": "adbc13f078c8f806"
+    },
     "POST /api/v1/admin/venues/": {
       "allowed_roles": [
         "ADMIN",
@@ -1826,7 +1984,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_create",
-      "schema_fingerprint": "dacfd2869aa6f6cd"
+      "schema_fingerprint": "33a84d5720becfbf"
     },
     "POST /api/v1/admins/{id}/verify-phone/": {
       "allowed_roles": [
@@ -2289,6 +2447,59 @@
       "deprecated": false,
       "operation_id": "studios_create",
       "schema_fingerprint": "fe6f2b40f73558ad"
+    },
+    "POST /api/v1/support/tickets/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER",
+        "ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat o'zi yozgan xatlar (boshqalarniki 404).",
+      "conditions": [
+        "ADMIN xati Super Admin'ga boradi; boshqalarniki — support.view ruxsati bor adminlarga."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "support_tickets_create",
+      "schema_fingerprint": "3ecfdb70035123f7"
+    },
+    "POST /api/v1/support/tickets/{id}/close/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER",
+        "ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat o'zi yozgan xatlar (boshqalarniki 404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "support_tickets_close_create",
+      "schema_fingerprint": "fce0d5dfd97dd822"
+    },
+    "POST /api/v1/support/tickets/{id}/messages/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER",
+        "ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat o'zi yozgan xatlar (boshqalarniki 404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "support_tickets_messages_create",
+      "schema_fingerprint": "adbc13f078c8f806"
     },
     "POST /api/v1/users/": {
       "allowed_roles": [

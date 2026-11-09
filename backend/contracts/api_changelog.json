@@ -684,6 +684,46 @@
         "POST /api/v1/admin/subscriptions/{id}/cancel/",
         "POST /api/v1/admin/subscriptions/{id}/reject/"
       ]
+    },
+    {
+      "revision": 16,
+      "date": "2026-11-09",
+      "note": "Yordam xatlari: /support/tickets/ (muallif) va /admin/support/tickets/ (support.view, support.monitor)",
+      "added": [
+        "GET /api/v1/admin/support/tickets/",
+        "GET /api/v1/admin/support/tickets/summary/",
+        "GET /api/v1/admin/support/tickets/{id}/",
+        "GET /api/v1/support/tickets/",
+        "GET /api/v1/support/tickets/summary/",
+        "GET /api/v1/support/tickets/{id}/",
+        "POST /api/v1/admin/support/tickets/{id}/close/",
+        "POST /api/v1/admin/support/tickets/{id}/messages/",
+        "POST /api/v1/support/tickets/",
+        "POST /api/v1/support/tickets/{id}/close/",
+        "POST /api/v1/support/tickets/{id}/messages/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admins/",
+        "GET /api/v1/admins/{id}/",
+        "PATCH /api/v1/admins/{id}/",
+        "POST /api/v1/admins/"
+      ]
     }
   ]
 }

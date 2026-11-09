@@ -100,7 +100,9 @@ def staff_reply(request, ticket: SupportTicket, body: str) -> SupportMessage:
         msg = SupportMessage.objects.create(
             ticket=ticket, author=user, author_role=user.role, is_staff_reply=True, body=body.strip()
         )
-        SupportTicket.objects.filter(pk=ticket.pk).update(status=TicketStatus.ANSWERED, last_message_at=now, updated_at=now)
+        SupportTicket.objects.filter(pk=ticket.pk).update(
+            status=TicketStatus.ANSWERED, last_message_at=now, updated_at=now
+        )
         SupportTicket.objects.filter(pk=ticket.pk, handled_by__isnull=True).update(handled_by=user)
     return msg
 

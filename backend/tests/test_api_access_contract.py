@@ -268,6 +268,28 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_admin_deletion_requests",
     ),
+    # help tickets — tests live in tests/test_support.py
+    **dict.fromkeys(
+        [
+            "support_tickets_list",
+            "support_tickets_create",
+            "support_tickets_summary_retrieve",
+            "support_tickets_retrieve",
+            "support_tickets_close_create",
+            "support_tickets_messages_create",
+        ],
+        "ownership_support_own_tickets",
+    ),
+    **dict.fromkeys(
+        [
+            "admin_support_tickets_list",
+            "admin_support_tickets_summary_retrieve",
+            "admin_support_tickets_retrieve",
+            "admin_support_tickets_close_create",
+            "admin_support_tickets_messages_create",
+        ],
+        "ownership_support_staff_queue",
+    ),
     # couple / guest media (Phase E) — tests live in tests/test_media_sharing.py
     **dict.fromkeys(
         [
@@ -369,13 +391,15 @@ from . import test_media_upload as _media_tests  # noqa: E402
 ownership_media_scope_is_own_studio = _media_tests.test_upload_scope_and_roles
 
 from . import test_media_deletion as _deletion_tests  # noqa: E402
+from . import test_support as _support_tests  # noqa: E402
+
+ownership_support_own_tickets = _support_tests.test_authors_see_only_their_own_tickets_and_can_close_and_reopen
+ownership_support_staff_queue = _support_tests.test_admin_tickets_go_to_super_admin_only
 
 ownership_media_deletion_is_own_studio = (
     _deletion_tests.test_studio_dismisses_unfinished_upload_and_session_is_cancelled
 )
-ownership_admin_deletion_requests = (
-    _deletion_tests.test_request_is_listed_for_admins_and_approval_trashes_drive_files
-)
+ownership_admin_deletion_requests = _deletion_tests.test_request_is_listed_for_admins_and_approval_trashes_drive_files
 
 from . import test_media_sharing as _sharing_tests  # noqa: E402
 
