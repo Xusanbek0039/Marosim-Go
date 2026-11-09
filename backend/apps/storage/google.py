@@ -231,6 +231,15 @@ class GoogleGateway:
         except HttpError as exc:
             raise _drive_error(exc) from exc
 
+    def trash_file(self, creds, file_id: str) -> None:
+        """Move a file to the Drive trash (the account owner can still restore it for ~30 days)."""
+        from googleapiclient.errors import HttpError
+
+        try:
+            self.drive(creds).files().update(fileId=file_id, body={"trashed": True}, fields="id").execute()
+        except HttpError as exc:
+            raise _drive_error(exc) from exc
+
     # --- media upload (Phase D): resumable sessions -------------------------------------
     def find_child_folder(self, creds, name: str, parent_id: str) -> str | None:
         """An app-created folder with ``name`` under ``parent_id`` (drive.file: only ours are visible)."""

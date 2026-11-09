@@ -11,6 +11,7 @@ from apps.ceremonies.views import (
     StudioMeCeremoniesView,
     StudioMeView,
 )
+from apps.media.admin_views import AdminDeletionRequestViewSet
 from apps.monitoring.health import LiveView, ReadyView
 from apps.studios.views import StudioViewSet
 from apps.subscriptions.views import (
@@ -40,6 +41,9 @@ router.register("me/subscriptions", MySubscriptionViewSet, basename="my-subscrip
 router.register("admin/subscriptions", AdminSubscriptionViewSet, basename="admin-subscription")
 router.register("admin/subscription-plans", AdminPlanViewSet, basename="admin-subscription-plan")
 router.register("me/venue-bookings", MyVenueBookingViewSet, basename="my-venue-booking")
+router.register(
+    "admin/media-deletion-requests", AdminDeletionRequestViewSet, basename="admin-media-deletion-request"
+)
 
 urlpatterns = [
     path("auth/", include("apps.accounts.auth_urls")),

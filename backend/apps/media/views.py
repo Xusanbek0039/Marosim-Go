@@ -4,6 +4,7 @@ The ceremony is resolved through the studio scope (``ceremonies.services.ceremon
 studio's ceremony is a 404. Upload itself goes client → Google; see ``services``.
 """
 
+from django.db.models import Prefetch
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.exceptions import NotFound
@@ -14,9 +15,15 @@ from apps.accounts.access import AccessNote
 from apps.ceremonies import services as ceremony_services
 from apps.ceremonies.permissions import IsStudioMemberOrSuperAdmin
 
-from . import services
-from .models import CeremonyMedia, MediaKind, MediaStatus
-from .serializers import MediaSerializer, UploadSessionSerializer, UploadStartSerializer
+from . import deletion, services
+from .models import CeremonyMedia, DeletionRequestStatus, MediaDeletionRequest, MediaKind, MediaStatus
+from .serializers import (
+    DeletionRequestCreateSerializer,
+    MediaSerializer,
+    PendingDeletionSerializer,
+    UploadSessionSerializer,
+    UploadStartSerializer,
+)
 
 STUDIO_SCOPE = "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi."
 UPLOAD_CONDITION = "Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN."
@@ -38,7 +45,9 @@ def _session_payload(request, media: CeremonyMedia, uri: str | None = None, rece
         summary="Marosimning yuklangan fayllari va holati",
         tags=["media"],
         parameters=[
-            OpenApiParameter("status", str, enum=[s.value for s in MediaStatus], required=False),
+            OpenApiParameter(
+                "status", str, enum=[s.value for s in MediaStatus if s != MediaStatus.DELETED], required=False
+            ),
             OpenApiParameter("kind", str, enum=[k.value for k in MediaKind], required=False),
         ],
     )
@@ -60,6 +69,16 @@ class StudioMediaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         "upload_status": AccessNote(conditions=("upload_url faqat yuklashni boshlagan foydalanuvchiga qaytadi.",)),
         "complete": AccessNote(conditions=(UPLOAD_CONDITION, "Fayl Drive'dan qayta o'qilib tekshiriladi.")),
         "cancel": AccessNote(conditions=("Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.",)),
+        "dismiss": AccessNote(
+            conditions=(
+                "Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.",
+                "Faqat tugallanmagan fayl (UPLOADING / FAILED / CANCELLED / EXPIRED); tayyor fayl — so'rov orqali.",
+            )
+        ),
+        "request_delete": AccessNote(
+            conditions=(UPLOAD_CONDITION, "Faqat READY fayl; bir faylga bitta kutilayotgan so'rov.")
+        ),
+        "cancel_delete": AccessNote(conditions=("So'rovni yuborgan a'zo yoki studiya OWNER/MANAGER.",)),
     }
 
     def get_throttles(self):
@@ -79,7 +98,15 @@ class StudioMediaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return CeremonyMedia.objects.none()
-        qs = CeremonyMedia.objects.filter(ceremony=self.ceremony()).select_related("uploaded_by", "ceremony__studio")
+        pending = MediaDeletionRequest.objects.filter(status=DeletionRequestStatus.PENDING).select_related(
+            "requested_by"
+        )
+        qs = (
+            CeremonyMedia.objects.filter(ceremony=self.ceremony())
+            .exclude(status=MediaStatus.DELETED)
+            .select_related("uploaded_by", "ceremony__studio")
+            .prefetch_related(Prefetch("deletion_requests", queryset=pending, to_attr="pending_deletions"))
+        )
         params = self.request.query_params
         if params.get("status") in MediaStatus.values:
             qs = qs.filter(status=params["status"])
@@ -135,3 +162,31 @@ class StudioMediaViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def cancel(self, request, ceremony_id=None, media_id=None):
         media = services.cancel(request, self._media())
         return Response(UploadSessionSerializer(_session_payload(request, media)).data)
+
+    @extend_schema(
+        summary="Tugallanmagan yuklashni ro'yxatdan o'chirish",
+        description="Ochiq Drive sessiyasi bekor qilinadi. Tayyor (READY) faylga 409 — o'chirish so'rovi yuboriladi.",
+        tags=["media"],
+        request=None,
+        responses={204: None},
+    )
+    def dismiss(self, request, ceremony_id=None, media_id=None):
+        deletion.dismiss(request, self._media())
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        summary="Tayyor faylni o'chirishni so'rash (admin tasdiqlaydi)",
+        tags=["media"],
+        request=DeletionRequestCreateSerializer,
+        responses={201: PendingDeletionSerializer},
+    )
+    def request_delete(self, request, ceremony_id=None, media_id=None):
+        body = DeletionRequestCreateSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        row = deletion.request_deletion(request, self._media(), body.validated_data["reason"])
+        return Response(PendingDeletionSerializer(row).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(summary="O'chirish so'rovini qaytarib olish", tags=["media"], request=None, responses={204: None})
+    def cancel_delete(self, request, ceremony_id=None, media_id=None):
+        deletion.cancel_request(request, self._media())
+        return Response(status=status.HTTP_204_NO_CONTENT)
