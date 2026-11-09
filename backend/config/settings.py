@@ -154,6 +154,7 @@ REST_FRAMEWORK = {
         "pinfl_reveal": env.str("THROTTLE_PINFL_REVEAL", default="20/hour"),
         "support_write": env.str("THROTTLE_SUPPORT_WRITE", default="60/hour"),
         "partner_apply": env.str("THROTTLE_PARTNER_APPLY", default="5/hour"),
+        "partner_challenge": env.str("THROTTLE_PARTNER_CHALLENGE", default="60/hour"),
     },
     "NUM_PROXIES": NUM_PROXIES or None,
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -332,6 +333,13 @@ MEDIA_WATERMARK_ENCODER = env.str("MEDIA_WATERMARK_ENCODER", default="auto")
 #: ffmpeg reads the original straight from Drive while encoding (no full download first).
 MEDIA_WATERMARK_STREAM_SOURCE = env.bool("MEDIA_WATERMARK_STREAM_SOURCE", default=True)
 CEREMONY_MAX_INVITATION_SENDS = env.int("CEREMONY_MAX_INVITATION_SENDS", default=5)
+
+# Landing page partner applications: anti-bot proof-of-work (apps/support/challenge.py).
+PARTNER_APPLY = {
+    "POW_BITS": env.int("PARTNER_APPLY_POW_BITS", default=16),
+    "MIN_SECONDS": env.int("PARTNER_APPLY_MIN_SECONDS", default=3),
+    "MAX_AGE_SECONDS": 2 * 3600,
+}
 
 # Ceremony media (Phase D): client → Google Drive resumable sessions; nothing is public.
 MEDIA_UPLOAD = {

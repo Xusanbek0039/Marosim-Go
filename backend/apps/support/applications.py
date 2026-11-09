@@ -1,14 +1,18 @@
 """Partner applications from the marosimgo.uz landing page.
 
-* ``POST /public/partner-applications/`` — anyone (no account): a studio or venue asks to join.
-  IP-throttled (``partner_apply``), the pluggable bot check runs, and a hidden ``website`` field
-  catches simple bots (answered 201 like a real request, nothing is stored).
+* ``GET /public/partner-applications/challenge/`` then ``POST /public/partner-applications/`` — anyone
+  (no account): a studio or venue asks to join. Layers against bots: IP throttle (``partner_apply``),
+  signed one-time proof-of-work challenge with a minimum fill time (``challenge``), a hidden
+  ``website`` honeypot (answered 201 like a real request, nothing is stored), at most
+  ``PHONE_LIMIT`` applications per phone a day, and the pluggable ``bot_protection`` guard.
 * ``/admin/support/applications/`` — staff with ``support.view`` (and the SUPER_ADMIN) review them on
   the "Yordam" page: list, filter, change status, keep a note.
 """
 
 import django_filters
 from django.core.exceptions import ValidationError as DjangoValidationError
+from datetime import timedelta
+
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, serializers, status, viewsets
@@ -23,9 +27,11 @@ from apps.accounts.access import AccessNote
 from apps.accounts.permissions import HasAdminPermission
 from apps.venues.models import Region
 
+from . import challenge
 from .models import ApplicationKind, ApplicationStatus, PartnerApplication
 
 UUID_RE = "[0-9a-fA-F-]{36}"
+PHONE_LIMIT = 3  # applications per phone number in 24 hours
 
 
 # ================================================================ serializers
@@ -38,6 +44,8 @@ class ApplicationCreateSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=2000, required=False, allow_blank=True, default="")
     #: Honeypot: hidden on the page, real people leave it empty.
     website = serializers.CharField(required=False, allow_blank=True, default="", write_only=True)
+    challenge = serializers.CharField(max_length=500, help_text="`challenge/` dan olingan token.")
+    proof = serializers.CharField(max_length=64, help_text="sha256(`token:proof`) `difficulty` ta nol bit bilan boshlanadi.")
 
     def validate_phone_number(self, value: str) -> str:
         try:
@@ -85,6 +93,12 @@ class ApplicationReceivedSerializer(serializers.Serializer):
     received = serializers.BooleanField(help_text="Doim true: ariza qabul qilindi (shaxsiy ma'lumot qaytarilmaydi).")
 
 
+class ChallengeSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    difficulty = serializers.IntegerField(help_text="sha256 natijasi shuncha nol bit bilan boshlanishi kerak.")
+    min_seconds = serializers.IntegerField(help_text="Forma kamida shuncha soniya ochiq turishi kerak.")
+
+
 class ApplicationSummarySerializer(serializers.Serializer):
     new = serializers.IntegerField()
     in_review = serializers.IntegerField()
@@ -107,19 +121,42 @@ class PublicApplicationViewSet(viewsets.GenericViewSet):
     serializer_class = ApplicationCreateSerializer
     access_notes = {
         "create": AccessNote(
-            conditions=("IP bo'yicha cheklangan (partner_apply); bot tekshiruvi; javobda shaxsiy ma'lumot yo'q.",)
-        )
+            conditions=(
+                "IP bo'yicha cheklangan (partner_apply); bir martalik proof-of-work topshiriq, kamida 3 s; "
+                "bitta raqamdan kuniga 3 ta; javobda shaxsiy ma'lumot yo'q.",
+            )
+        ),
+        "challenge": AccessNote(conditions=("IP bo'yicha cheklangan (partner_challenge).",)),
     }
+
+    def get_throttles(self):
+        self.throttle_scope = "partner_challenge" if self.action == "challenge" else "partner_apply"
+        return super().get_throttles()
+
+    @extend_schema(
+        summary="Bot tekshiruvi uchun bir martalik topshiriq (proof-of-work)",
+        tags=["public"],
+        responses=ChallengeSerializer,
+    )
+    @action(detail=False, methods=["get"])
+    def challenge(self, request):
+        response = Response(challenge.issue())
+        response["Cache-Control"] = "no-store"
+        return response
 
     def create(self, request):
         bot_protection.verify(request)
         body = ApplicationCreateSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         data = dict(body.validated_data)
+        challenge.verify(data.pop("challenge"), data.pop("proof"))
         if data.pop("website", ""):
-            return Response(
-                {"received": True}, status=status.HTTP_201_CREATED
-            )  # honeypot filled: a bot, silently dropped
+            return Response({"received": True}, status=status.HTTP_201_CREATED)  # honeypot: silently dropped
+        since = timezone.now() - timedelta(hours=24)
+        if PartnerApplication.objects.filter(phone_number=data["phone_number"], created_at__gte=since).count() >= PHONE_LIMIT:
+            raise serializers.ValidationError(
+                {"phone_number": ["Bu raqamdan bugun ariza yuborilgan. Tez orada siz bilan bog'lanamiz."]}
+            )
         PartnerApplication.objects.create(**{k: v.strip() if isinstance(v, str) else v for k, v in data.items()})
         return Response({"received": True}, status=status.HTTP_201_CREATED)
 
