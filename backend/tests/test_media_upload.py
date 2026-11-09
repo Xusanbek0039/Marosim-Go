@@ -57,6 +57,11 @@ class FakeDrive:
         self.deleted.append(file_id)
         self.items.pop(file_id, None)
 
+    def trash_file(self, creds, file_id):
+        if file_id not in self.items:
+            raise GoogleError("not_found", 404)
+        self.items[file_id]["trashed"] = True
+
     def file_metadata(self, creds, file_id):
         if file_id not in self.items:
             raise GoogleError("not_found", 404)

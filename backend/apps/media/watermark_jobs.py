@@ -141,10 +141,13 @@ def process(media_id) -> str:
                 app_properties={"mg_media_wm": str(media.pk)},
             )
             size = int(created.get("size") or dst.stat().st_size)
-        CeremonyMedia.objects.filter(pk=media.pk).update(
+        won = CeremonyMedia.objects.filter(pk=media.pk, status=MediaStatus.READY).update(
             wm_status=WatermarkStatus.READY, wm_drive_file_id=created["id"], wm_size_bytes=size, wm_error="",
             wm_progress=100,
         )
+        if not won:  # deleted while encoding: do not leave the copy behind in Drive
+            gateway().trash_file(creds, created["id"])
+            return ""
         logger.info("watermark ready for media %s", media.pk)
         return WatermarkStatus.READY
     except (watermark.WatermarkError, StorageError, GoogleError, OSError, KeyError) as exc:
