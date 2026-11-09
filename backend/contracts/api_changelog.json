@@ -567,6 +567,123 @@
       "schema_changed": [
         "GET /api/v1/me/ceremonies/{ceremony_id}/media/"
       ]
+    },
+    {
+      "revision": 14,
+      "date": "2026-11-09",
+      "note": "Media o'chirish: studiya tugallanmagan yuklashni o'chiradi; tayyor fayl uchun so'rov, admin (requests.*) tasdiqlaydi",
+      "added": [
+        "DELETE /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/",
+        "GET /api/v1/admin/media-deletion-requests/",
+        "GET /api/v1/admin/media-deletion-requests/summary/",
+        "GET /api/v1/admin/media-deletion-requests/{id}/",
+        "POST /api/v1/admin/media-deletion-requests/{id}/approve/",
+        "POST /api/v1/admin/media-deletion-requests/{id}/reject/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/cancel/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admin/subscriptions/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/ceremonies/{ceremony_id}/media/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/approve/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/cancel/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/reject/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admin/subscriptions/",
+        "GET /api/v1/admin/subscriptions/{id}/",
+        "GET /api/v1/admins/",
+        "GET /api/v1/admins/{id}/",
+        "GET /api/v1/ceremonies/{ceremony_id}/media/",
+        "GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/",
+        "PATCH /api/v1/admins/{id}/",
+        "POST /api/v1/admin/subscriptions/",
+        "POST /api/v1/admin/subscriptions/{id}/approve/",
+        "POST /api/v1/admin/subscriptions/{id}/cancel/",
+        "POST /api/v1/admin/subscriptions/{id}/reject/",
+        "POST /api/v1/admins/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/",
+        "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/"
+      ]
+    },
+    {
+      "revision": 15,
+      "date": "2026-11-09",
+      "note": "Media o'chirish so'rovlari (serializer nomlari)",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admin/subscriptions/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/approve/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/cancel/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/reject/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admin/subscriptions/",
+        "GET /api/v1/admin/subscriptions/{id}/",
+        "POST /api/v1/admin/subscriptions/",
+        "POST /api/v1/admin/subscriptions/{id}/approve/",
+        "POST /api/v1/admin/subscriptions/{id}/cancel/",
+        "POST /api/v1/admin/subscriptions/{id}/reject/"
+      ]
     }
   ]
 }

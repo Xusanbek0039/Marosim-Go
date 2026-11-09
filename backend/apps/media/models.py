@@ -149,9 +149,7 @@ class MediaDeletionRequest(BaseModel):
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["status", "created_at"])]
         constraints = [
-            models.UniqueConstraint(
-                fields=["media"], condition=Q(status="PENDING"), name="media_deletion_one_pending"
-            ),
+            models.UniqueConstraint(fields=["media"], condition=Q(status="PENDING"), name="media_deletion_one_pending"),
         ]
 
     def __str__(self) -> str:

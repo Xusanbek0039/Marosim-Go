@@ -56,7 +56,9 @@ def test_studio_dismisses_unfinished_upload_and_session_is_cancelled(studio, dri
 def test_failed_upload_is_dismissed_by_manager(studio, drive):  # noqa: F811
     c = studio["ceremony"]
     created = start(studio["uploader"], c).data
-    CeremonyMedia.objects.filter(pk=created["media"]["id"]).update(status=MediaStatus.FAILED, upload_session_encrypted="")
+    CeremonyMedia.objects.filter(pk=created["media"]["id"]).update(
+        status=MediaStatus.FAILED, upload_session_encrypted=""
+    )
     assert studio["owner"].delete(f"{base(c)}uploads/{created['media']['id']}/").status_code == 204
     assert CeremonyMedia.objects.get().status == MediaStatus.DELETED
 

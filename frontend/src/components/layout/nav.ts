@@ -9,6 +9,7 @@ import {
   GlobeIcon,
   HardDriveIcon,
   HistoryIcon,
+  InboxIcon,
   ListTreeIcon,
   SmartphoneIcon,
   UserIcon,
@@ -31,6 +32,8 @@ export interface NavItem {
   requires?: PermissionCode | "super";
   /** Active only on this exact path (for section index pages). */
   exact?: boolean;
+  /** Live counter shown next to the label (e.g. pending requests). */
+  badge?: "requests";
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -40,6 +43,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/studios", label: "Studiyalar", icon: VideoIcon, requires: "studios.view" },
   { href: "/venues", label: "To'yxonalar", icon: CastleIcon, requires: "venues.view" },
   { href: "/subscriptions", label: "Obunalar", icon: GemIcon, requires: "subscriptions.view" },
+  { href: "/requests", label: "So'rovlar", icon: InboxIcon, requires: "requests.view", badge: "requests" },
   { href: "/storage", label: "Google Drive", icon: HardDriveIcon, requires: "super" },
   { href: "/settings", label: "Sozlamalar", icon: Settings2Icon },
 ];

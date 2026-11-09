@@ -142,7 +142,10 @@ def process(media_id) -> str:
             )
             size = int(created.get("size") or dst.stat().st_size)
         won = CeremonyMedia.objects.filter(pk=media.pk, status=MediaStatus.READY).update(
-            wm_status=WatermarkStatus.READY, wm_drive_file_id=created["id"], wm_size_bytes=size, wm_error="",
+            wm_status=WatermarkStatus.READY,
+            wm_drive_file_id=created["id"],
+            wm_size_bytes=size,
+            wm_error="",
             wm_progress=100,
         )
         if not won:  # deleted while encoding: do not leave the copy behind in Drive

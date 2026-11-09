@@ -102,30 +102,39 @@ class DecisionSerializer(serializers.Serializer):
     note = serializers.CharField(max_length=500, required=False, allow_blank=True, default="")
 
 
-class _MediaBriefSerializer(serializers.ModelSerializer):
+class _DeletionMediaBriefSerializer(serializers.ModelSerializer):
     uploaded_by_name = serializers.SerializerMethodField()
 
     class Meta:
         model = CeremonyMedia
-        fields = ["id", "kind", "status", "original_name", "mime_type", "size_bytes", "uploaded_by_name", "completed_at"]
+        fields = [
+            "id",
+            "kind",
+            "status",
+            "original_name",
+            "mime_type",
+            "size_bytes",
+            "uploaded_by_name",
+            "completed_at",
+        ]
         read_only_fields = fields
 
     def get_uploaded_by_name(self, obj) -> str | None:
         return _name(obj.uploaded_by)
 
 
-class _CeremonyBriefSerializer(serializers.Serializer):
+class _DeletionCeremonyBriefSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     title = serializers.CharField()
     event_date = serializers.DateField(allow_null=True)
 
 
-class _StudioBriefSerializer(serializers.Serializer):
+class _DeletionStudioBriefSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     name = serializers.CharField()
 
 
-class _UserBriefSerializer(serializers.Serializer):
+class _DeletionUserBriefSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     name = serializers.CharField(source="full_name", allow_null=True)
     phone_number = serializers.CharField(allow_null=True)
@@ -134,10 +143,10 @@ class _UserBriefSerializer(serializers.Serializer):
 class AdminDeletionRequestSerializer(serializers.ModelSerializer):
     """Admin view of a deletion request with enough context to decide."""
 
-    media = _MediaBriefSerializer(read_only=True)
-    ceremony = _CeremonyBriefSerializer(source="media.ceremony", read_only=True)
-    studio = _StudioBriefSerializer(source="media.ceremony.studio", read_only=True)
-    requested_by = _UserBriefSerializer(read_only=True, allow_null=True)
+    media = _DeletionMediaBriefSerializer(read_only=True)
+    ceremony = _DeletionCeremonyBriefSerializer(source="media.ceremony", read_only=True)
+    studio = _DeletionStudioBriefSerializer(source="media.ceremony.studio", read_only=True)
+    requested_by = _DeletionUserBriefSerializer(read_only=True, allow_null=True)
     decided_by_name = serializers.SerializerMethodField()
 
     class Meta:

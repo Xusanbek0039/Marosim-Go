@@ -6,7 +6,7 @@ import { api } from "./api";
 import type { Paginated } from "./types";
 
 export type MediaKind = "PHOTO" | "VIDEO";
-export type MediaStatus = "UPLOADING" | "READY" | "FAILED" | "CANCELLED" | "EXPIRED";
+export type MediaStatus = "UPLOADING" | "READY" | "FAILED" | "CANCELLED" | "EXPIRED" | "DELETED";
 
 export interface StudioMedia {
   id: string;
@@ -20,6 +20,8 @@ export interface StudioMedia {
   duration_ms: number | null;
   error_code: string;
   uploaded_by_name: string | null;
+  /** Pending request for an admin to delete this READY file, or null. */
+  deletion_request: { id: string; reason: string; requested_by_name: string | null; created_at: string } | null;
   created_at: string;
   completed_at: string | null;
 }
@@ -78,6 +80,33 @@ export function useCancelUpload(ceremonyId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (mediaId: string) => api.post<UploadSession>(`${base(ceremonyId)}uploads/${mediaId}/cancel/`),
+    onSettled: () => qc.invalidateQueries({ queryKey: key(ceremonyId) }),
+  });
+}
+
+/** Unfinished uploads (never a usable file) are removed by the studio itself. */
+export function useDismissUpload(ceremonyId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (mediaId: string) => api.delete(`${base(ceremonyId)}uploads/${mediaId}/`),
+    onSettled: () => qc.invalidateQueries({ queryKey: key(ceremonyId) }),
+  });
+}
+
+/** READY files are deleted only after an admin approves the request. */
+export function useRequestDeletion(ceremonyId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ mediaId, reason }: { mediaId: string; reason: string }) =>
+      api.post(`${base(ceremonyId)}${mediaId}/delete-request/`, { reason }),
+    onSettled: () => qc.invalidateQueries({ queryKey: key(ceremonyId) }),
+  });
+}
+
+export function useWithdrawDeletion(ceremonyId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (mediaId: string) => api.post(`${base(ceremonyId)}${mediaId}/delete-request/cancel/`),
     onSettled: () => qc.invalidateQueries({ queryKey: key(ceremonyId) }),
   });
 }

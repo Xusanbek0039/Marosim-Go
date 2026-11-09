@@ -249,6 +249,25 @@ OWNERSHIP_TESTS = {
         ],
         "ownership_media_scope_is_own_studio",
     ),
+    # media deletion — tests live in tests/test_media_deletion.py
+    **dict.fromkeys(
+        [
+            "ceremonies_media_uploads_destroy",
+            "ceremonies_media_delete_request_create",
+            "ceremonies_media_delete_request_cancel_create",
+        ],
+        "ownership_media_deletion_is_own_studio",
+    ),
+    **dict.fromkeys(
+        [
+            "admin_media_deletion_requests_list",
+            "admin_media_deletion_requests_summary_retrieve",
+            "admin_media_deletion_requests_retrieve",
+            "admin_media_deletion_requests_approve_create",
+            "admin_media_deletion_requests_reject_create",
+        ],
+        "ownership_admin_deletion_requests",
+    ),
     # couple / guest media (Phase E) — tests live in tests/test_media_sharing.py
     **dict.fromkeys(
         [
@@ -348,6 +367,15 @@ ownership_invitation_detail_is_recipient_only = _ownership_tests.test_wrong_user
 from . import test_media_upload as _media_tests  # noqa: E402
 
 ownership_media_scope_is_own_studio = _media_tests.test_upload_scope_and_roles
+
+from . import test_media_deletion as _deletion_tests  # noqa: E402
+
+ownership_media_deletion_is_own_studio = (
+    _deletion_tests.test_studio_dismisses_unfinished_upload_and_session_is_cancelled
+)
+ownership_admin_deletion_requests = (
+    _deletion_tests.test_request_is_listed_for_admins_and_approval_trashes_drive_files
+)
 
 from . import test_media_sharing as _sharing_tests  # noqa: E402
 

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { LogoMark, Wordmark } from "@/components/brand/logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMe } from "@/features/auth/hooks";
+import { useRequestsSummary } from "@/features/requests/api";
 import { formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { duration, spring } from "@/motion/tokens";
@@ -16,6 +17,22 @@ import { duration, spring } from "@/motion/tokens";
 import { NAV_SECTIONS, type NavItem, canSee, isActive } from "./nav";
 
 export const SIDEBAR_WIDTH = { expanded: 272, collapsed: 84 } as const;
+
+function RequestsCount({ collapsed }: { collapsed: boolean }) {
+  const { data } = useRequestsSummary();
+  if (!data?.pending) return null;
+  return (
+    <span
+      aria-label={`${data.pending} ta kutilayotgan so'rov`}
+      className={cn(
+        "z-10 inline-flex min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-[11px] font-bold leading-5 text-white tabular-nums",
+        collapsed ? "absolute top-1 right-1" : "relative ml-auto",
+      )}
+    >
+      {data.pending > 99 ? "99+" : data.pending}
+    </span>
+  );
+}
 
 function NavLink({
   item,
@@ -68,6 +85,7 @@ function NavLink({
           </motion.span>
         )}
       </AnimatePresence>
+      {item.badge === "requests" && <RequestsCount collapsed={collapsed} />}
     </Link>
   );
   return collapsed ? (

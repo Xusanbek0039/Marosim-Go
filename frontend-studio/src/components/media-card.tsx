@@ -1,16 +1,29 @@
 "use client";
 
-import { CheckCircle2Icon, CloudUploadIcon, FileImageIcon, FileVideoIcon, Loader2Icon, XIcon } from "lucide-react";
+import { CheckCircle2Icon, CloudUploadIcon, FileImageIcon, FileVideoIcon, Loader2Icon, Trash2Icon, Undo2Icon, XIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ApiError } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { ACCEPTED_TYPES, mimeOf, uploadFile, UploadAborted, useCancelUpload, useCeremonyMedia, useRefreshMedia, type MediaStatus } from "@/lib/media";
+import {
+  ACCEPTED_TYPES,
+  mimeOf,
+  uploadFile,
+  UploadAborted,
+  useCancelUpload,
+  useCeremonyMedia,
+  useDismissUpload,
+  useRefreshMedia,
+  useRequestDeletion,
+  useWithdrawDeletion,
+  type MediaStatus,
+  type StudioMedia,
+} from "@/lib/media";
 import type { Ceremony } from "@/lib/types";
 
-import { Badge, Button, Card, cn, EmptyState, ErrorState, Skeleton } from "./ui";
+import { Badge, Button, Card, cn, EmptyState, ErrorState, Field, Modal, Skeleton, Textarea } from "./ui";
 
 const PARALLEL = 2;
 // crypto.randomUUID needs a secure context (HTTPS/localhost) and breaks over plain-HTTP LAN IPs.
@@ -22,6 +35,7 @@ const STATUS: Record<MediaStatus, { label: string; tone: "neutral" | "brand" | "
   FAILED: { label: "Xato", tone: "danger" },
   CANCELLED: { label: "Bekor qilingan", tone: "neutral" },
   EXPIRED: { label: "Muddati o'tgan", tone: "warning" },
+  DELETED: { label: "O'chirilgan", tone: "neutral" },
 };
 
 export function formatBytes(n: number) {
@@ -149,11 +163,105 @@ function JobRow({ job, onCancel }: { job: Job; onCancel: () => void }) {
   );
 }
 
+const errorText = (err: unknown) => (err instanceof ApiError ? err.message : "Amalni bajarib bo'lmadi. Qayta urinib ko'ring.");
+
+function DeleteRequestModal({ ceremonyId, media, onClose }: { ceremonyId: string; media: StudioMedia | null; onClose: () => void }) {
+  const [reason, setReason] = useState("");
+  const request = useRequestDeletion(ceremonyId);
+  const close = () => {
+    setReason("");
+    onClose();
+  };
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!media || !reason.trim()) return;
+    request.mutate(
+      { mediaId: media.id, reason: reason.trim() },
+      {
+        onSuccess: () => {
+          toast.success("So'rov administratorga yuborildi. Tasdiqlangach fayl o'chiriladi.");
+          close();
+        },
+        onError: (err) => toast.error(errorText(err)),
+      },
+    );
+  };
+  return (
+    <Modal open={Boolean(media)} onClose={close} title="Faylni o'chirishni so'rash">
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">{media?.original_name}</span> mijozga allaqachon ko&apos;rinmoqda. Uni o&apos;chirish
+          uchun administrator tasdig&apos;i kerak. Tasdiqlangach fayl Google Drive savatiga o&apos;tadi.
+        </p>
+        <Field label="Sabab" htmlFor="delete-reason" hint="Administrator shu sababni ko'radi.">
+          <Textarea
+            id="delete-reason"
+            value={reason}
+            maxLength={500}
+            required
+            autoFocus
+            placeholder="Masalan: boshqa marosimning videosi yuklanib qolgan"
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </Field>
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="ghost" onClick={close}>
+            Bekor qilish
+          </Button>
+          <Button type="submit" variant="danger" loading={request.isPending} disabled={!reason.trim()}>
+            So&apos;rov yuborish
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function MediaRow({ ceremonyId, media, onAskDelete }: { ceremonyId: string; media: StudioMedia; onAskDelete: () => void }) {
+  const dismiss = useDismissUpload(ceremonyId);
+  const withdraw = useWithdrawDeletion(ceremonyId);
+  const pending = media.deletion_request;
+  const remove = () => {
+    if (!window.confirm(`"${media.original_name}" ro'yxatdan o'chirilsinmi? Yuklash tugallanmagan, fayl mijozga ko'rinmaydi.`)) return;
+    dismiss.mutate(media.id, { onSuccess: () => toast.success("O'chirildi"), onError: (err) => toast.error(errorText(err)) });
+  };
+  const undo = () =>
+    withdraw.mutate(media.id, { onSuccess: () => toast.success("So'rov qaytarib olindi"), onError: (err) => toast.error(errorText(err)) });
+  return (
+    <li className="flex items-center gap-3 border-t border-border/70 py-2.5 text-sm first:border-t-0">
+      {media.kind === "VIDEO" ? <FileVideoIcon className="size-5 text-muted-foreground" aria-hidden /> : <FileImageIcon className="size-5 text-muted-foreground" aria-hidden />}
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-semibold">{media.original_name}</p>
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {formatBytes(media.size_bytes)} · {formatDateTime(media.completed_at ?? media.created_at)}
+          {media.uploaded_by_name ? ` · ${media.uploaded_by_name}` : ""}
+        </p>
+        {pending && <p className="mt-0.5 truncate text-xs text-amber-700 dark:text-amber-300">O&apos;chirish sababi: {pending.reason}</p>}
+      </div>
+      {pending ? <Badge tone="warning">O&apos;chirish so&apos;ralgan</Badge> : <Badge tone={STATUS[media.status].tone}>{STATUS[media.status].label}</Badge>}
+      {media.status !== "READY" ? (
+        <Button size="sm" variant="ghost" aria-label="O'chirish" title="O'chirish" loading={dismiss.isPending} onClick={remove}>
+          {!dismiss.isPending && <Trash2Icon />}
+        </Button>
+      ) : pending ? (
+        <Button size="sm" variant="ghost" aria-label="So'rovni qaytarib olish" title="So'rovni qaytarib olish" loading={withdraw.isPending} onClick={undo}>
+          {!withdraw.isPending && <Undo2Icon />}
+        </Button>
+      ) : (
+        <Button size="sm" variant="ghost" aria-label="O'chirishni so'rash" title="O'chirishni so'rash" onClick={onAskDelete}>
+          <Trash2Icon />
+        </Button>
+      )}
+    </li>
+  );
+}
+
 export function MediaCard({ ceremony }: { ceremony: Ceremony }) {
   const { data, error, isPending, refetch } = useCeremonyMedia(ceremony.id);
   const { jobs, add, cancel, clearFinished } = useUploadQueue(ceremony.id);
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [toDelete, setToDelete] = useState<StudioMedia | null>(null);
   const archived = ceremony.status === "ARCHIVED";
   const rows = data?.results ?? [];
   const ready = rows.filter((m) => m.status === "READY");
@@ -246,20 +354,11 @@ export function MediaCard({ ceremony }: { ceremony: Ceremony }) {
       ) : (
         <ul className="flex flex-col">
           {rows.map((m) => (
-            <li key={m.id} className="flex items-center gap-3 border-t border-border/70 py-2.5 text-sm first:border-t-0">
-              {m.kind === "VIDEO" ? <FileVideoIcon className="size-5 text-muted-foreground" aria-hidden /> : <FileImageIcon className="size-5 text-muted-foreground" aria-hidden />}
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{m.original_name}</p>
-                <p className="text-xs text-muted-foreground tabular-nums">
-                  {formatBytes(m.size_bytes)} · {formatDateTime(m.completed_at ?? m.created_at)}
-                  {m.uploaded_by_name ? ` · ${m.uploaded_by_name}` : ""}
-                </p>
-              </div>
-              <Badge tone={STATUS[m.status].tone}>{STATUS[m.status].label}</Badge>
-            </li>
+            <MediaRow key={m.id} ceremonyId={ceremony.id} media={m} onAskDelete={() => setToDelete(m)} />
           ))}
         </ul>
       )}
+      <DeleteRequestModal ceremonyId={ceremony.id} media={toDelete} onClose={() => setToDelete(null)} />
     </Card>
   );
 }

@@ -57,6 +57,24 @@
       "operation_id": "admins_destroy",
       "schema_fingerprint": "687f94926a661e2f"
     },
+    "DELETE /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "Yuklashni boshlagan a'zo yoki studiya OWNER/MANAGER.",
+        "Faqat tugallanmagan fayl (UPLOADING / FAILED / CANCELLED / EXPIRED); tayyor fayl — so'rov orqali."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_uploads_destroy",
+      "schema_fingerprint": "025204d8d5c5d7dc"
+    },
     "DELETE /api/v1/ceremonies/{id}/participants/{participant_id}/": {
       "allowed_roles": [
         "STUDIO",
@@ -136,6 +154,69 @@
       "deprecated": false,
       "operation_id": "venue_owner_venues_images_destroy",
       "schema_fingerprint": "04052fbc8eafde5a"
+    },
+    "GET /api/v1/admin/media-deletion-requests/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "requests.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "requests.view"
+        ]
+      },
+      "ownership_scope": "Barcha studiyalarning so'rovlari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_media_deletion_requests_list",
+      "schema_fingerprint": "b27112c0a6ee540c"
+    },
+    "GET /api/v1/admin/media-deletion-requests/summary/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "requests.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "requests.view"
+        ]
+      },
+      "ownership_scope": "Barcha studiyalarning so'rovlari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_media_deletion_requests_summary_retrieve",
+      "schema_fingerprint": "cc998f34e1bfa42e"
+    },
+    "GET /api/v1/admin/media-deletion-requests/{id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "requests.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "requests.view"
+        ]
+      },
+      "ownership_scope": "Barcha studiyalarning so'rovlari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_media_deletion_requests_retrieve",
+      "schema_fingerprint": "7ae850d418caec6b"
     },
     "GET /api/v1/admin/storage/google/callback/": {
       "allowed_roles": [
@@ -340,7 +421,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_list",
-      "schema_fingerprint": "7569d25d767d10fb"
+      "schema_fingerprint": "35de021aa33b9310"
     },
     "GET /api/v1/admins/permissions/": {
       "allowed_roles": [
@@ -368,7 +449,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_retrieve",
-      "schema_fingerprint": "ee8887a938b0c639"
+      "schema_fingerprint": "0f08bfb010605c44"
     },
     "GET /api/v1/admins/{id}/pinfl/": {
       "allowed_roles": [
@@ -446,7 +527,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_media_list",
-      "schema_fingerprint": "9460a5627a83bf53"
+      "schema_fingerprint": "a81ad7a9d6095c3f"
     },
     "GET /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/": {
       "allowed_roles": [
@@ -463,7 +544,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_media_uploads_retrieve",
-      "schema_fingerprint": "71d031a2417d8a1f"
+      "schema_fingerprint": "34ca8045ea263d1c"
     },
     "GET /api/v1/ceremonies/{id}/": {
       "allowed_roles": [
@@ -1324,7 +1405,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_partial_update",
-      "schema_fingerprint": "33c1874f3341d8d2"
+      "schema_fingerprint": "f505643e774b7c9d"
     },
     "PATCH /api/v1/auth/me/": {
       "allowed_roles": [
@@ -1492,6 +1573,48 @@
       "deprecated": false,
       "operation_id": "venue_owner_venues_members_partial_update",
       "schema_fingerprint": "96bd0eb2154a254a"
+    },
+    "POST /api/v1/admin/media-deletion-requests/{id}/approve/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "requests.media_delete"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "requests.media_delete"
+        ]
+      },
+      "ownership_scope": "Barcha studiyalarning so'rovlari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_media_deletion_requests_approve_create",
+      "schema_fingerprint": "c65dfce182756f3a"
+    },
+    "POST /api/v1/admin/media-deletion-requests/{id}/reject/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "requests.media_delete"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "requests.media_delete"
+        ]
+      },
+      "ownership_scope": "Barcha studiyalarning so'rovlari (faqat ruxsati borlar).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_media_deletion_requests_reject_create",
+      "schema_fingerprint": "c65dfce182756f3a"
     },
     "POST /api/v1/admin/storage/google/disconnect/": {
       "allowed_roles": [
@@ -1703,7 +1826,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_create",
-      "schema_fingerprint": "ab0424acf7b1a756"
+      "schema_fingerprint": "dacfd2869aa6f6cd"
     },
     "POST /api/v1/admins/{id}/verify-phone/": {
       "allowed_roles": [
@@ -1822,7 +1945,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_media_uploads_create",
-      "schema_fingerprint": "bc6b1d0f34479e17"
+      "schema_fingerprint": "bc352e31d7760e91"
     },
     "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/cancel/": {
       "allowed_roles": [
@@ -1839,7 +1962,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_media_uploads_cancel_create",
-      "schema_fingerprint": "411d152f245c55ea"
+      "schema_fingerprint": "cabceff87d568f91"
     },
     "POST /api/v1/ceremonies/{ceremony_id}/media/uploads/{media_id}/complete/": {
       "allowed_roles": [
@@ -1857,7 +1980,42 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "ceremonies_media_uploads_complete_create",
-      "schema_fingerprint": "411d152f245c55ea"
+      "schema_fingerprint": "cabceff87d568f91"
+    },
+    "POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "Har qanday faol studiya a'zosi (OWNER / MANAGER / UPLOADER) yoki SUPER_ADMIN.",
+        "Faqat READY fayl; bir faylga bitta kutilayotgan so'rov."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_delete_request_create",
+      "schema_fingerprint": "b7ce17fe4f97eb95"
+    },
+    "POST /api/v1/ceremonies/{ceremony_id}/media/{media_id}/delete-request/cancel/": {
+      "allowed_roles": [
+        "STUDIO",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "STUDIO: faqat faol a'zolik bo'lgan studiyaning marosimi (boshqasi 404); SUPER_ADMIN: barchasi.",
+      "conditions": [
+        "So'rovni yuborgan a'zo yoki studiya OWNER/MANAGER."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "ceremonies_media_delete_request_cancel_create",
+      "schema_fingerprint": "51351c32bcf9e042"
     },
     "POST /api/v1/ceremonies/{id}/owners/invite/": {
       "allowed_roles": [
