@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.venues",
     "apps.subscriptions",
     "apps.devcenter",
+    "apps.support",
 ]
 
 MIDDLEWARE = [
@@ -151,6 +152,7 @@ REST_FRAMEWORK = {
         "storage_callback": env.str("THROTTLE_STORAGE_CALLBACK", default="30/hour"),
         "token_refresh": env.str("THROTTLE_REFRESH", default="30/min"),
         "pinfl_reveal": env.str("THROTTLE_PINFL_REVEAL", default="20/hour"),
+        "support_write": env.str("THROTTLE_SUPPORT_WRITE", default="60/hour"),
     },
     "NUM_PROXIES": NUM_PROXIES or None,
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -290,6 +292,9 @@ SPECTACULAR_SETTINGS = {
         "SubscriptionStateEnum": ["PENDING", "ACTIVE", "SCHEDULED", "EXPIRED", "REJECTED", "CANCELLED"],
         "PaymentMethodEnum": "apps.subscriptions.models.PaymentMethod",
         "MediaStatusEnum": "apps.media.models.MediaStatus",
+        "MediaDeletionStatusEnum": "apps.media.models.DeletionRequestStatus",
+        "SupportTicketStatusEnum": "apps.support.models.TicketStatus",
+        "SupportAudienceEnum": "apps.support.models.TicketAudience",
         "StorageConnectionStatusEnum": "apps.storage.models.ConnectionStatus",
         "VenueRegionEnum": "apps.venues.models.Region",
         "VenueTypeEnum": "apps.venues.models.VenueType",

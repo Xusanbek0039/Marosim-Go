@@ -38,6 +38,10 @@ ADMIN_PERMISSIONS: tuple[PermissionDef, ...] = (
     ),
     PermissionDef("requests.view", "requests", "So'rovlarni ko'rish (media o'chirish)"),
     PermissionDef("requests.media_delete", "requests", "Media o'chirish so'rovini tasdiqlash / rad etish"),
+    PermissionDef("support.view", "support", "Yordam xatlarini qabul qilish va javob berish"),
+    PermissionDef(
+        "support.monitor", "support", "Barcha yordam xatlarini kuzatish (adminlar xatlari ham, faqat o'qish)"
+    ),
 )
 
 ALL_CODES: tuple[str, ...] = tuple(p.code for p in ADMIN_PERMISSIONS)
@@ -50,6 +54,7 @@ MODULE_LABELS = {
     "venues": "To'yxonalar",
     "subscriptions": "Obunalar",
     "requests": "So'rovlar",
+    "support": "Yordam",
 }
 
 
