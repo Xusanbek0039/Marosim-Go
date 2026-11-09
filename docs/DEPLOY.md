@@ -1,4 +1,4 @@
-# Deploy — cPanel, bitta backend, beshta domen
+# Deploy — cPanel, bitta backend, yettita domen
 
 Faqat `backend/` papkasi deploy qilinadi. Bitta Django ilovasi (Passenger) barcha domenlarga javob beradi,
 Node.js kerak emas:
@@ -10,6 +10,8 @@ Node.js kerak emas:
 | `superadmin.marosimgo.uz` | Super Admin panel + `/api/v1/` | `backend/panel/` |
 | `admin.marosimgo.uz` | Admin panel + `/api/v1/` | `backend/panel-admin/` |
 | `studio.marosimgo.uz` | Studiya kabineti + `/api/v1/` | `backend/panel-studio/` |
+| `userlogin.marosimgo.uz` | Foydalanuvchi (kelin-kuyov, mehmon) kabineti + `/api/v1/` | `backend/panel-user/` |
+| `toyxona.marosimgo.uz` | To'yxona kabineti + `/api/v1/` | `backend/panel-toyxona/` |
 
 Domen qaysi panelni olishi uning birinchi qismidan aniqlanadi (`studio.` → studiya). Har bir panel API'ni
 o'z domenida chaqiradi, shuning uchun cookie'lar first-party bo'lib qoladi va CORS kerak bo'lmaydi.
@@ -20,16 +22,18 @@ o'z domenida chaqiradi, shuning uchun cookie'lar first-party bo'lib qoladi va CO
 cd frontend         && npm run build:panel        # → backend/panel/
 cd frontend         && npm run build:panel:admin  # → backend/panel-admin/
 cd frontend-studio  && npm run build:panel        # → backend/panel-studio/
+cd frontend-user    && npm run build:panel        # → backend/panel-user/
+cd frontend-toyxona && npm run build:panel        # → backend/panel-toyxona/
 ```
 
 Build fayllari gitga commit qilinadi, server ularni `git pull` bilan oladi.
 
 ## 2. cPanel sozlamalari
 
-1. **Domains:** asosiy domen `marosimgo.uz` va `api`, `superadmin`, `admin`, `studio` subdomenlari.
+1. **Domains:** asosiy domen `marosimgo.uz` va `api`, `superadmin`, `admin`, `studio`, `userlogin`, `toyxona` subdomenlari.
 2. **Setup Python App:** Application root = `backend/`, startup file = `passenger_wsgi.py`,
    entry point = `application`, Application URL = `api.marosimgo.uz`.
-3. Qolgan domenlar (`marosimgo.uz`, `superadmin`, `admin`, `studio`) ham **shu bitta** ilovaga ulanishi kerak. cPanel bitta ilovaga bitta URL
+3. Qolgan domenlar (`marosimgo.uz`, `superadmin`, `admin`, `studio`, `userlogin`, `toyxona`) ham **shu bitta** ilovaga ulanishi kerak. cPanel bitta ilovaga bitta URL
    bersa, `api` subdomenining document root'idagi `.htaccess` faylidan Passenger qatorlarini
    (`PassengerAppRoot`, `PassengerBaseURI`, `PassengerPython` va boshqalar) ularning document root'laridagi
    `.htaccess` ga nusxalang. Ikkinchi Python ilova yaratmang.
@@ -41,9 +45,9 @@ Build fayllari gitga commit qilinadi, server ularni `git pull` bilan oladi.
 > natijada har bir so'rov 400 xato beradi.
 
 ```dotenv
-DJANGO_ALLOWED_HOSTS=marosimgo.uz,www.marosimgo.uz,api.marosimgo.uz,superadmin.marosimgo.uz,admin.marosimgo.uz,studio.marosimgo.uz
-CSRF_TRUSTED_ORIGINS=https://superadmin.marosimgo.uz,https://admin.marosimgo.uz,https://studio.marosimgo.uz
-CORS_ALLOWED_ORIGINS=https://superadmin.marosimgo.uz,https://admin.marosimgo.uz,https://studio.marosimgo.uz
+DJANGO_ALLOWED_HOSTS=marosimgo.uz,www.marosimgo.uz,api.marosimgo.uz,superadmin.marosimgo.uz,admin.marosimgo.uz,studio.marosimgo.uz,userlogin.marosimgo.uz,toyxona.marosimgo.uz
+CSRF_TRUSTED_ORIGINS=https://superadmin.marosimgo.uz,https://admin.marosimgo.uz,https://studio.marosimgo.uz,https://userlogin.marosimgo.uz,https://toyxona.marosimgo.uz
+CORS_ALLOWED_ORIGINS=https://superadmin.marosimgo.uz,https://admin.marosimgo.uz,https://studio.marosimgo.uz,https://userlogin.marosimgo.uz,https://toyxona.marosimgo.uz
 MEDIA_UPLOAD_BROWSER_ORIGINS=https://studio.marosimgo.uz
 PANEL_URL=https://superadmin.marosimgo.uz
 ```

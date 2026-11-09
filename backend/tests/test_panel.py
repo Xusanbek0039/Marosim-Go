@@ -118,3 +118,18 @@ def test_root_domain_serves_the_landing_page(settings):
     assert Client(HTTP_HOST="marosimgo.uz").get("/fonts/jakarta-latin.woff2").status_code == 200
     missing = Client(HTTP_HOST="marosimgo.uz").get("/nope")
     assert missing.status_code == 404 and b"Bosh sahifaga" in body(missing)
+
+
+@pytest.mark.parametrize(
+    ("host", "site", "folder"),
+    [("userlogin.marosimgo.uz", "userlogin", "panel-user"), ("toyxona.marosimgo.uz", "toyxona", "panel-toyxona")],
+)
+def test_user_and_venue_cabinets_have_their_own_subdomains(settings, host, site, folder):
+    from django.conf import settings as conf
+    from django.test import RequestFactory
+
+    from config.panel import site_for
+
+    settings.ALLOWED_HOSTS = [host]
+    assert site_for(RequestFactory(HTTP_HOST=host).get("/")) == site
+    assert conf.PANEL_SITES[site].name == folder

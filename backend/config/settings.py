@@ -382,6 +382,8 @@ PANEL_SITES = {
     "superadmin": BASE_DIR / "panel",
     "admin": BASE_DIR / "panel-admin",
     "studio": BASE_DIR / "panel-studio",
+    "userlogin": BASE_DIR / "panel-user",  # couples and guests (frontend-user)
+    "toyxona": BASE_DIR / "panel-toyxona",  # venue owners (frontend-toyxona)
     "landing": BASE_DIR / "landing",  # hand-written page, no build step
 }
 # A host picks its site by its first DNS label (studio.marosimgo.uz → studio, studio.localhost → studio).

@@ -7,6 +7,8 @@ the panel by the host's first DNS label (``settings.PANEL_SITES``):
 * ``superadmin.marosimgo.uz`` — Super Admin panel  (``backend/panel/``)
 * ``admin.marosimgo.uz``      — Admin panel        (``backend/panel-admin/``)
 * ``studio.marosimgo.uz``     — Studio cabinet     (``backend/panel-studio/``)
+* ``userlogin.marosimgo.uz``  — User cabinet       (``backend/panel-user/``)
+* ``toyxona.marosimgo.uz``    — Venue cabinet      (``backend/panel-toyxona/``)
 
 Every panel host also serves ``/api/v1/`` on its own origin, so the httpOnly auth cookies stay
 first-party and no CORS is involved.

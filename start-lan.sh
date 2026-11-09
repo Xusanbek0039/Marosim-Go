@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starts Django (Super Admin, Admin, Studio) + toyxona + user panels for the local network (LAN demo).
+# Starts every panel for the local network (LAN demo): one Django app per port, picking the panel by port.
 # Usage: bash start-lan.sh        Stop: Ctrl+C
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 PORTS="8000,8001,8002,3002,3003"
@@ -12,20 +12,24 @@ free_ports() {
   powershell -NoProfile -Command "Get-NetTCPConnection -State Listen -LocalPort $PORTS -ErrorAction SilentlyContinue |
     ForEach-Object { Stop-Process -Id \$_.OwningProcess -Force -ErrorAction SilentlyContinue }
     Get-CimInstance Win32_Process | Where-Object {
-      \$_.CommandLine -like '*manage.py runserver 0.0.0.0:800*' -or \$_.CommandLine -like '*next*start -H 0.0.0.0 -p 300*'
+      \$_.CommandLine -like '*manage.py runserver 0.0.0.0:800*' -or \$_.CommandLine -like '*manage.py runserver 0.0.0.0:300*' -or \$_.CommandLine -like '*next*start -H 0.0.0.0 -p 300*'
     } | ForEach-Object { Stop-Process -Id \$_.ProcessId -Force -ErrorAction SilentlyContinue }" >/dev/null 2>&1
 }
 free_ports
 trap 'free_ports; exit 0' INT TERM
 
-# 8000 = Super Admin, 8001 = Admin, 8002 = Studio (each also serves the API; Django picks the panel by host)
-(cd "$ROOT/backend" && venv/Scripts/python manage.py runserver 0.0.0.0:8000 --insecure --noreload) &
-(cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=admin,localhost=admin,127.0.0.1=admin" \
-  venv/Scripts/python manage.py runserver 0.0.0.0:8001 --insecure --noreload) &
-(cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=studio,localhost=studio,127.0.0.1=studio" \
-  venv/Scripts/python manage.py runserver 0.0.0.0:8002 --insecure --noreload) &
-(cd "$ROOT/frontend-toyxona" && npx next start -H 0.0.0.0 -p 3003) &
-(cd "$ROOT/frontend-user" && npx next start -H 0.0.0.0 -p 3002) &
+# Each port serves one panel + the API (as on production, where the subdomain picks the panel):
+# 8000 = Super Admin, 8001 = Admin, 8002 = Studio, 3002 = User, 3003 = To'yxona.
+# User / To'yxona are static builds now (npm run build:panel in frontend-user / frontend-toyxona).
+serve() {
+  (cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=$2,localhost=$2,127.0.0.1=$2" \
+    venv/Scripts/python manage.py runserver "0.0.0.0:$1" --insecure --noreload) &
+}
+serve 8000 superadmin
+serve 8001 admin
+serve 8002 studio
+serve 3002 userlogin
+serve 3003 toyxona
 
 # Git Bash's "wait" can return early on Windows: idle until Ctrl+C instead.
 while true; do sleep 3600; done
