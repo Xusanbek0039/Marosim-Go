@@ -7,6 +7,7 @@ export const APP = {
   home: "/",
   nav: [
     { href: "/", label: "To'yxonalarim" },
+    { href: "/yordam", label: "Yordam" },
     { href: "/profile", label: "Profil" },
   ],
   allowRegister: false,

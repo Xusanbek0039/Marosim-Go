@@ -10,6 +10,7 @@ export const APP = {
     { href: "/toyxonalar", label: "To'yxonalar" },
     { href: "/bronlarim", label: "Bronlarim" },
     { href: "/obuna", label: "Obuna" },
+    { href: "/yordam", label: "Yordam" },
     { href: "/profile", label: "Profil" },
   ],
   allowRegister: true,
