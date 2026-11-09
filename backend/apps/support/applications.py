@@ -9,10 +9,10 @@
   the "Yordam" page: list, filter, change status, keep a note.
 """
 
-import django_filters
-from django.core.exceptions import ValidationError as DjangoValidationError
 from datetime import timedelta
 
+import django_filters
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, serializers, status, viewsets
@@ -45,7 +45,9 @@ class ApplicationCreateSerializer(serializers.Serializer):
     #: Honeypot: hidden on the page, real people leave it empty.
     website = serializers.CharField(required=False, allow_blank=True, default="", write_only=True)
     challenge = serializers.CharField(max_length=500, help_text="`challenge/` dan olingan token.")
-    proof = serializers.CharField(max_length=64, help_text="sha256(`token:proof`) `difficulty` ta nol bit bilan boshlanadi.")
+    proof = serializers.CharField(
+        max_length=64, help_text="sha256(`token:proof`) `difficulty` ta nol bit bilan boshlanadi."
+    )
 
     def validate_phone_number(self, value: str) -> str:
         try:
@@ -153,7 +155,10 @@ class PublicApplicationViewSet(viewsets.GenericViewSet):
         if data.pop("website", ""):
             return Response({"received": True}, status=status.HTTP_201_CREATED)  # honeypot: silently dropped
         since = timezone.now() - timedelta(hours=24)
-        if PartnerApplication.objects.filter(phone_number=data["phone_number"], created_at__gte=since).count() >= PHONE_LIMIT:
+        if (
+            PartnerApplication.objects.filter(phone_number=data["phone_number"], created_at__gte=since).count()
+            >= PHONE_LIMIT
+        ):
             raise serializers.ValidationError(
                 {"phone_number": ["Bu raqamdan bugun ariza yuborilgan. Tez orada siz bilan bog'lanamiz."]}
             )
