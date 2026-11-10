@@ -28,6 +28,8 @@ class Studio(BaseModel, SoftDeleteModel):
     is_active = models.BooleanField(default=True)
     #: Weekly days off (0 = Monday … 6 = Sunday), shown as "dam olish" on the public calendar.
     off_weekdays = models.JSONField(default=list, blank=True)
+    #: Space for the studio's portfolio (photos + reels), kept on Google Drive. Set by the panel.
+    portfolio_quota_mb = models.PositiveIntegerField(default=1024)
 
     class Meta:
         ordering = ["-created_at"]
@@ -52,17 +54,30 @@ class PortfolioKind(models.TextChoices):
     VIDEO = "VIDEO", "Reels video"
 
 
+class PortfolioStorage(models.TextChoices):
+    #: Google Drive: ``MarosimGo / Studio_<nom> / Portfolio`` (default when Drive is connected).
+    DRIVE = "DRIVE", "Google Drive"
+    #: Local MEDIA_ROOT: older rows and installations without a Drive connection.
+    LOCAL = "LOCAL", "Server diski"
+
+
 class StudioImage(BaseModel):
     """Portfolio item of a studio (its work), shown on the public studio profile.
 
-    ``kind=VIDEO`` rows are reels: ``video`` is the file and ``image`` its poster frame. Reels,
-    reactions and comments are public only while the studio's galichka is active.
+    ``kind=VIDEO`` rows are reels: the video and its poster frame. Reels, reactions and comments are
+    public only while the studio's galichka is active. Files live on Drive (``drive_*_id``) or, for
+    ``storage=LOCAL``, in ``image`` / ``video``. ``size_bytes`` counts against the studio's quota.
     """
 
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="images")
     kind = models.CharField(max_length=5, choices=PortfolioKind.choices, default=PortfolioKind.IMAGE)
-    image = models.ImageField(upload_to=studio_upload_to)
+    storage = models.CharField(max_length=5, choices=PortfolioStorage.choices, default=PortfolioStorage.LOCAL)
+    image = models.ImageField(upload_to=studio_upload_to, blank=True)
     video = models.FileField(upload_to=reel_upload_to, null=True, blank=True)
+    drive_file_id = models.CharField(max_length=128, blank=True, help_text="Video (reels) yoki rasm fayli")
+    drive_poster_id = models.CharField(max_length=128, blank=True, help_text="Reels muqovasi")
+    mime_type = models.CharField(max_length=50, blank=True)
+    size_bytes = models.PositiveBigIntegerField(default=0)
     caption = models.CharField(max_length=300, blank=True)
     duration = models.FloatField(default=0)
     position = models.PositiveSmallIntegerField(default=0)

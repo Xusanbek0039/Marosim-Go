@@ -412,3 +412,21 @@ class CeremonyViewerAccess(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.ceremony_id} VIEWER {self.user_id} ({self.status})"
+
+
+class CeremonyFolder(BaseModel):
+    """A user's own name for a ceremony in "Mening marosimlarim" (the ceremony itself is unchanged).
+
+    Each owner / viewer sees the ceremony as a folder; the name is personal to that account. Admins
+    with ``users.update`` may rename it for the user.
+    """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ceremony_folders")
+    ceremony = models.ForeignKey(Ceremony, on_delete=models.CASCADE, related_name="folders")
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "ceremony"], name="ceremonies_folder_one_per_user")]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} · {self.name}"

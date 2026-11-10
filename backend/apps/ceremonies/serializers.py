@@ -332,11 +332,13 @@ class MyCeremonySerializer(serializers.ModelSerializer):
     access_role = serializers.SerializerMethodField()
     my_role = serializers.SerializerMethodField()
     participants = serializers.SerializerMethodField()
+    folder_name = serializers.SerializerMethodField(help_text="Shaxsiy papka nomi (o'zgartirilmagan bo'lsa — title)")
 
     class Meta:
         model = Ceremony
         fields = [
             "id",
+            "folder_name",
             "title",
             "event_type",
             "event_date",
@@ -366,6 +368,40 @@ class MyCeremonySerializer(serializers.ModelSerializer):
     @extend_schema_field(OwnerBriefSerializer(many=True))
     def get_participants(self, obj):
         return OwnerBriefSerializer(obj.accepted_owners, many=True).data
+
+    def get_folder_name(self, obj) -> str:
+        from .folders import custom_name
+
+        return custom_name(obj) or obj.title
+
+
+class FolderRenameSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=100, allow_blank=True, help_text="Bo'sh — marosim nomiga qaytarish")
+
+
+class FolderResultSerializer(serializers.Serializer):
+    folder_name = serializers.CharField()
+    is_custom = serializers.BooleanField()
+
+
+class AccountFolderSerializer(serializers.Serializer):
+    """One folder of an account, as the panel sees it."""
+
+    id = serializers.UUIDField(source="ceremony.id")
+    folder_name = serializers.SerializerMethodField()
+    is_custom = serializers.SerializerMethodField()
+    title = serializers.CharField(source="ceremony.title")
+    event_type = serializers.CharField(source="ceremony.event_type")
+    event_date = serializers.DateField(source="ceremony.event_date")
+    status = serializers.CharField(source="ceremony.status")
+    studio = StudioBriefSerializer(source="ceremony.studio")
+    access_role = serializers.ChoiceField(choices=AccessRole.choices)
+
+    def get_folder_name(self, row) -> str:
+        return row["custom_name"] or row["ceremony"].title
+
+    def get_is_custom(self, row) -> bool:
+        return bool(row["custom_name"])
 
 
 class InvitationSerializer(serializers.ModelSerializer):

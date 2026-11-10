@@ -22,7 +22,7 @@ from apps.studios.models import StudioMembership
 from apps.studios.services import active_memberships
 from apps.subscriptions.services import viewer_limit
 
-from . import invitations, ownership, services
+from . import folders, invitations, ownership, services
 from .models import (
     AccessRole,
     Ceremony,
@@ -37,6 +37,8 @@ from .models import (
 )
 from .permissions import IsCeremonyMember, IsCeremonyOwner, IsClientUser, IsStudioMember, IsStudioMemberOrSuperAdmin
 from .serializers import (
+    FolderRenameSerializer,
+    FolderResultSerializer,
     AcceptResultSerializer,
     CeremonySerializer,
     InvitationSerializer,
@@ -382,7 +384,23 @@ class MyCeremonyViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             return Ceremony.objects.none()
-        return with_owners(ownership.accessible_ceremonies(self.request.user)).order_by("-event_date")
+        qs = with_owners(ownership.accessible_ceremonies(self.request.user)).order_by("-event_date")
+        return folders.with_folders(qs, self.request.user)
+
+    # ----------------------------------------------------------- folder
+    @extend_schema(
+        summary="Papka nomini o'zgartirish (faqat o'zim uchun)",
+        tags=["me"],
+        request=FolderRenameSerializer,
+        responses=FolderResultSerializer,
+    )
+    @action(detail=True, methods=["patch"])
+    def folder(self, request, pk=None):
+        ceremony = self.get_object()
+        body = FolderRenameSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        name = folders.rename(request, request.user, ceremony, body.validated_data["name"])
+        return Response({"folder_name": name or ceremony.title, "is_custom": bool(name)})
 
     def _row(self, qs, row_id):
         row = qs.filter(pk=row_id).first()

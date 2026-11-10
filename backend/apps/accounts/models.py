@@ -108,6 +108,9 @@ class User(BaseModel, SoftDeleteModel, AbstractBaseUser):
     address = models.CharField(max_length=255, blank=True)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER, db_index=True)
     admin_permissions = models.JSONField(default=list, blank=True)
+    #: Capabilities switched off for this one account (``<ROLE>.<feature>`` codes, see ``features``),
+    #: on top of the platform-wide switches. Managed from the panel's profile drawer.
+    disabled_features = models.JSONField(default=list, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

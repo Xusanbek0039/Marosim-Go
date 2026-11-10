@@ -62,9 +62,35 @@ def ensure_feature(request, view):
     feature = feature_of(view)
     if feature == "subscriptions" and getattr(view, "action", None) != "create":
         return True  # existing purchases, payment instructions and cancellation remain available
-    if feature and f"{role}.{feature}" in PlatformPolicy.load().disabled_features:
+    if not feature:
+        return True
+    code = f"{role}.{feature}"
+    if code in PlatformPolicy.load().disabled_features:
         raise PermissionDenied("Bu imkoniyat platforma boshqaruvi tomonidan vaqtincha o'chirilgan.")
+    if role != "PUBLIC" and code in (request.user.disabled_features or ()):
+        raise PermissionDenied("Bu imkoniyat hisobingiz uchun administrator tomonidan o'chirilgan.")
     return True
+
+
+def account_codes(user) -> tuple[str, ...]:
+    """Feature codes that apply to ``user``'s role (empty for staff accounts)."""
+    return tuple(f"{user.role}.{feature}" for feature in ROLE_FEATURES.get(user.role, ()))
+
+
+def account_catalog(user):
+    """Per-account switches: ``enabled`` (this account) and ``platform_enabled`` (the role-wide switch)."""
+    disabled = set(PlatformPolicy.load().disabled_features)
+    mine = set(user.disabled_features or ())
+    return [
+        {
+            "code": code,
+            "role": user.role,
+            "label": FEATURE_LABELS[code.split(".", 1)[1]],
+            "enabled": code not in mine,
+            "platform_enabled": code not in disabled,
+        }
+        for code in account_codes(user)
+    ]
 
 
 def catalog():
