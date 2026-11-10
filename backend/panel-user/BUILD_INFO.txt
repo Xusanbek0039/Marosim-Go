@@ -1,3 +1,3 @@
 MarosimGo User cabinet — static build
-Built: 2026-11-09T17:01:03.427Z
+Built: 2026-11-10T05:20:01.263Z
 Do not edit: regenerate with `npm run build:panel` in frontend-user/.

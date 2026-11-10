@@ -2,4 +2,4 @@
 :HL["/_next/static/media/jakarta_latin-s.p.18rizl4rsrl42.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 2:[["children",{"s":"__PAGE__","h":160}]]
 1:[["children",{"s":"login","h":96,"c":"$Q2"}]]
-0:{"b":"e1MmirvHjylzj56e4gvPt","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
+0:{"b":"hBsBQe-05nhdhE1tB-ZAy","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

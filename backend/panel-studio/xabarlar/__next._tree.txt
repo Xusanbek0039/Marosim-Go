@@ -1,0 +1,6 @@
+:HL["/_next/static/chunks/3y2skeqrfgsvw.css","style"]
+:HL["/_next/static/media/jakarta_latin-s.p.18rizl4rsrl42.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+3:[["children",{"s":"__PAGE__","h":160}]]
+2:[["children",{"s":"xabarlar","h":96,"c":"$Q3"}]]
+1:[["children",{"s":"(app)","h":96,"c":"$Q2"}]]
+0:{"b":"hqpe_NS9kVa-PiFrDqdvm","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
