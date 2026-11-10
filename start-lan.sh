@@ -2,7 +2,7 @@
 # Starts every panel for the local network (LAN demo): one Django app per port, picking the panel by port.
 # Usage: bash start-lan.sh        Stop: Ctrl+C
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-PORTS="8000,8001,8002,3002,3003"
+PORTS="8000,8001,8002,8003,3002,3003"
 
 # Prefer the activated environment, then the project's conventional venv locations.
 # Normalize Windows paths so environments activated in PowerShell also work in Git Bash.
@@ -43,7 +43,7 @@ trap 'free_ports; exit 0' INT TERM
 
 # Each port serves one panel + the API (as on production, where the subdomain picks the panel):
 # 8000 = Super Admin (http://127.0.0.1:8000/ = the marosimgo.uz landing page), 8001 = Admin,
-# 8002 = Studio, 3002 = User, 3003 = To'yxona.
+# 8002 = Studio, 8003 = landing (for tunnels), 3002 = User, 3003 = To'yxona.
 # User / To'yxona are static builds now (npm run build:panel in frontend-user / frontend-toyxona).
 # serve <port> <panel> [panel for 127.0.0.1]; other hosts (e.g. *.trycloudflare.com tunnels) get <panel>
 serve() {
@@ -53,6 +53,7 @@ serve() {
 serve 8000 superadmin landing
 serve 8001 admin
 serve 8002 studio
+serve 8003 landing
 serve 3002 userlogin
 serve 3003 toyxona
 
