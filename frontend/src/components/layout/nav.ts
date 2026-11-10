@@ -39,8 +39,8 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/platform", label: "Platforma boshqaruvi", icon: Settings2Icon, requires: "platform.view" },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboardIcon, requires: "dashboard.view" },
+  { href: "/platform", label: "Platforma boshqaruvi", icon: Settings2Icon, requires: "platform.view" },
   { href: "/users", label: "Foydalanuvchilar", icon: UsersIcon, requires: "users.view" },
   { href: "/admins", label: "Adminlar", icon: ShieldCheckIcon, requires: "super" },
   { href: "/studios", label: "Studiyalar", icon: VideoIcon, requires: "studios.view" },

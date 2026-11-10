@@ -49,9 +49,10 @@ let csrfPromise: Promise<void> | null = null;
 async function ensureCsrf(): Promise<string> {
   let token = readCookie("csrftoken");
   if (!token) {
-    csrfPromise ??= fetch(`${API_BASE}/auth/csrf/`, { credentials: "same-origin" }).then(() => undefined);
+    csrfPromise ??= fetch(`${API_BASE}/auth/csrf/`, { credentials: "same-origin" })
+      .then(() => undefined)
+      .finally(() => { csrfPromise = null; });
     await csrfPromise;
-    csrfPromise = null;
     token = readCookie("csrftoken");
   }
   return token ?? "";

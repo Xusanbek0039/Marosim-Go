@@ -43,6 +43,9 @@ import { formatDate, formatDateTime, formatPhone } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const FILTERS = [
+  { key: "audience", label: "Tarif turi", options: [
+    { value: "USER", label: "Foydalanuvchi" }, { value: "STUDIO", label: "Studiya galichkasi" }, { value: "VENUE", label: "To'yxona galichkasi" },
+  ] },
   {
     key: "state",
     label: "Holat",
@@ -414,7 +417,7 @@ function PlanRow({ plan, editable }: { plan: Plan; editable: boolean }) {
   return (
     <li className={cn("grid items-end gap-3 px-5 py-4 sm:grid-cols-[1fr_1fr_0.7fr_0.7fr_auto]", !plan.is_active && "opacity-60")}>
       <div className="flex flex-col gap-1.5">
-        <Label className="text-xs">Nomi ({plan.code} ? {plan.audience})</Label>
+        <Label className="text-xs">Nomi ({plan.code} · {plan.audience})</Label>
         <Input disabled={!editable} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
       </div>
       <div className="flex flex-col gap-1.5">

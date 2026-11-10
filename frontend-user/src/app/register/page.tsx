@@ -54,7 +54,7 @@ export default function RegisterPage() {
 
   return (
     <AuthFrame subtitle="Yangi hisob yaratish">
-      <motion.form animate={controls} onSubmit={submit} noValidate className="flex flex-col gap-4">
+      <motion.form method="post" animate={controls} onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field label="Telefon raqam" htmlFor="phone_number" error={errors.phone_number} hint="Faqat O'zbekiston raqami">
           <PhoneInput
             id="phone_number"

@@ -26,6 +26,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1"],
   ...(isExport ? { output: "export" as const, images: { unoptimized: true }, pageExtensions: ["tsx"] } : {}),
   // Django URLs end with "/": never let Next strip it before proxying.
   skipTrailingSlashRedirect: true,

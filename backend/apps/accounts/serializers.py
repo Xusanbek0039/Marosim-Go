@@ -282,8 +282,9 @@ class ManagedUserSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
         if self.instance and attrs.get("role", self.instance.role) != self.instance.role:
             if self.instance.responsible_studios.filter(is_active=True, deleted_at__isnull=True).exists():
                 raise serializers.ValidationError({"role": ["Avval studiya egaligini boshqa shaxsga o'tkazing."]})
-            if self.instance.venue_memberships.filter(is_active=True, role="OWNER", venue__is_active=True,
-                                                       venue__deleted_at__isnull=True).exists():
+            if self.instance.venue_memberships.filter(
+                is_active=True, role="OWNER", venue__is_active=True, venue__deleted_at__isnull=True
+            ).exists():
                 raise serializers.ValidationError({"role": ["Avval to'yxona egaligini boshqa shaxsga o'tkazing."]})
         if creating:
             missing = {

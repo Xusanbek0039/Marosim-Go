@@ -1,7 +1,7 @@
 """Subscription endpoints.
 
 * ``/subscriptions/plans/`` — public price list.
-* ``/me/subscriptions/`` — the couple's own requests (USER only; others' rows are 404).
+* ``/me/subscriptions/`` — own USER subscriptions and business-owner badge purchases.
 * ``/admin/subscriptions/``, ``/admin/subscription-plans/``, ``/admin/subscription-settings/`` —
   Super Admin always, ADMIN only with the ``subscriptions.*`` codes the Super Admin granted.
 """
@@ -9,7 +9,7 @@
 import django_filters
 from django.db.models import Q, Sum
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -36,8 +36,8 @@ from .serializers import (
     PlanSerializer,
     SettingsSerializer,
     SubscriptionRequestSerializer,
-    SummarySerializer,
     SubscriptionTargetSerializer,
+    SummarySerializer,
 )
 
 UUID_RE = "[0-9a-fA-F-]{36}"
@@ -45,7 +45,13 @@ PLAN_FIELDS = ["code", "name", "audience", "duration_months", "price", "max_view
 
 
 # ---------------------------------------------------------------- public
-@extend_schema_view(list=extend_schema(summary="Obuna tariflari", tags=["subscriptions"]))
+@extend_schema_view(
+    list=extend_schema(
+        summary="Obuna tariflari",
+        tags=["subscriptions"],
+        parameters=[OpenApiParameter("audience", str, enum=PlanAudience.values)],
+    )
+)
 class PlanListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = PlanSerializer
     permission_classes = [AllowAny]
@@ -79,7 +85,9 @@ class MySubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, view
     lookup_value_regex = UUID_RE
     access_notes = {
         "*": AccessNote(ownership="Faqat so'rovchining o'z obunalari; boshqasiniki 404."),
-        "create": AccessNote(ownership="", conditions=("Bir vaqtda bitta kutilayotgan so'rov.",)),
+        "create": AccessNote(
+            ownership="", conditions=("Bir hisob yoki biznes uchun bir vaqtda bitta kutilayotgan so'rov.",)
+        ),
         "status": AccessNote(ownership=""),
     }
 
@@ -88,21 +96,34 @@ class MySubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, view
             return Subscription.objects.none()
         return Subscription.objects.filter(user=self.request.user).select_related("plan", "studio", "venue")
 
-    @extend_schema(summary="Galichka sotib olish mumkin bo'lgan o'z bizneslarim", tags=["me"],
-                   responses=SubscriptionTargetSerializer(many=True))
+    @extend_schema(
+        summary="Galichka sotib olish mumkin bo'lgan o'z bizneslarim",
+        tags=["me"],
+        responses=SubscriptionTargetSerializer(many=True),
+    )
     @action(detail=False, methods=["get"])
     def targets(self, request):
         from apps.studios.models import Studio
         from apps.venues.models import Venue
+
         user = request.user
         rows = []
         if user.role == Role.STUDIO:
-            rows = [{"id": s.pk, "name": s.name, "kind": "studio"} for s in
-                    Studio.objects.filter(responsible_user=user, is_active=True, deleted_at__isnull=True)]
+            rows = [
+                {"id": s.pk, "name": s.name, "kind": "studio"}
+                for s in Studio.objects.filter(responsible_user=user, is_active=True, deleted_at__isnull=True)
+            ]
         elif user.role == Role.VENUE_OWNER:
-            rows = [{"id": v.pk, "name": v.name, "kind": "venue"} for v in
-                    Venue.objects.filter(memberships__user=user, memberships__role="OWNER",
-                                         memberships__is_active=True, is_active=True, deleted_at__isnull=True)]
+            rows = [
+                {"id": v.pk, "name": v.name, "kind": "venue"}
+                for v in Venue.objects.filter(
+                    memberships__user=user,
+                    memberships__role="OWNER",
+                    memberships__is_active=True,
+                    is_active=True,
+                    deleted_at__isnull=True,
+                )
+            ]
         return Response(SubscriptionTargetSerializer(rows, many=True).data)
 
     def create(self, request, *args, **kwargs):
@@ -123,6 +144,10 @@ class MySubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, view
         summary="Obuna holati, limitlar, tariflar va to'lov ma'lumotlari",
         tags=["me"],
         responses=MySubscriptionStatusSerializer,
+        parameters=[
+            OpenApiParameter("studio", str, description="STUDIO: o'z studiyangiz UUID si"),
+            OpenApiParameter("venue", str, description="VENUE_OWNER: o'z to'yxonangiz UUID si"),
+        ],
     )
     @action(detail=False, methods=["get"])
     def status(self, request):
@@ -170,6 +195,7 @@ class MySubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, view
 
 # ----------------------------------------------------------------- admin
 class SubscriptionFilter(django_filters.FilterSet):
+    audience = django_filters.ChoiceFilter(field_name="plan__audience", choices=PlanAudience.choices)
     state = django_filters.ChoiceFilter(
         choices=[(s, s) for s in ("PENDING", "ACTIVE", "EXPIRED", "SCHEDULED", "REJECTED", "CANCELLED")],
         method="filter_state",
@@ -178,7 +204,7 @@ class SubscriptionFilter(django_filters.FilterSet):
 
     class Meta:
         model = Subscription
-        fields = ["state", "user", "plan"]
+        fields = ["state", "user", "plan", "audience"]
 
     def filter_state(self, qs, name, value):
         now = timezone.now()
@@ -219,7 +245,14 @@ class AdminSubscriptionViewSet(
     queryset = Subscription.objects.none()
     lookup_value_regex = UUID_RE
     filterset_class = SubscriptionFilter
-    search_fields = ["user__first_name", "user__last_name", "user__phone_number", "payment_reference"]
+    search_fields = [
+        "user__first_name",
+        "user__last_name",
+        "user__phone_number",
+        "payment_reference",
+        "studio__name",
+        "venue__name",
+    ]
     ordering_fields = ["created_at", "ends_at", "price"]
     ordering = ["-created_at"]
     access_notes = {"*": AccessNote(ownership=ALL)}

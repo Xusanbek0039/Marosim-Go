@@ -26,7 +26,10 @@ FEATURE_CODES = {f"{role}.{feature}" for role, features in ROLE_FEATURES.items()
 
 
 def feature_of(view):
-    module = type(view).__module__.split(".")[1]
+    parts = type(view).__module__.split(".")
+    if len(parts) < 2:
+        return None
+    module = parts[1]
     name = type(view).__name__
     if module == "accounts" and name == "RegisterView":
         return "registration"
@@ -36,8 +39,16 @@ def feature_of(view):
         return "portfolio"
     if module == "ceremonies":
         action = getattr(view, "action", None)
-        if action in {"members", "invitations", "invitation_revoke", "invitation_resend", "viewer_revoke",
-                      "owner_requests", "owner_request_approve", "owner_request_reject"}:
+        if action in {
+            "members",
+            "invitations",
+            "invitation_revoke",
+            "invitation_resend",
+            "viewer_revoke",
+            "owner_requests",
+            "owner_request_approve",
+            "owner_request_reject",
+        }:
             return "sharing"
         return "ceremonies"
     return {"media": "media", "reviews": "reviews", "subscriptions": "subscriptions", "support": "support"}.get(module)

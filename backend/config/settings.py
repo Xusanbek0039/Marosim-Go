@@ -272,6 +272,7 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "ENUM_NAME_OVERRIDES": {
+        "SubscriptionAudienceEnum": "apps.subscriptions.models.PlanAudience",
         "RoleEnum": "apps.accounts.models.Role",
         "ClientRoleEnum": ["USER", "STUDIO"],
         "AdminRoleEnum": ["ADMIN"],

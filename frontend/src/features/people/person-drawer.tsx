@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { RoleBadge, StatusBadge, UserAvatar } from "@/components/common";
+import { PaidBadge } from "@/components/paid-badge";
 import { MotionDrawer } from "@/components/motion/motion-dialog";
 import { Button } from "@/components/ui/button";
 import { useCan, useMe } from "@/features/auth/hooks";
@@ -115,7 +116,7 @@ export function PersonDrawer({
             className="size-24 text-2xl ring-4 ring-cyan-400/40 ring-offset-4 ring-offset-transparent"
           />
         </motion.div>
-        <h3 className="text-xl font-extrabold">{person.full_name}</h3>
+        <h3 className="text-xl font-extrabold">{person.full_name} <PaidBadge verified={person.is_verified} /></h3>
         <div className="flex items-center gap-3">
           <RoleBadge role={person.role} />
           <StatusBadge active={person.is_active} />

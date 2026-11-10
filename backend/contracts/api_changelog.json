@@ -862,6 +862,258 @@
         "POST /api/v1/admins/",
         "POST /api/v1/studios/"
       ]
+    },
+    {
+      "revision": 21,
+      "date": "2026-11-09",
+      "note": "Paid business badges, subscriber badges and delegated role capability controls",
+      "added": [
+        "GET /api/v1/admin/platform-policy/",
+        "GET /api/v1/me/subscriptions/targets/",
+        "PATCH /api/v1/admin/platform-policy/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admin/subscription-plans/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admin/subscriptions/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admin/venues/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admin/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/auth/me/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/dashboard/overview/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/subscriptions/": [
+          "allowed_roles",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/subscriptions/status/": [
+          "allowed_roles",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/public/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/public/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/subscriptions/plans/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/users/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/users/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venue-owner/venues/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venue-owner/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venues/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venues/search/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admin/subscription-plans/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admin/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/admins/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/auth/me/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/users/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/venue-owner/venues/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscription-plans/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/approve/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/cancel/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/subscriptions/{id}/reject/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admin/venues/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/admins/{id}/verify-phone/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/auth/login/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/auth/refresh/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/auth/register/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/subscriptions/": [
+          "allowed_roles",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/subscriptions/{id}/cancel/": [
+          "allowed_roles",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/users/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/users/{id}/verify-phone/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/venue-owner/venues/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [
+        "GET /api/v1/me/subscriptions/",
+        "GET /api/v1/me/subscriptions/status/",
+        "POST /api/v1/me/subscriptions/",
+        "POST /api/v1/me/subscriptions/{id}/cancel/"
+      ],
+      "schema_changed": [
+        "GET /api/v1/admin/subscription-plans/",
+        "GET /api/v1/admin/subscriptions/",
+        "GET /api/v1/admin/subscriptions/{id}/",
+        "GET /api/v1/admin/venues/",
+        "GET /api/v1/admin/venues/{id}/",
+        "GET /api/v1/admins/",
+        "GET /api/v1/admins/{id}/",
+        "GET /api/v1/auth/me/",
+        "GET /api/v1/dashboard/overview/",
+        "GET /api/v1/me/subscriptions/",
+        "GET /api/v1/me/subscriptions/status/",
+        "GET /api/v1/public/studios/",
+        "GET /api/v1/public/studios/{id}/",
+        "GET /api/v1/studios/",
+        "GET /api/v1/studios/{id}/",
+        "GET /api/v1/subscriptions/plans/",
+        "GET /api/v1/users/",
+        "GET /api/v1/users/{id}/",
+        "GET /api/v1/venue-owner/venues/",
+        "GET /api/v1/venue-owner/venues/{id}/",
+        "GET /api/v1/venues/",
+        "GET /api/v1/venues/search/",
+        "GET /api/v1/venues/{id}/",
+        "PATCH /api/v1/admin/subscription-plans/{id}/",
+        "PATCH /api/v1/admin/venues/{id}/",
+        "PATCH /api/v1/admins/{id}/",
+        "PATCH /api/v1/auth/me/",
+        "PATCH /api/v1/studios/{id}/",
+        "PATCH /api/v1/users/{id}/",
+        "PATCH /api/v1/venue-owner/venues/{id}/",
+        "POST /api/v1/admin/subscription-plans/",
+        "POST /api/v1/admin/subscriptions/",
+        "POST /api/v1/admin/subscriptions/{id}/approve/",
+        "POST /api/v1/admin/subscriptions/{id}/cancel/",
+        "POST /api/v1/admin/subscriptions/{id}/reject/",
+        "POST /api/v1/admin/venues/",
+        "POST /api/v1/admins/",
+        "POST /api/v1/admins/{id}/verify-phone/",
+        "POST /api/v1/auth/login/",
+        "POST /api/v1/auth/refresh/",
+        "POST /api/v1/auth/register/",
+        "POST /api/v1/me/subscriptions/",
+        "POST /api/v1/me/subscriptions/{id}/cancel/",
+        "POST /api/v1/studios/",
+        "POST /api/v1/users/",
+        "POST /api/v1/users/{id}/verify-phone/",
+        "POST /api/v1/venue-owner/venues/"
+      ]
+    },
+    {
+      "revision": 22,
+      "date": "2026-11-09",
+      "note": "Document plan audience and per-business subscription status",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/me/subscriptions/status/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/subscriptions/plans/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/subscriptions/": [
+          "conditions"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/me/subscriptions/status/",
+        "GET /api/v1/subscriptions/plans/"
+      ]
+    },
+    {
+      "revision": 23,
+      "date": "2026-11-09",
+      "note": "Filter business badge purchases by audience and business name",
+      "added": [],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/admin/subscriptions/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/admin/subscriptions/"
+      ]
     }
   ]
 }

@@ -338,6 +338,29 @@
       "operation_id": "admin_media_deletion_requests_retrieve",
       "schema_fingerprint": "7ae850d418caec6b"
     },
+    "GET /api/v1/admin/platform-policy/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "platform.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "platform.view"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [
+        "Admin faqat Super Admin bergan platform ruxsatlari bilan."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_platform_policy_list",
+      "schema_fingerprint": "bec27ffad5ca8599"
+    },
     "GET /api/v1/admin/reviews/": {
       "allowed_roles": [
         "ADMIN",
@@ -443,7 +466,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscription_plans_list",
-      "schema_fingerprint": "5cf4a941b02ca72d"
+      "schema_fingerprint": "4beccf195294e8c4"
     },
     "GET /api/v1/admin/subscription-settings/": {
       "allowed_roles": [
@@ -485,7 +508,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscriptions_list",
-      "schema_fingerprint": "1024edd54266d9ef"
+      "schema_fingerprint": "e20f8893eaa0ec7f"
     },
     "GET /api/v1/admin/subscriptions/summary/": {
       "allowed_roles": [
@@ -527,7 +550,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscriptions_retrieve",
-      "schema_fingerprint": "a145ad42b7a3c6fb"
+      "schema_fingerprint": "b5a644a6f0d9552e"
     },
     "GET /api/v1/admin/support/applications/": {
       "allowed_roles": [
@@ -674,7 +697,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_venues_list",
-      "schema_fingerprint": "9c2a1359b4f1aa48"
+      "schema_fingerprint": "38a2d400f1e8bc4f"
     },
     "GET /api/v1/admin/venues/{id}/": {
       "allowed_roles": [
@@ -695,7 +718,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_venues_retrieve",
-      "schema_fingerprint": "3553169e1e4d91ae"
+      "schema_fingerprint": "b8b83eec87c79513"
     },
     "GET /api/v1/admin/venues/{id}/bookings/": {
       "allowed_roles": [
@@ -772,7 +795,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_list",
-      "schema_fingerprint": "3f27af92ad4e5805"
+      "schema_fingerprint": "b4082b6409724e25"
     },
     "GET /api/v1/admins/permissions/": {
       "allowed_roles": [
@@ -800,7 +823,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_retrieve",
-      "schema_fingerprint": "f2cd4b1dae40cb5d"
+      "schema_fingerprint": "c4456d680ad0357c"
     },
     "GET /api/v1/admins/{id}/pinfl/": {
       "allowed_roles": [
@@ -848,7 +871,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_me_retrieve",
-      "schema_fingerprint": "c51e94478662ae15"
+      "schema_fingerprint": "8a982e120b56f927"
     },
     "GET /api/v1/ceremonies/": {
       "allowed_roles": [
@@ -967,7 +990,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "dashboard_overview_retrieve",
-      "schema_fingerprint": "7a523cf53cd955ae"
+      "schema_fingerprint": "26a8a5902edddaf1"
     },
     "GET /api/v1/devcenter/changelog/": {
       "allowed_roles": [
@@ -1227,7 +1250,9 @@
     },
     "GET /api/v1/me/subscriptions/": {
       "allowed_roles": [
-        "USER"
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER"
       ],
       "auth_type": "JWT",
       "required_permissions": [],
@@ -1237,11 +1262,13 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_subscriptions_list",
-      "schema_fingerprint": "528489f6d3df9e63"
+      "schema_fingerprint": "ca5f430650d9e4be"
     },
     "GET /api/v1/me/subscriptions/status/": {
       "allowed_roles": [
-        "USER"
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER"
       ],
       "auth_type": "JWT",
       "required_permissions": [],
@@ -1251,7 +1278,23 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_subscriptions_status_retrieve",
-      "schema_fingerprint": "fde4c8953b606980"
+      "schema_fingerprint": "7531968c253747f7"
+    },
+    "GET /api/v1/me/subscriptions/targets/": {
+      "allowed_roles": [
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z obunalari; boshqasiniki 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_subscriptions_targets_list",
+      "schema_fingerprint": "fe9176d81a6c1c60"
     },
     "GET /api/v1/me/venue-bookings/": {
       "allowed_roles": [
@@ -1353,7 +1396,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_list",
-      "schema_fingerprint": "51e615334b1cec80"
+      "schema_fingerprint": "b9cebdc59169b2d5"
     },
     "GET /api/v1/public/studios/{id}/": {
       "allowed_roles": [
@@ -1369,7 +1412,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_retrieve",
-      "schema_fingerprint": "b9b52108e8084b00"
+      "schema_fingerprint": "203174bbba33cafc"
     },
     "GET /api/v1/public/studios/{id}/schedule/": {
       "allowed_roles": [
@@ -1423,7 +1466,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_list",
-      "schema_fingerprint": "c11a1117a0c1625f"
+      "schema_fingerprint": "477c30d0345306cb"
     },
     "GET /api/v1/studios/me/": {
       "allowed_roles": [
@@ -1486,7 +1529,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_retrieve",
-      "schema_fingerprint": "c7c4af792a39e4cd"
+      "schema_fingerprint": "01eb36c4276f864b"
     },
     "GET /api/v1/studios/{id}/calendar/": {
       "allowed_roles": [
@@ -1521,7 +1564,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "subscriptions_plans_list",
-      "schema_fingerprint": "5b1dae90b2d7ced5"
+      "schema_fingerprint": "dc91a1ab42e16b7f"
     },
     "GET /api/v1/support/tickets/": {
       "allowed_roles": [
@@ -1593,7 +1636,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_list",
-      "schema_fingerprint": "383f487bfe77962e"
+      "schema_fingerprint": "c3f7368e4ba32236"
     },
     "GET /api/v1/users/{id}/": {
       "allowed_roles": [
@@ -1614,7 +1657,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_retrieve",
-      "schema_fingerprint": "548e6dff2aa05ba0"
+      "schema_fingerprint": "cd4b35fb8ddb81e3"
     },
     "GET /api/v1/users/{id}/pinfl/": {
       "allowed_roles": [
@@ -1652,7 +1695,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_list",
-      "schema_fingerprint": "2b2e45fd438c9417"
+      "schema_fingerprint": "f1baeabd75662682"
     },
     "GET /api/v1/venue-owner/venues/{id}/": {
       "allowed_roles": [
@@ -1666,7 +1709,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_retrieve",
-      "schema_fingerprint": "fd743e80371c2a0f"
+      "schema_fingerprint": "28223df65559edd7"
     },
     "GET /api/v1/venue-owner/venues/{id}/bookings/": {
       "allowed_roles": [
@@ -1789,7 +1832,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venues_list",
-      "schema_fingerprint": "a63b122d34fb1671"
+      "schema_fingerprint": "27fba2ec0649770f"
     },
     "GET /api/v1/venues/search/": {
       "allowed_roles": [
@@ -1805,7 +1848,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venues_search_list",
-      "schema_fingerprint": "28b06d65e30616c5"
+      "schema_fingerprint": "a53ced42edb5ac9b"
     },
     "GET /api/v1/venues/{id}/": {
       "allowed_roles": [
@@ -1821,7 +1864,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venues_retrieve",
-      "schema_fingerprint": "83526975e8a46e49"
+      "schema_fingerprint": "1aa3f712764ce159"
     },
     "GET /api/v1/venues/{id}/availability/": {
       "allowed_roles": [
@@ -1855,6 +1898,29 @@
       "deprecated": false,
       "operation_id": "venues_reviews_retrieve",
       "schema_fingerprint": "5b436cd893f83719"
+    },
+    "PATCH /api/v1/admin/platform-policy/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "platform.manage"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "platform.manage"
+        ]
+      },
+      "ownership_scope": null,
+      "conditions": [
+        "Admin faqat Super Admin bergan platform ruxsatlari bilan."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "admin_platform_policy_partial_update",
+      "schema_fingerprint": "f7ed3dd7b6fb75a3"
     },
     "PATCH /api/v1/admin/reviews/{id}/": {
       "allowed_roles": [
@@ -1898,7 +1964,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscription_plans_partial_update",
-      "schema_fingerprint": "57ed2b56445ff668"
+      "schema_fingerprint": "330f4285d4f5d41e"
     },
     "PATCH /api/v1/admin/subscription-settings/": {
       "allowed_roles": [
@@ -1963,7 +2029,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_venues_partial_update",
-      "schema_fingerprint": "dfea0be3d6f799a7"
+      "schema_fingerprint": "ef88af09c078bc38"
     },
     "PATCH /api/v1/admin/venues/{id}/bookings/{booking_id}/": {
       "allowed_roles": [
@@ -2040,7 +2106,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_partial_update",
-      "schema_fingerprint": "cc9bb42e5b2c3472"
+      "schema_fingerprint": "526e3d8406191185"
     },
     "PATCH /api/v1/auth/me/": {
       "allowed_roles": [
@@ -2060,7 +2126,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_me_partial_update",
-      "schema_fingerprint": "d3d9c82e1e4e76cb"
+      "schema_fingerprint": "67848fd4b909142a"
     },
     "PATCH /api/v1/ceremonies/{id}/": {
       "allowed_roles": [
@@ -2099,7 +2165,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_partial_update",
-      "schema_fingerprint": "816b2f9750168f07"
+      "schema_fingerprint": "f201494396dd4cd8"
     },
     "PATCH /api/v1/users/{id}/": {
       "allowed_roles": [
@@ -2120,7 +2186,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_partial_update",
-      "schema_fingerprint": "6681081948a6e302"
+      "schema_fingerprint": "633ec8c608ddbbcb"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/": {
       "allowed_roles": [
@@ -2137,7 +2203,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_partial_update",
-      "schema_fingerprint": "ed2631c9cb2e2dd2"
+      "schema_fingerprint": "40ebcf3f31aed802"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/bookings/{booking_id}/": {
       "allowed_roles": [
@@ -2298,7 +2364,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscription_plans_create",
-      "schema_fingerprint": "4c27f9062652c5d4"
+      "schema_fingerprint": "b802ac53e43f1437"
     },
     "POST /api/v1/admin/subscriptions/": {
       "allowed_roles": [
@@ -2319,7 +2385,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscriptions_create",
-      "schema_fingerprint": "f7317bf5f85b2bd1"
+      "schema_fingerprint": "3e8a211b32f67629"
     },
     "POST /api/v1/admin/subscriptions/{id}/approve/": {
       "allowed_roles": [
@@ -2340,7 +2406,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscriptions_approve_create",
-      "schema_fingerprint": "241e916995147b09"
+      "schema_fingerprint": "273651a5a70e1357"
     },
     "POST /api/v1/admin/subscriptions/{id}/cancel/": {
       "allowed_roles": [
@@ -2361,7 +2427,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscriptions_cancel_create",
-      "schema_fingerprint": "8a11a7645d5aa44d"
+      "schema_fingerprint": "7f9c5d297a2ea9d0"
     },
     "POST /api/v1/admin/subscriptions/{id}/reject/": {
       "allowed_roles": [
@@ -2382,7 +2448,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_subscriptions_reject_create",
-      "schema_fingerprint": "8a11a7645d5aa44d"
+      "schema_fingerprint": "7f9c5d297a2ea9d0"
     },
     "POST /api/v1/admin/support/tickets/{id}/close/": {
       "allowed_roles": [
@@ -2447,7 +2513,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admin_venues_create",
-      "schema_fingerprint": "2abdc0251538017d"
+      "schema_fingerprint": "afc0b01c91b546de"
     },
     "POST /api/v1/admin/venues/{id}/bookings/": {
       "allowed_roles": [
@@ -2610,7 +2676,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_create",
-      "schema_fingerprint": "3c6734aceeb9bffe"
+      "schema_fingerprint": "af45f05c5ea90cad"
     },
     "POST /api/v1/admins/{id}/verify-phone/": {
       "allowed_roles": [
@@ -2624,7 +2690,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "admins_verify_phone_create",
-      "schema_fingerprint": "79d53be4b6c4ebf1"
+      "schema_fingerprint": "82e11fc922f5d2e1"
     },
     "POST /api/v1/auth/login/": {
       "allowed_roles": [
@@ -2641,7 +2707,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_login_create",
-      "schema_fingerprint": "18de5bbf2e55c793"
+      "schema_fingerprint": "064a416b015d4b60"
     },
     "POST /api/v1/auth/logout/": {
       "allowed_roles": [
@@ -2674,7 +2740,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_refresh_create",
-      "schema_fingerprint": "7e38e157f02d6eff"
+      "schema_fingerprint": "17baf6e4c0d49ef9"
     },
     "POST /api/v1/auth/register/": {
       "allowed_roles": [
@@ -2692,7 +2758,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "auth_register_create",
-      "schema_fingerprint": "772e1dcbec5606fb"
+      "schema_fingerprint": "9def3474d9a100d8"
     },
     "POST /api/v1/ceremonies/": {
       "allowed_roles": [
@@ -2993,23 +3059,27 @@
     },
     "POST /api/v1/me/subscriptions/": {
       "allowed_roles": [
-        "USER"
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER"
       ],
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
       "ownership_scope": null,
       "conditions": [
-        "Bir vaqtda bitta kutilayotgan so'rov."
+        "Bir hisob yoki biznes uchun bir vaqtda bitta kutilayotgan so'rov."
       ],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_subscriptions_create",
-      "schema_fingerprint": "3fab0d21cc2cbd9c"
+      "schema_fingerprint": "14ed0532a952dd80"
     },
     "POST /api/v1/me/subscriptions/{id}/cancel/": {
       "allowed_roles": [
-        "USER"
+        "USER",
+        "STUDIO",
+        "VENUE_OWNER"
       ],
       "auth_type": "JWT",
       "required_permissions": [],
@@ -3019,7 +3089,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_subscriptions_cancel_create",
-      "schema_fingerprint": "60ca8e112aa384cc"
+      "schema_fingerprint": "6e436d4032fb74e8"
     },
     "POST /api/v1/me/venue-bookings/": {
       "allowed_roles": [
@@ -3104,7 +3174,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_create",
-      "schema_fingerprint": "4fa9213bb16a6092"
+      "schema_fingerprint": "81943d72c1967fa0"
     },
     "POST /api/v1/studios/me/{studio_id}/images/": {
       "allowed_roles": [
@@ -3215,7 +3285,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_create",
-      "schema_fingerprint": "0a77219256292fe2"
+      "schema_fingerprint": "7cc7a0a84df65e2d"
     },
     "POST /api/v1/users/{id}/verify-phone/": {
       "allowed_roles": [
@@ -3236,7 +3306,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "users_verify_phone_create",
-      "schema_fingerprint": "79d53be4b6c4ebf1"
+      "schema_fingerprint": "82e11fc922f5d2e1"
     },
     "POST /api/v1/venue-owner/venues/": {
       "allowed_roles": [
@@ -3253,7 +3323,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "venue_owner_venues_create",
-      "schema_fingerprint": "4429dae1119dc243"
+      "schema_fingerprint": "026074cf0cea895e"
     },
     "POST /api/v1/venue-owner/venues/{id}/bookings/": {
       "allowed_roles": [

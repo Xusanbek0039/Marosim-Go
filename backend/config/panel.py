@@ -111,6 +111,12 @@ def _find(root: Path, path: str) -> Path | None:
         return None
     stem, dot, ext = name.partition(".")
     names = [name, f"{name}.html", f"{name}/index.html"]
+    # Next exports segment payloads into directories, while the browser flattens
+    # their segment names into a URL: __next.group.route.__PAGE__.txt.
+    if name.startswith("__next.") and name.endswith(".txt"):
+        segments = name[len("__next.") : -len(".txt")].split(".")
+        if len(segments) > 1 and all(segments):
+            names.append(f"__next.{segments[0]}/" + "/".join(segments[1:]) + ".txt")
     # ``abc`` → ``_.html`` / ``_/index.html``; ``abc.txt`` → ``_.txt`` (the RSC payload of that page)
     names += [f"{PLACEHOLDER}{dot}{ext}"] if dot else [f"{PLACEHOLDER}.html", f"{PLACEHOLDER}/index.html"]
     for candidate in names:

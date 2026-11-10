@@ -51,7 +51,7 @@ function LoginForm() {
   };
 
   return (
-    <motion.form animate={controls} onSubmit={submit} noValidate className="flex flex-col gap-4">
+    <motion.form method="post" animate={controls} onSubmit={submit} noValidate className="flex flex-col gap-4">
       <Field label="Telefon raqam" htmlFor="phone_number">
         <PhoneInput id="phone_number" autoComplete="username" autoFocus value={phone} onChange={setPhone} />
       </Field>

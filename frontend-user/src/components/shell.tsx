@@ -27,7 +27,7 @@ export function Logo({ className }: { className?: string }) {
     <span className={cn("flex items-center gap-2.5", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset */}
       <img src="/brand/logo-icon.png" alt="" className="h-8 w-auto" />
-      <span className="text-lg font-extrabold tracking-tight">
+      <span className="hidden text-lg font-extrabold tracking-tight min-[380px]:inline">
         Marosim<span className="text-accent">Go</span>
       </span>
     </span>
@@ -68,7 +68,7 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
         <Link href={APP.home} aria-label={`${APP.name} — bosh sahifa`}>
           <Logo />
         </Link>
-        <nav aria-label="Asosiy menyu" className="ml-2 hidden items-center gap-1 sm:flex">
+        <nav aria-label="Asosiy menyu" className="ml-2 hidden items-center gap-1 lg:flex">
           {nav.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (
@@ -117,7 +117,7 @@ export function Shell({ nav, children }: { nav: NavLink[]; children: React.React
         </div>
       </header>
       {nav.length > 1 && (
-        <nav aria-label="Mobil menyu" className="glass flex gap-1 overflow-x-auto rounded-2xl p-1 [scrollbar-width:none] sm:hidden">
+        <nav aria-label="Mobil menyu" className="glass flex gap-1 overflow-x-auto rounded-2xl p-1 [scrollbar-width:none] lg:hidden">
           {nav.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             return (

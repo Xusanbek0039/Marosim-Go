@@ -98,6 +98,33 @@ def test_dynamic_segments_use_the_placeholder_export(build):
     assert studio.get("/ceremonies/../../secret.txt").status_code == 404
 
 
+def test_flattened_segment_prefetch_urls_match_export_directories(build, settings):
+    segment = build / "admins/__next.!KHBhbmVsKQ/admins/__PAGE__.txt"
+    segment.parent.mkdir(parents=True)
+    segment.write_text("admin page segment")
+    root_segment = build / "__next.!KHBhbmVsKQ/__PAGE__.txt"
+    root_segment.parent.mkdir(parents=True)
+    root_segment.write_text("root segment")
+    studio_root = settings.PANEL_SITES["studio"]
+    dynamic = studio_root / "ceremonies/_/__next.!KGFwcCk/ceremonies/$d$id/__PAGE__.txt"
+    dynamic.parent.mkdir(parents=True)
+    dynamic.write_text("dynamic ceremony segment")
+
+    response = panel().get("/admins/__next.!KHBhbmVsKQ.admins.__PAGE__.txt", {"_rsc": "prefetch"})
+    assert response.status_code == 200
+    assert body(response) == b"admin page segment"
+    assert response["Cache-Control"] == "no-cache"
+    assert response["Content-Type"].startswith("text/plain")
+    assert body(panel().get("/__next.!KHBhbmVsKQ.__PAGE__.txt")) == b"root segment"
+    studio = Client(HTTP_HOST="studio.marosimgo.uz")
+    response = studio.get(
+        "/ceremonies/dfe97f48-7712-461f-bffa-a125b3aa50a9/__next.!KGFwcCk.ceremonies.$d$id.__PAGE__.txt"
+    )
+    assert response.status_code == 200
+    assert body(response) == b"dynamic ceremony segment"
+    assert panel().get("/admins/__next.!KHBhbmVsKQ..admins.__PAGE__.txt").status_code == 404
+
+
 def test_unbuilt_panel_and_unknown_host(build, settings):
     res = Client(HTTP_HOST="admin.marosimgo.uz").get("/dashboard")
     assert res.status_code == 404 and "build" in res.content.decode()

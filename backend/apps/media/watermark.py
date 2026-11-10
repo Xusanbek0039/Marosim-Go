@@ -116,7 +116,15 @@ CPU = "libx264"
 
 
 def ffmpeg_bin() -> str | None:
-    return shutil.which("ffmpeg")
+    system = shutil.which("ffmpeg")
+    if system:
+        return system
+    try:
+        from imageio_ffmpeg import get_ffmpeg_exe
+
+        return get_ffmpeg_exe()
+    except (ImportError, RuntimeError, OSError):
+        return None
 
 
 @lru_cache(maxsize=1)
@@ -247,6 +255,8 @@ def burn_video(src, dst: Path, workdir: Path, *, http_headers: str | None = None
         code, tail = _run(cmd, info.duration, on_progress, workdir)
         if code == 0 and dst.exists() and dst.stat().st_size > 0:
             return
-        logger.warning("watermark: %s failed (%s), %s", enc, tail[-120:], "retrying on CPU" if enc != CPU else "giving up")
+        logger.warning(
+            "watermark: %s failed (%s), %s", enc, tail[-120:], "retrying on CPU" if enc != CPU else "giving up"
+        )
         dst.unlink(missing_ok=True)
     raise WatermarkError(f"ffmpeg_failed: {tail}")

@@ -87,10 +87,11 @@ export function LoginForm() {
 
       <motion.div animate={controls} className="relative w-full max-w-[440px]">
         <motion.form
+          method="post"
           onSubmit={onSubmit}
           noValidate
           variants={listContainer(0.07)}
-          initial="initial"
+          initial={false}
           animate="animate"
           className="glass-strong flex flex-col gap-5 rounded-[32px] p-7 shadow-[0_0_90px_-30px_rgb(6_182_212/0.55)] sm:p-9"
         >

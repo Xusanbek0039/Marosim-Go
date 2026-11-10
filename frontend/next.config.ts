@@ -26,6 +26,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1"],
   ...(isExport ? { output: "export" as const, images: { unoptimized: true } } : {}),
   // Partial prerendering cannot run in a static export.
   ...(isExport ? {} : { cacheComponents: true, partialPrefetching: true }),
@@ -45,7 +46,7 @@ const nextConfig: NextConfig = {
 
 async function rewrites() {
   return [
-    { source: "/api/v1/:path*", destination: `${BACKEND_URL}/api/v1/:path*` },
+    { source: "/api/v1/:path*", destination: `${BACKEND_URL}/api/v1/:path*/` },
     { source: "/media/:path*", destination: `${BACKEND_URL}/media/:path*` },
   ];
 }

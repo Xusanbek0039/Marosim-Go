@@ -399,6 +399,7 @@ OWNERSHIP_TESTS = {
         "ownership_panel_venue_schedule",
     ),
     # subscriptions — tests live in tests/test_subscriptions.py
+    "me_subscriptions_targets_list": "ownership_subscription_targets",
     **dict.fromkeys(["me_subscriptions_list", "me_subscriptions_cancel_create"], "ownership_my_subscriptions"),
     **dict.fromkeys(
         [
@@ -477,6 +478,10 @@ from . import test_subscriptions as _subscription_tests  # noqa: E402
 
 ownership_my_subscriptions = _subscription_tests.test_my_subscriptions_scope_is_own
 ownership_admin_subscriptions = _subscription_tests.test_admin_rights_come_only_from_granted_codes
+
+from . import test_paid_badges_policy as _badge_tests  # noqa: E402
+
+ownership_subscription_targets = _badge_tests.test_business_purchase_ownership_and_plan_scope
 
 
 @pytest.mark.parametrize(

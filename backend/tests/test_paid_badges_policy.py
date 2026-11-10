@@ -112,7 +112,9 @@ def test_badge_does_not_spread_to_other_studios(make_user, make_studio, client_f
 def test_user_badge_is_read_only_and_follows_subscription(plain_user, client_for, super_admin):
     user = client_for(plain_user)
     assert user.patch("/api/v1/auth/me/", {"is_verified": True}, format="json").data["is_verified"] is False
-    sub = client_for(super_admin).post(ADMIN, {"user_id": str(plain_user.pk), "plan": str(SubscriptionPlan.objects.get(code="M1").pk)})
+    sub = client_for(super_admin).post(
+        ADMIN, {"user_id": str(plain_user.pk), "plan": str(SubscriptionPlan.objects.get(code="M1").pk)}
+    )
     assert sub.status_code == 201
     assert user.get("/api/v1/auth/me/").data["is_verified"] is True
     assert not user.get("/api/v1/auth/me/").data["is_phone_verified"]
@@ -124,7 +126,9 @@ def test_policy_is_delegated_only_by_super_admin(make_user, client_for, super_ad
     client = client_for(admin)
     assert client.get(POLICY).status_code == 403
     root = client_for(super_admin)
-    assert root.patch(f"/api/v1/admins/{admin.pk}/", {"permissions": ["platform.view"]}, format="json").status_code == 200
+    assert (
+        root.patch(f"/api/v1/admins/{admin.pk}/", {"permissions": ["platform.view"]}, format="json").status_code == 200
+    )
     assert client.get(POLICY).status_code == 200
     assert client.patch(POLICY, {"disabled_features": []}, format="json").status_code == 403
     root.patch(f"/api/v1/admins/{admin.pk}/", {"permissions": ["platform.view", "platform.manage"]}, format="json")
@@ -132,21 +136,26 @@ def test_policy_is_delegated_only_by_super_admin(make_user, client_for, super_ad
     # Neither direct API calls nor a user's existing session bypass the switch.
     response = client_for(plain_user).post("/api/v1/venues/00000000-0000-0000-0000-000000000001/like/")
     assert response.status_code == 403
-    assert client.patch(f"/api/v1/admins/{admin.pk}/", {"permissions": ["users.delete"]}, format="json").status_code == 403
+    assert (
+        client.patch(f"/api/v1/admins/{admin.pk}/", {"permissions": ["users.delete"]}, format="json").status_code == 403
+    )
     assert client.patch(POLICY, {"disabled_features": ["SUPER_ADMIN.anything"]}, format="json").status_code == 400
     root.patch(POLICY, {"disabled_features": []}, format="json")
     assert client_for(plain_user).post("/api/v1/venues/00000000-0000-0000-0000-000000000001/like/").status_code == 404
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(("role", "feature", "url"), [
-    (Role.USER, "sharing", "/api/v1/me/ceremonies/00000000-0000-0000-0000-000000000001/invitations/"),
-    (Role.USER, "ceremonies", "/api/v1/me/ceremonies/"),
-    (Role.USER, "bookings", "/api/v1/me/venue-bookings/"),
-    (Role.STUDIO, "ceremonies", "/api/v1/studios/me/"),
-    (Role.STUDIO, "portfolio", "/api/v1/studios/me/00000000-0000-0000-0000-000000000001/images/"),
-    (Role.VENUE_OWNER, "venues", "/api/v1/venue-owner/venues/"),
-])
+@pytest.mark.parametrize(
+    ("role", "feature", "url"),
+    [
+        (Role.USER, "sharing", "/api/v1/me/ceremonies/00000000-0000-0000-0000-000000000001/invitations/"),
+        (Role.USER, "ceremonies", "/api/v1/me/ceremonies/"),
+        (Role.USER, "bookings", "/api/v1/me/venue-bookings/"),
+        (Role.STUDIO, "ceremonies", "/api/v1/studios/me/"),
+        (Role.STUDIO, "portfolio", "/api/v1/studios/me/00000000-0000-0000-0000-000000000001/images/"),
+        (Role.VENUE_OWNER, "venues", "/api/v1/venue-owner/venues/"),
+    ],
+)
 def test_disabled_role_features_are_enforced(role, feature, url, make_user, client_for):
     PlatformPolicy.objects.create(pk=1, disabled_features=[f"{role}.{feature}"])
     assert client_for(make_user(role)).get(url).status_code == 403
@@ -165,3 +174,32 @@ def test_disabled_purchase_preserves_existing_purchase_history(plain_user, clien
 def test_registration_can_be_disabled(anon):
     PlatformPolicy.objects.create(pk=1, disabled_features=["PUBLIC.registration"])
     assert anon.post("/api/v1/auth/register/", {}).status_code == 403
+
+
+@pytest.mark.django_db
+def test_business_owner_account_cannot_be_stranded(business, client_for, super_admin):
+    owner, target, serializer, plan = business
+    root = client_for(super_admin)
+    url = f"/api/v1/users/{owner.pk}/"
+    assert root.patch(url, {"role": "USER"}, format="json").status_code == 400
+    assert root.patch(url, {"is_active": False}, format="json").status_code == 409
+    assert root.delete(url).status_code == 409
+    owner.refresh_from_db()
+    assert owner.is_active and not owner.is_deleted
+
+
+@pytest.mark.django_db
+def test_normalized_plan_code_duplicate_is_validation_error(client_for, super_admin):
+    response = client_for(super_admin).post(
+        "/api/v1/admin/subscription-plans/",
+        {
+            "code": "m1",
+            "name": "Duplicate",
+            "duration_months": 1,
+            "price": "100",
+            "max_viewers": 10,
+        },
+        format="json",
+    )
+    assert response.status_code == 400
+    assert SubscriptionPlan.objects.filter(code="M1").count() == 1
