@@ -9,6 +9,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from apps.audit.services import AuditAction, diff, record, snapshot
 from apps.core.exceptions import Conflict
 
+from apps.ceremonies.invitations import settle_user_ownerships
 from apps.ceremonies.serializers import AccountFolderSerializer, FolderRenameSerializer, FolderResultSerializer
 
 from . import features
@@ -85,6 +86,9 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
                 changes={"from": before.get("admin_permissions"), "to": after.get("admin_permissions")},
             )
 
+        if (was_active and not user.is_active) or (before.get("role") == Role.USER != user.role):
+            settle_user_ownerships(user)  # their pending votes on owner requests stop counting
+
         changes = diff(before, after, touched)
         changes.pop("is_active", None)
         changes.pop("admin_permissions", None)
@@ -95,6 +99,7 @@ class ManagedUserViewSetBase(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         self._ensure_not_studio_owner(instance, "O'chirish")
         instance.soft_delete()
+        settle_user_ownerships(instance)
         revoke_all_sessions(instance)
         record(self.request, AuditAction.DELETE, instance)
 

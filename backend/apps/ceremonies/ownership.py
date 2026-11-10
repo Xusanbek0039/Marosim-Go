@@ -10,6 +10,8 @@ Every endpoint of the ownership model (Phases C–E) decides access through thes
 * Owners share VIEWER access and propose new owners. A new owner needs the approval of every
   owner ACCEPTED when they accepted (inviter's own invitation counts as their approval); with no
   owners yet (the studio's first invitations) a verified phone is the initial verification.
+  An owner whose account stops being an alive USER no longer votes; requests waiting only on
+  them settle (``invitations.settle_user_ownerships``).
 * An owner can revoke only what they granted (their viewers, their pending invitations) and leave
   themselves. Removing another owner is a Super Admin action.
 * JSHSHIR is only an identifier for addressing an invitation; it never authenticates anyone.
@@ -298,8 +300,18 @@ def can_resend_invitation(user, invitation: CeremonyInvitation) -> bool:
 
 # ------------------------------------------------------------ owner requests
 def approvers_for(ceremony: Ceremony, exclude_user_id=None) -> list:
-    """Owners whose approval a new ownership needs: everyone ACCEPTED right now."""
-    qs = CeremonyOwnership.objects.filter(ceremony=ceremony, status=OwnershipStatus.ACCEPTED)
+    """Owners whose approval a new ownership needs: everyone ACCEPTED right now.
+
+    Only alive USER-role accounts count: an owner moved to another role, deactivated or deleted
+    can no longer decide (``role_in``), so waiting for them would block the request forever.
+    """
+    qs = CeremonyOwnership.objects.filter(
+        ceremony=ceremony,
+        status=OwnershipStatus.ACCEPTED,
+        user__role=Role.USER,
+        user__is_active=True,
+        user__deleted_at__isnull=True,
+    )
     if exclude_user_id is not None:
         qs = qs.exclude(user_id=exclude_user_id)
     return list(qs.values_list("user_id", flat=True))

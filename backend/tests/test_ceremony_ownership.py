@@ -281,6 +281,49 @@ def test_owner_request_needs_every_current_owner(world, make_user):
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("change", ["role", "inactive", "deleted"])
+def test_owner_who_stops_being_a_client_no_longer_blocks_requests(world, make_user, change):
+    groom, bride, c = make_user(), make_user(), world["ceremony"]
+    own(c, groom, OwnerType.GROOM)
+    request = own(c, bride, OwnerType.BRIDE, status=OwnershipStatus.PENDING)
+    CeremonyOwnershipApproval.objects.create(ownership=request, approver=groom)
+    assert ownership.approval_outcome(request) == ApprovalDecision.PENDING
+
+    if change == "role":
+        groom.role = Role.VENUE_OWNER
+        groom.save()
+    elif change == "inactive":
+        groom.is_active = False
+        groom.save()
+    else:
+        groom.soft_delete()
+    # The groom can no longer decide, so their vote must not keep the request waiting.
+    assert not ownership.can_decide_owner_request(groom, request)
+    assert ownership.approvers_for(c) == []
+    assert ownership.approval_outcome(request) == ApprovalDecision.APPROVED
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("change", ["role", "inactive", "delete"])
+def test_account_change_settles_requests_waiting_on_that_owner(world, make_user, super_admin, client_for, change):
+    groom, bride, c = make_user(), make_user(), world["ceremony"]
+    own(c, groom, OwnerType.GROOM)
+    request = own(c, bride, OwnerType.BRIDE, status=OwnershipStatus.PENDING)
+    CeremonyOwnershipApproval.objects.create(ownership=request, approver=groom)
+
+    api, url = client_for(super_admin), f"/api/v1/users/{groom.pk}/"
+    if change == "delete":
+        res = api.delete(url)
+    else:
+        body = {"role": Role.VENUE_OWNER} if change == "role" else {"is_active": False}
+        res = api.patch(url, body, format="json")
+    assert res.status_code in (200, 204), res.data
+    request.refresh_from_db()
+    assert request.status == OwnershipStatus.ACCEPTED
+    assert ownership.role_in(bride, c) == AccessRole.OWNER
+
+
+@pytest.mark.django_db
 def test_viewer_cannot_approve_owner_requests(world, make_user):
     owner, guest, newcomer, c = make_user(), make_user(), make_user(), world["ceremony"]
     own(c, owner)

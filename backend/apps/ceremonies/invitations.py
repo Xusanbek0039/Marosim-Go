@@ -395,6 +395,19 @@ def _settle_ceremony(ceremony: Ceremony) -> None:
         _settle(row)
 
 
+def settle_user_ownerships(user) -> None:
+    """Re-decide pending owner requests on the user's ceremonies after they stop being an alive USER.
+
+    Their pending votes no longer count (``ownership.approvers_for``), so a request waiting only on
+    them must not stay PENDING forever.
+    """
+    ceremony_ids = CeremonyOwnership.objects.filter(user=user, status=OwnershipStatus.ACCEPTED).values_list(
+        "ceremony_id", flat=True
+    )
+    for row in CeremonyOwnership.objects.filter(ceremony_id__in=list(ceremony_ids), status=OwnershipStatus.PENDING):
+        _settle(row)
+
+
 @transaction.atomic
 def decide_owner_request(request, row: CeremonyOwnership, *, approve: bool) -> CeremonyOwnership:
     user = request.user
