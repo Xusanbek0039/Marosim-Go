@@ -45,9 +45,9 @@ trap 'free_ports; exit 0' INT TERM
 # 8000 = Super Admin (http://127.0.0.1:8000/ = the marosimgo.uz landing page), 8001 = Admin,
 # 8002 = Studio, 3002 = User, 3003 = To'yxona.
 # User / To'yxona are static builds now (npm run build:panel in frontend-user / frontend-toyxona).
-# serve <port> <panel> [panel for 127.0.0.1]
+# serve <port> <panel> [panel for 127.0.0.1]; other hosts (e.g. *.trycloudflare.com tunnels) get <panel>
 serve() {
-  (cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=$2,localhost=$2,127.0.0.1=${3:-$2}" \
+  (cd "$ROOT/backend" && PANEL_HOST_SITES="192.168.1.12=$2,localhost=$2,127.0.0.1=${3:-$2}" PANEL_DEFAULT_SITE="$2" \
     "$PYTHON" manage.py runserver "0.0.0.0:$1" --insecure --noreload) &
 }
 serve 8000 superadmin landing
