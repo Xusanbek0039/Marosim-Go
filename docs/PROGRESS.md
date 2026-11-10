@@ -1,5 +1,17 @@
 # Progress
 
+## 2026-11-10 — Studiya portfoliosi: Reels, like / dislike / izoh, chat (galichka bilan), studiya grafigi ✅
+
+Foydalanuvchi so'rovi: portfolio'ga videolar (Reels formatida), like / dislike / izoh va studiya bilan yozishish — faqat **galichka** (faol pulli obuna) bo'lganda; galichkasiz studiyaga uni olishga undov. Studiyada ham to'yxonalardek ish / band / dam olish kunlari grafigi.
+
+* **Model** (`studios/0004`): `StudioImage.kind` (IMAGE / VIDEO), `video`, `caption`, `duration`; `StudioPortfolioReaction` (+1 / -1, bittadan), `StudioPortfolioComment`, `StudioDayStatus` (BUSY / OFF + ichki izoh), `Studio.off_weekdays`, `StudioConversation` + `StudioChatMessage`.
+* **Reels** (`apps/studios/reels.py`): vertikal (bo'yi ≥ 1.5 × eni, 9:16), 1–90 s, MP4 / MOV / WEBM, `STUDIO_REEL_MAX_MB` (100). ffprobe bilan tekshiriladi, poster ffmpeg yoki brauzer kadridan; ko'pi bilan 15 ta. Studiya panelining proxy'si faqat `/studios/me/{id}/reels/` uchun 110 MB qabul qiladi.
+* **Galichka shart** (`services.BadgeRequired`, 403 `badge_required`): reels yuklash, like / dislike, izoh yozish, chatda yozish (ikkala tomondan). Galichka tugasa reels ommadan yashiriladi (o'chirilmaydi), chat tarixi o'qiladi, lekin yozib bo'lmaydi.
+* **API:** `POST /studios/me/{id}/reels/`, `PATCH /studios/me/{id}/images/{item}/` (caption), `GET|DELETE …/images/{item}/comments/…` (moderatsiya), `GET|PATCH /studios/me/{id}/schedule/`, `PUT …/schedule/days/{date}/`, `GET /studios/me/{id}/chats/`, `GET|POST …/chats/{conversation}/`; ommaviy `PUT|DELETE /public/studios/{id}/portfolio/{item}/reaction/`, `GET|POST …/comments/`, `DELETE …/comments/{comment}/`; mijoz `GET /me/studio-chats/`, `GET|POST /me/studio-chats/{studio}/`. Ommaviy profil: `images` (faqat rasmlar), `reels`, `chat_enabled`, har bir ishda `engagement`; grafikda `days`, `off_weekdays`.
+* **Studiya paneli:** Portfolio — Reels / Rasmlar tablari, 9:16 kartalar, video tanlashda brauzerda tekshiruv + poster, izohlar va moderatsiya; galichkasizlarga `BadgeUpsell`. Yangi sahifalar: **Grafik** (oy kalendari, kunni band / dam olish qilish, haftalik dam olish kunlari) va **Xabarlar** (mijozlar bilan chat).
+* **Mijoz ilovasi:** studiya sahifasida Reels qatori va to'liq ekranli vertikal ko'ruvchi (svayp / ↑↓, ovoz, like / dislike, izohlar oynasi), "Studiyaga yozish"; yangi **Xabarlar** sahifasi; grafikda dam olish kunlari.
+* **Testlar:** `tests/test_studio_portfolio_engagement.py` (6), kontrakt yangilandi (`api_contract --write`, 214 operatsiya). Brauzerda bosib ko'rilmadi.
+
 ## 2026-11-09 — Landing: oilaviy dizayn, light / dark, 3D nikoh uzuklari ✅
 
 * Iliq "to'y" uslubi: oltin, anor, olxo'ri ranglari, suzani naqshlari, serif sarlavhalar; yangi bo'limlar "Oilaviy lahzalar" (mozaika) va "Bu xotira kim uchun", iqtibos.

@@ -2,11 +2,12 @@
 
 import { PaidBadge } from "@/components/paid-badge";
 
-import { ArrowLeftIcon, CameraIcon, ChevronLeftIcon, ChevronRightIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import { ArrowLeftIcon, BadgeCheckIcon, CameraIcon, ChevronLeftIcon, ChevronRightIcon, ClapperboardIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 
 import { PhotoGrid } from "@/components/photo-grid";
+import { EngagedPhotoGrid, ReelsStrip } from "@/components/reels";
 import { ReviewsSection, StatsLine } from "@/components/reviews";
 import { Card, cn, ErrorState, Skeleton } from "@/components/ui";
 import { formatPhone } from "@/lib/format";
@@ -72,13 +73,38 @@ function StudioDetail() {
             )}
           </div>
           {studio.description && <p className="text-sm whitespace-pre-line text-foreground/85">{studio.description}</p>}
+          {studio.chat_enabled ? (
+            <Link
+              href={`/xabarlar?studio=${studio.id}`}
+              className="brand-gradient inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold text-white shadow-[0_10px_24px_-12px_rgb(37_99_235/0.85)] transition hover:brightness-110 sm:w-max"
+            >
+              <MessageCircleIcon className="size-4" aria-hidden /> Studiyaga yozish
+            </Link>
+          ) : (
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <BadgeCheckIcon className="size-4" aria-hidden /> Chat faqat galichkali studiyalarda mavjud — hozircha telefon orqali bog&apos;laning.
+            </p>
+          )}
         </div>
       </Card>
+
+      {studio.reels.length > 0 && (
+        <Card className="flex flex-col gap-3">
+          <h2 className="flex items-center gap-2 text-lg font-bold">
+            <ClapperboardIcon className="size-5 text-accent" aria-hidden /> Reels
+          </h2>
+          <ReelsStrip studioId={studio.id} items={studio.reels} studioName={studio.name} />
+        </Card>
+      )}
 
       {studio.images.length > 0 && (
         <Card className="flex flex-col gap-3">
           <h2 className="text-lg font-bold">Ishlaridan namunalar</h2>
-          <PhotoGrid images={studio.images} title={studio.name} />
+          {studio.is_verified ? (
+            <EngagedPhotoGrid studioId={studio.id} items={studio.images} studioName={studio.name} />
+          ) : (
+            <PhotoGrid images={studio.images} title={studio.name} />
+          )}
         </Card>
       )}
 
@@ -99,6 +125,8 @@ function BusyCalendar({ id }: { id: string }) {
   const last = new Date(cursor.y, cursor.m + 1, 0);
   const schedule = useStudioSchedule(id, isoDate(first), isoDate(last));
   const busy = schedule.data?.busy ?? {};
+  const marked = schedule.data?.days ?? {};
+  const offWeekdays = schedule.data?.off_weekdays ?? [];
   const lead = (first.getDay() + 6) % 7;
   const cells = [...Array<null>(lead).fill(null), ...Array.from({ length: last.getDate() }, (_, i) => i + 1)];
   const today = todayIso();
@@ -138,16 +166,27 @@ function BusyCalendar({ id }: { id: string }) {
             const iso = isoDate(new Date(cursor.y, cursor.m, d));
             const n = busy[iso] ?? 0;
             const past = iso < today;
+            const off = marked[iso] === "OFF" || (!marked[iso] && !n && offWeekdays.includes(i % 7)); // grid column = weekday (Monday first)
+            const state = past ? "past" : off ? "off" : marked[iso] === "BUSY" || n ? "busy" : "free";
             return (
               <span
                 key={iso}
                 className={cn(
                   "flex aspect-square flex-col items-center justify-center rounded-xl text-sm font-bold sm:aspect-[1.4]",
-                  past ? "text-muted-foreground/50" : n ? "bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+                  {
+                    past: "text-muted-foreground/50",
+                    off: "bg-slate-500/15 text-slate-600 dark:text-slate-300",
+                    busy: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+                    free: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+                  }[state],
                 )}
               >
                 {d}
-                {!past && <span className="text-[10px] font-semibold">{n ? `${n} ta band` : "bo'sh"}</span>}
+                {!past && (
+                  <span className="text-[10px] font-semibold">
+                    {state === "off" ? "dam olish" : state === "busy" ? (n ? `${n} ta band` : "band") : "bo'sh"}
+                  </span>
+                )}
               </span>
             );
           })}
@@ -155,7 +194,8 @@ function BusyCalendar({ id }: { id: string }) {
       )}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5"><i className="size-3 rounded bg-emerald-500/40" /> Bo&apos;sh</span>
-        <span className="flex items-center gap-1.5"><i className="size-3 rounded bg-amber-500/40" /> Marosim bor (band)</span>
+        <span className="flex items-center gap-1.5"><i className="size-3 rounded bg-amber-500/40" /> Band (ish kuni)</span>
+        <span className="flex items-center gap-1.5"><i className="size-3 rounded bg-slate-500/40" /> Dam olish</span>
       </div>
     </Card>
   );
