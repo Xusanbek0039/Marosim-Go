@@ -108,6 +108,7 @@ export interface PortfolioItem {
   video: string | null;
   caption: string;
   duration: number;
+  size_bytes: number;
   position: number;
   created_at: string;
   engagement: Engagement;
@@ -134,6 +135,22 @@ export function usePortfolio(studioId: string) {
   return useQuery({
     queryKey: portfolioKey(studioId),
     queryFn: () => api.get<PortfolioItem[]>(`/studios/me/${studioId}/images/`),
+  });
+}
+
+export interface PortfolioUsage {
+  used_bytes: number;
+  quota_bytes: number;
+  free_bytes: number;
+  /** Where new files go. */
+  storage: "DRIVE" | "LOCAL";
+}
+
+/** Space the studio's portfolio uses on Google Drive (1 GB by default). */
+export function usePortfolioUsage(studioId: string) {
+  return useQuery({
+    queryKey: [...portfolioKey(studioId), "storage"],
+    queryFn: () => api.get<PortfolioUsage>(`/studios/me/${studioId}/storage/`),
   });
 }
 

@@ -2,6 +2,7 @@
 
 import {
   ClapperboardIcon,
+  HardDriveIcon,
   ImageIcon,
   ImagePlusIcon,
   LockIcon,
@@ -34,6 +35,7 @@ import {
   useItemComments,
   useMyStudios,
   usePortfolio,
+  usePortfolioUsage,
   useUpdateCaption,
   useUploadPortfolio,
   useUploadReel,
@@ -106,6 +108,8 @@ function StudioPortfolio({ membership }: { membership: MyStudioMembership }) {
         </div>
       </div>
 
+      <StorageBar studioId={studio.id} />
+
       {!verified && <BadgeUpsell />}
 
       {isPending ? (
@@ -131,6 +135,30 @@ function StudioPortfolio({ membership }: { membership: MyStudioMembership }) {
         {open && <ItemDetail studioId={studio.id} item={open} canManage={can_manage} verified={verified} onClose={() => setOpen(null)} />}
       </Modal>
     </Card>
+  );
+}
+
+const mb = (bytes: number) => (bytes >= 1024 ** 3 ? `${(bytes / 1024 ** 3).toFixed(2)} GB` : `${(bytes / 1024 ** 2).toFixed(bytes < 10 * 1024 ** 2 ? 1 : 0)} MB`);
+
+function StorageBar({ studioId }: { studioId: string }) {
+  const { data } = usePortfolioUsage(studioId);
+  if (!data) return <Skeleton className="h-14 rounded-2xl" />;
+  const pct = data.quota_bytes ? Math.min(100, (data.used_bytes / data.quota_bytes) * 100) : 100;
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl bg-muted/60 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="flex items-center gap-1.5 font-semibold">
+          <HardDriveIcon className="size-4 text-cyan-600 dark:text-cyan-300" aria-hidden />
+          Portfolio joyi {data.storage === "DRIVE" ? "(Google Drive)" : ""}
+        </span>
+        <span className="tabular-nums text-muted-foreground">
+          {mb(data.used_bytes)} / {mb(data.quota_bytes)} · {mb(data.free_bytes)} bo&apos;sh
+        </span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-background" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Portfolio joyi">
+        <div className={cn("h-full rounded-full", pct > 90 ? "bg-red-500" : pct > 70 ? "bg-amber-500" : "brand-gradient")} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
   );
 }
 

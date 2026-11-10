@@ -252,6 +252,10 @@ function StudiosContent() {
                 ["Mas'ul shaxs", viewing.responsible_user.full_name],
                 ["Mas'ul telefon", formatPhone(viewing.responsible_user.phone_number)],
                 ["Mas'ul JSHSHIR", viewing.responsible_user.pinfl_masked ?? "—"],
+                [
+                  "Portfolio joyi (Drive)",
+                  `${(viewing.portfolio_used_bytes / 1024 ** 2).toFixed(1)} MB / ${(viewing.portfolio_quota_mb / 1024).toFixed(viewing.portfolio_quota_mb % 1024 ? 2 : 0)} GB`,
+                ],
                 ["Yaratilgan", formatDate(viewing.created_at)],
                 ["Yangilangan", formatDate(viewing.updated_at)],
               ].map(([label, value]) => (

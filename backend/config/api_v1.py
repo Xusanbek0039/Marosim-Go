@@ -117,6 +117,12 @@ urlpatterns = [
         studio_views.PortfolioMyCommentView.as_view(),
         name="studio-portfolio-comment",
     ),
+    path(
+        "public/studios/<uuid:studio_id>/portfolio/<uuid:item_id>/file/<str:part>/",
+        studio_views.PortfolioFileView.as_view(),
+        name="studio-portfolio-file",
+    ),
+    path("studios/me/<uuid:studio_id>/storage/", studio_views.StudioMeStorageView.as_view(), name="studio-me-storage"),
     path("me/studio-chats/", studio_views.MyStudioChatsView.as_view(), name="my-studio-chats"),
     path("me/studio-chats/<uuid:studio_id>/", studio_views.MyStudioChatView.as_view(), name="my-studio-chat"),
     # reviews / likes of public venues and studios

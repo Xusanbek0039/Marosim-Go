@@ -38,7 +38,10 @@ export function CeremonyDetail() {
                   data.access_role === "VIEWER" && <Badge tone="warning">Ko&apos;ruvchi</Badge>
                 )}
               </div>
-              <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{data.title}</h1>
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{data.folder_name}</h1>
+                {data.folder_name !== data.title && <p className="text-sm text-muted-foreground">{data.title}</p>}
+              </div>
               <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <CalendarDaysIcon className="size-4" /> {formatEventDate(data.event_date)}

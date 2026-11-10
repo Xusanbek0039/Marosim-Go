@@ -12,7 +12,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -43,6 +43,7 @@ from .serializers import (
     OffWeekdaysSerializer,
     PortfolioItemSerializer,
     PortfolioItemUpdateSerializer,
+    PortfolioUsageSerializer,
     PublicStudioSerializer,
     ReactionWriteSerializer,
     ReelUploadSerializer,
@@ -465,3 +466,91 @@ class StudioMeChatView(APIView):
         return Response(ChatMessageSerializer(message).data, status=status.HTTP_201_CREATED)
 
 
+
+
+# ------------------------------------------------------------ portfolio files
+class PortfolioFileView(APIView):
+    """Bytes of one portfolio file (Drive stream with HTTP Range, or the local file)."""
+
+    permission_classes = [AllowAny]
+    access_notes = {
+        "*": AccessNote(
+            conditions=(
+                "Ommaga: faqat ko'rinadigan ishlar (reels — galichka faol bo'lsa); studiya a'zolari va "
+                "studios.view ruxsatli xodimlar — barchasi",
+                "HTTP Range qo'llab-quvvatlanadi (video uchun)",
+            )
+        )
+    }
+
+    def perform_content_negotiation(self, request, force=False):
+        return super().perform_content_negotiation(request, force=True)
+
+    def _can_see_hidden(self, request, studio) -> bool:
+        user = request.user
+        if not user.is_authenticated:
+            return False
+        if user.role in ("SUPER_ADMIN", "ADMIN"):
+            return user.has_admin_permission("studios.view")
+        return services.active_memberships(user).filter(studio=studio).exists()
+
+    @extend_schema(
+        summary="Portfolio fayli (rasm, reels videosi yoki muqovasi)",
+        tags=["studios-public"],
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY, 206: OpenApiTypes.BINARY},
+    )
+    def get(self, request, studio_id, item_id, part):
+        from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+
+        from apps.media.viewing import _safe_range
+
+        from . import portfolio_storage
+        from .models import PortfolioKind, PortfolioStorage, Studio
+
+        studio = get_object_or_404(Studio, pk=studio_id, deleted_at__isnull=True)
+        item = StudioImage.objects.filter(studio=studio, pk=item_id).first()
+        if item is None or part not in ("main", "poster") or (part == "poster" and item.kind != PortfolioKind.VIDEO):
+            raise NotFound()
+        public = studio.is_active and services.public_items(studio).filter(pk=item.pk).exists()
+        if not public and not self._can_see_hidden(request, studio):
+            raise NotFound()
+
+        if item.storage == PortfolioStorage.LOCAL:
+            field = item.video if part == "main" and item.kind == PortfolioKind.VIDEO else item.image
+            if not field:
+                raise NotFound()
+            response = FileResponse(field.open("rb"))
+        else:
+            file_id = item.drive_poster_id if part == "poster" else item.drive_file_id
+            mime = "image/webp" if part == "poster" or item.kind == PortfolioKind.IMAGE else item.mime_type
+            stream = portfolio_storage.open_stream(file_id, _safe_range(request.headers.get("Range")))
+            if stream.status == 416:
+                stream.close()
+                return HttpResponse(status=416)
+
+            def body():
+                try:
+                    yield from stream.chunks
+                finally:
+                    stream.close()
+
+            response = StreamingHttpResponse(body(), status=stream.status, content_type=mime or "application/octet-stream")
+            for key, value in stream.headers.items():
+                response[key] = value
+            response["Accept-Ranges"] = "bytes"
+        response["Cache-Control"] = "private, max-age=3600"
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Disposition"] = "inline"
+        return response
+
+
+class StudioMeStorageView(APIView):
+    permission_classes = [IsStudioMember]
+    access_notes = {"*": AccessNote(ownership=OWN_STUDIO)}
+
+    @extend_schema(summary="Portfolio joyi (ishlatilgan / ajratilgan)", tags=["studio"], responses=PortfolioUsageSerializer)
+    def get(self, request, studio_id):
+        from . import portfolio_storage
+
+        membership = _membership(request, studio_id)
+        return Response(PortfolioUsageSerializer(portfolio_storage.usage(membership.studio)).data)

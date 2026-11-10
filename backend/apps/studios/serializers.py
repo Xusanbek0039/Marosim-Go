@@ -1,3 +1,4 @@
+from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
@@ -10,14 +11,45 @@ from apps.reviews.services import empty_stats, stats_map
 from apps.subscriptions.badges import PaidBadgeSerializer
 
 from . import services
-from .models import PortfolioKind, Studio, StudioDayStatus, StudioImage
+from .models import PortfolioKind, PortfolioStorage, Studio, StudioDayStatus, StudioImage
+
+
+def _absolute(context, url: str) -> str:
+    request = context.get("request")
+    return request.build_absolute_uri(url) if request is not None else url
 
 
 class StudioImageSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField(help_text="Rasm yoki reels muqovasi")
+    video = serializers.SerializerMethodField()
+
     class Meta:
         model = StudioImage
-        fields = ["id", "kind", "image", "video", "caption", "duration", "position", "created_at"]
+        fields = ["id", "kind", "image", "video", "caption", "duration", "size_bytes", "position", "created_at"]
         read_only_fields = fields
+
+    def _file_url(self, item, part: str) -> str:
+        url = reverse("studio-portfolio-file", kwargs={"studio_id": item.studio_id, "item_id": item.pk, "part": part})
+        return _absolute(self.context, url)
+
+    def get_image(self, item) -> str | None:
+        if item.storage == PortfolioStorage.DRIVE:
+            return self._file_url(item, "poster" if item.kind == PortfolioKind.VIDEO else "main")
+        return _absolute(self.context, item.image.url) if item.image else None
+
+    def get_video(self, item) -> str | None:
+        if item.kind != PortfolioKind.VIDEO:
+            return None
+        if item.storage == PortfolioStorage.DRIVE:
+            return self._file_url(item, "main")
+        return _absolute(self.context, item.video.url) if item.video else None
+
+
+class PortfolioUsageSerializer(serializers.Serializer):
+    used_bytes = serializers.IntegerField()
+    quota_bytes = serializers.IntegerField()
+    free_bytes = serializers.IntegerField()
+    storage = serializers.ChoiceField(choices=PortfolioStorage.choices, help_text="Yangi fayllar qayerga yoziladi")
 
 
 class StudioImageUploadSerializer(serializers.Serializer):
@@ -101,6 +133,10 @@ class StudioSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     profile_picture = serializers.ImageField(required=False, allow_null=True)
     images = StudioImageSerializer(many=True, read_only=True)
     phone_number = PhoneNumberField(required=False, allow_blank=True)
+    portfolio_quota_mb = serializers.IntegerField(
+        min_value=0, max_value=1024 * 1024, required=False, help_text="Portfolio uchun joy (MB), standart 1024"
+    )
+    portfolio_used_bytes = serializers.SerializerMethodField()
 
     class Meta:
         model = Studio
@@ -113,6 +149,8 @@ class StudioSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
             "address",
             "phone_number",
             "images",
+            "portfolio_quota_mb",
+            "portfolio_used_bytes",
             "responsible_user",
             "responsible_user_id",
             "is_active",
@@ -141,6 +179,9 @@ class StudioSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
 
     def validate_profile_picture(self, value):
         return process_image(value) if value else value
+
+    def get_portfolio_used_bytes(self, studio) -> int:
+        return sum(item.size_bytes for item in studio.images.all())
 
 
 # ------------------------------------------------------------------ public

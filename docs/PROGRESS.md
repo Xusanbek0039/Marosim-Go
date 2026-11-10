@@ -1,5 +1,13 @@
 # Progress
 
+## 2026-11-10 — Marosim papkalari, har bir profil uchun imkoniyatlar, studiyaga 1 GB Drive joyi ✅
+
+* **Mening marosimlarim — papkalar** (`ceremonies/0006`, `CeremonyFolder`): foydalanuvchi ilovasida har bir marosim papka; ikki guruh — "Mening to'yim" (OWNER) va "Menga ruxsat berilganlar" (VIEWER). Papka nomi shaxsiy: `PATCH /me/ceremonies/{id}/folder/` (bo'sh nom — marosim nomiga qaytadi), studiya va boshqa a'zolar asl nomni ko'radi. `MyCeremony.folder_name` qo'shildi.
+* **Admin / Super Admin:** profil oynasida (Foydalanuvchilar) "Marosim papkalari" — `GET /users/{id}/folders/` (`users.view`), `PATCH /users/{id}/folders/{ceremony}/` (`users.update`).
+* **Har bir profil uchun imkoniyatlar** (`accounts/0005`, `User.disabled_features`): "Platforma boshqaruvi"dagi rol kalitlari endi har bir hisob uchun ham — `GET|PATCH /users/{id}/features/` (`platform.view` / `platform.manage`). Server har so'rovda rol + hisob kalitini tekshiradi (403). Profil oynasida "Imkoniyatlar (shu profil uchun)" bo'limi.
+* **Studiya portfoliosi — 1 GB Drive** (`studios/0005`): `Studio.portfolio_quota_mb` (standart 1024, admin studiya formasida GB bilan o'zgartiradi), `StudioImage.storage / drive_file_id / drive_poster_id / size_bytes`. Yangi fayllar Drive'ga: `MarosimGo / Studio_<nom> / Portfolio` (marosimlar bilan bir studiya papkasida); Drive ulanmagan bo'lsa — server diski (`STUDIO_PORTFOLIO_STORAGE` = auto / drive / local). Rasm, reels va muqova birga hisoblanadi; joy tugasa 400. Fayllar `GET /public/studios/{id}/portfolio/{item}/file/{main|poster}/` orqali (Range bilan) beriladi; o'chirilganda Drive savatiga. Studiya panelida joy ko'rsatkichi, `GET /studios/me/{id}/storage/`.
+* **Testlar:** `tests/test_account_folders_features.py` (5), kontrakt 221 operatsiya, to'liq to'plam yashil. Brauzerda bosib ko'rilmadi; haqiqiy Drive'ga yuklash faqat soxta gateway bilan tekshirildi.
+
 ## 2026-11-10 — Studiya portfoliosi: Reels, like / dislike / izoh, chat (galichka bilan), studiya grafigi ✅
 
 Foydalanuvchi so'rovi: portfolio'ga videolar (Reels formatida), like / dislike / izoh va studiya bilan yozishish — faqat **galichka** (faol pulli obuna) bo'lganda; galichkasiz studiyaga uni olishga undov. Studiyada ham to'yxonalardek ish / band / dam olish kunlari grafigi.

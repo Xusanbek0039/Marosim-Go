@@ -1133,7 +1133,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_list",
-      "schema_fingerprint": "4d3927e6bf5eb361"
+      "schema_fingerprint": "7172917d1a695893"
     },
     "GET /api/v1/me/ceremonies/{ceremony_id}/media/": {
       "allowed_roles": [
@@ -1212,7 +1212,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_retrieve",
-      "schema_fingerprint": "de3f00e1ee10a617"
+      "schema_fingerprint": "5642cfd3fc5224dd"
     },
     "GET /api/v1/me/ceremonies/{id}/invitations/": {
       "allowed_roles": [
@@ -1471,7 +1471,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_list",
-      "schema_fingerprint": "20388e52bcc57428"
+      "schema_fingerprint": "b84ab99f54b4a78a"
     },
     "GET /api/v1/public/studios/{id}/": {
       "allowed_roles": [
@@ -1487,7 +1487,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_retrieve",
-      "schema_fingerprint": "7e96fa1f7baf00bc"
+      "schema_fingerprint": "cbcb04973c416a61"
     },
     "GET /api/v1/public/studios/{id}/schedule/": {
       "allowed_roles": [
@@ -1521,6 +1521,23 @@
       "deprecated": false,
       "operation_id": "public_studios_portfolio_comments_list",
       "schema_fingerprint": "e35bef9bd04986be"
+    },
+    "GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/file/{part}/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Ommaga: faqat ko'rinadigan ishlar (reels — galichka faol bo'lsa); studiya a'zolari va studios.view ruxsatli xodimlar — barchasi",
+        "HTTP Range qo'llab-quvvatlanadi (video uchun)"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_studios_portfolio_file_retrieve",
+      "schema_fingerprint": "ca864b01aaa3f495"
     },
     "GET /api/v1/public/studios/{target_id}/reviews/": {
       "allowed_roles": [
@@ -1558,7 +1575,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_list",
-      "schema_fingerprint": "71806ffac6dc99cf"
+      "schema_fingerprint": "407b4dd6ac97e985"
     },
     "GET /api/v1/studios/me/": {
       "allowed_roles": [
@@ -1628,7 +1645,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_images_list",
-      "schema_fingerprint": "b28a27271d78c414"
+      "schema_fingerprint": "de4eb153321f4e48"
     },
     "GET /api/v1/studios/me/{studio_id}/images/{image_id}/comments/": {
       "allowed_roles": [
@@ -1658,6 +1675,20 @@
       "operation_id": "studios_me_schedule_retrieve",
       "schema_fingerprint": "87bb77691c39731d"
     },
+    "GET /api/v1/studios/me/{studio_id}/storage/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_storage_retrieve",
+      "schema_fingerprint": "9e03270657c3d59d"
+    },
     "GET /api/v1/studios/{id}/": {
       "allowed_roles": [
         "ADMIN",
@@ -1677,7 +1708,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_retrieve",
-      "schema_fingerprint": "727b2882a6518cff"
+      "schema_fingerprint": "bdd59bd05aa15bd4"
     },
     "GET /api/v1/studios/{id}/calendar/": {
       "allowed_roles": [
@@ -1806,6 +1837,50 @@
       "deprecated": false,
       "operation_id": "users_retrieve",
       "schema_fingerprint": "cd4b35fb8ddb81e3"
+    },
+    "GET /api/v1/users/{id}/features/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "platform.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "platform.view"
+        ]
+      },
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "users_features_list",
+      "schema_fingerprint": "e534a038a9e28b89"
+    },
+    "GET /api/v1/users/{id}/folders/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "users.view"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "users.view"
+        ]
+      },
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "conditions": [
+        "Faqat USER: egasi yoki ko'ruvchisi bo'lgan marosimlar"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "users_folders_list",
+      "schema_fingerprint": "fb797446588c0460"
     },
     "GET /api/v1/users/{id}/pinfl/": {
       "allowed_roles": [
@@ -2294,6 +2369,20 @@
       "operation_id": "ceremonies_partial_update",
       "schema_fingerprint": "b5c1499a623d97eb"
     },
+    "PATCH /api/v1/me/ceremonies/{id}/folder/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_ceremonies_folder_partial_update",
+      "schema_fingerprint": "c3bcc1656197901e"
+    },
     "PATCH /api/v1/studios/me/{studio_id}/images/{image_id}/": {
       "allowed_roles": [
         "STUDIO"
@@ -2306,7 +2395,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_images_partial_update",
-      "schema_fingerprint": "25cb51c4be8ce486"
+      "schema_fingerprint": "de7b4389e4b84c29"
     },
     "PATCH /api/v1/studios/me/{studio_id}/schedule/": {
       "allowed_roles": [
@@ -2341,7 +2430,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_partial_update",
-      "schema_fingerprint": "57373976fdbf10ee"
+      "schema_fingerprint": "bed1cdc2f80d3076"
     },
     "PATCH /api/v1/users/{id}/": {
       "allowed_roles": [
@@ -2363,6 +2452,52 @@
       "deprecated": false,
       "operation_id": "users_partial_update",
       "schema_fingerprint": "633ec8c608ddbbcb"
+    },
+    "PATCH /api/v1/users/{id}/features/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "platform.manage"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "platform.manage"
+        ]
+      },
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "conditions": [
+        "Faqat shu hisob roliga tegishli imkoniyat kodlari"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "users_features_partial_update",
+      "schema_fingerprint": "b9b18fd174d8b83d"
+    },
+    "PATCH /api/v1/users/{id}/folders/{ceremony_id}/": {
+      "allowed_roles": [
+        "ADMIN",
+        "SUPER_ADMIN"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [
+        "users.update"
+      ],
+      "role_requirements": {
+        "ADMIN": [
+          "users.update"
+        ]
+      },
+      "ownership_scope": "Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404).",
+      "conditions": [
+        "Faqat shu hisob ochishi mumkin bo'lgan marosim; boshqasi 404"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "users_folders_partial_update",
+      "schema_fingerprint": "096925909336ffa8"
     },
     "PATCH /api/v1/venue-owner/venues/{id}/": {
       "allowed_roles": [
@@ -3148,7 +3283,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_ceremonies_leave_create",
-      "schema_fingerprint": "31188fc30a041b55"
+      "schema_fingerprint": "5d1b44375e543980"
     },
     "POST /api/v1/me/ceremonies/{id}/owner-requests/{request_id}/approve/": {
       "allowed_roles": [
@@ -3217,7 +3352,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "me_invitations_accept_create",
-      "schema_fingerprint": "920ae66bd0a27fd0"
+      "schema_fingerprint": "b4d81aac14791b8c"
     },
     "POST /api/v1/me/invitations/{id}/decline/": {
       "allowed_roles": [
@@ -3384,7 +3519,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_create",
-      "schema_fingerprint": "2178612770184caa"
+      "schema_fingerprint": "165a2f757d03f047"
     },
     "POST /api/v1/studios/me/{studio_id}/chats/{conversation_id}/": {
       "allowed_roles": [
@@ -3416,7 +3551,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_images_create",
-      "schema_fingerprint": "035c3c672f2dbb01"
+      "schema_fingerprint": "7ce6b5cdad602de9"
     },
     "POST /api/v1/studios/me/{studio_id}/reels/": {
       "allowed_roles": [
@@ -3433,7 +3568,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_reels_create",
-      "schema_fingerprint": "1c9eff0c68c29a9d"
+      "schema_fingerprint": "478b624fd81bc531"
     },
     "POST /api/v1/studios/{id}/images/": {
       "allowed_roles": [
@@ -3456,7 +3591,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_images_create",
-      "schema_fingerprint": "a422fb4dde9aad99"
+      "schema_fingerprint": "1b3b597803ca791b"
     },
     "POST /api/v1/support/tickets/": {
       "allowed_roles": [

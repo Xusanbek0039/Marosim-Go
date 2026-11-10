@@ -26,6 +26,7 @@ const schema = z.object({
   description: z.string().trim().max(2000),
   responsible_user_id: z.string().min(1, "Mas'ul shaxsni tanlang"),
   is_active: z.boolean(),
+  portfolio_quota_gb: z.number({ message: "Raqam kiriting" }).min(0, "Manfiy bo'lmaydi").max(1000, "Juda katta"),
   profile_picture: z.custom<File | null | undefined>(),
 });
 type Values = z.infer<typeof schema>;
@@ -57,7 +58,7 @@ export function StudioFormDialog({
 
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", address: "", phone_number: "", description: "", responsible_user_id: "", is_active: true, profile_picture: undefined },
+    defaultValues: { name: "", address: "", phone_number: "", description: "", responsible_user_id: "", is_active: true, portfolio_quota_gb: 1, profile_picture: undefined },
   });
   const { errors } = form.formState;
 
@@ -72,9 +73,10 @@ export function StudioFormDialog({
             description: studio.description ?? "",
             responsible_user_id: studio.responsible_user.id,
             is_active: studio.is_active,
+            portfolio_quota_gb: Math.round(((studio.portfolio_quota_mb ?? 1024) / 1024) * 100) / 100,
             profile_picture: undefined,
           }
-        : { name: "", address: "", phone_number: "", description: "", responsible_user_id: "", is_active: true, profile_picture: undefined },
+        : { name: "", address: "", phone_number: "", description: "", responsible_user_id: "", is_active: true, portfolio_quota_gb: 1, profile_picture: undefined },
     );
   }, [open, studio, form]);
 
@@ -87,6 +89,7 @@ export function StudioFormDialog({
         description: values.description,
         responsible_user_id: values.responsible_user_id,
         is_active: values.is_active,
+        portfolio_quota_mb: Math.round(values.portfolio_quota_gb * 1024),
       };
       if (values.profile_picture !== undefined) payload.profile_picture = values.profile_picture;
       const done = () => {
@@ -140,6 +143,9 @@ export function StudioFormDialog({
         </Field>
         <Field label="Telefon (mijozlar uchun)" htmlFor="studio-phone" error={errors.phone_number?.message}>
           <Input id="studio-phone" inputMode="tel" placeholder="+998 90 123 45 67" aria-invalid={Boolean(errors.phone_number)} {...form.register("phone_number")} />
+        </Field>
+        <Field label="Portfolio joyi, GB (Google Drive, standart 1 GB)" htmlFor="studio-quota" error={errors.portfolio_quota_gb?.message}>
+          <Input id="studio-quota" type="number" step="0.5" min={0} aria-invalid={Boolean(errors.portfolio_quota_gb)} {...form.register("portfolio_quota_gb", { valueAsNumber: true })} />
         </Field>
         <Field label="Tavsif (ommaviy profilda ko'rinadi)" htmlFor="studio-description" error={errors.description?.message}>
           <textarea

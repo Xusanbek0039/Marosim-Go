@@ -408,6 +408,11 @@ OWNERSHIP_TESTS = {
         ["studios_me_schedule_retrieve", "studios_me_schedule_partial_update", "studios_me_schedule_days_update"],
         "ownership_studio_schedule_is_own",
     ),
+    # folders, per-account capabilities, studio space — tests/test_account_folders_features.py
+    "me_ceremonies_folder_partial_update": "ownership_folders_are_personal",
+    **dict.fromkeys(["users_folders_list", "users_folders_partial_update"], "ownership_admin_user_folders"),
+    **dict.fromkeys(["users_features_list", "users_features_partial_update"], "ownership_account_features"),
+    "studios_me_storage_retrieve": "ownership_studio_storage_is_own",
     **dict.fromkeys(
         ["studios_calendar_list", "studios_images_create", "studios_images_destroy"],
         "ownership_panel_studio_calendar_portfolio",
@@ -509,6 +514,13 @@ ownership_studio_reels_are_own = _engagement_tests.test_uploader_cannot_add_reel
 ownership_portfolio_engagement_is_own = _engagement_tests.test_reactions_and_comments
 ownership_studio_chat_is_private = _engagement_tests.test_chat_needs_galichka_and_is_private
 ownership_studio_schedule_is_own = _engagement_tests.test_studio_marks_busy_and_off_days
+
+from . import test_account_folders_features as _folder_tests  # noqa: E402
+
+ownership_folders_are_personal = _folder_tests.test_user_folders_are_personal
+ownership_admin_user_folders = _folder_tests.test_admin_manages_user_folders
+ownership_account_features = _folder_tests.test_capabilities_per_account
+ownership_studio_storage_is_own = _folder_tests.test_portfolio_quota
 
 from . import test_subscriptions as _subscription_tests  # noqa: E402
 

@@ -15,6 +15,7 @@ import { ApiError } from "@/lib/api/client";
 import type { Admin, ManagedUser } from "@/lib/api/types";
 import { formatDate, formatDateTime, formatPhone } from "@/lib/format";
 
+import { AccountFeatures, AccountFolders } from "./account-panels";
 import type { PersonKind } from "./person-form-dialog";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -199,6 +200,13 @@ export function PersonDrawer({
             ))}
           </div>
         </div>
+      )}
+
+      {kind !== "admin" && (
+        <>
+          <AccountFeatures userId={person.id} />
+          {person.role === "USER" && <AccountFolders userId={person.id} />}
+        </>
       )}
 
       {canReveal && (

@@ -1195,6 +1195,86 @@
         "POST /api/v1/studios/me/{studio_id}/images/",
         "POST /api/v1/studios/{id}/images/"
       ]
+    },
+    {
+      "revision": 25,
+      "date": "2026-11-10",
+      "note": "",
+      "added": [
+        "GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/file/{part}/",
+        "GET /api/v1/studios/me/{studio_id}/storage/",
+        "GET /api/v1/users/{id}/features/",
+        "GET /api/v1/users/{id}/folders/",
+        "PATCH /api/v1/me/ceremonies/{id}/folder/",
+        "PATCH /api/v1/users/{id}/features/",
+        "PATCH /api/v1/users/{id}/folders/{ceremony_id}/"
+      ],
+      "removed": [],
+      "changed": {
+        "GET /api/v1/me/ceremonies/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/me/ceremonies/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/public/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/public/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/me/{studio_id}/images/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/studios/me/{studio_id}/images/{image_id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/ceremonies/{id}/leave/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/me/invitations/{id}/accept/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/me/{studio_id}/images/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/me/{studio_id}/reels/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/{id}/images/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/me/ceremonies/",
+        "GET /api/v1/me/ceremonies/{id}/",
+        "GET /api/v1/public/studios/",
+        "GET /api/v1/public/studios/{id}/",
+        "GET /api/v1/studios/",
+        "GET /api/v1/studios/me/{studio_id}/images/",
+        "GET /api/v1/studios/{id}/",
+        "PATCH /api/v1/studios/me/{studio_id}/images/{image_id}/",
+        "PATCH /api/v1/studios/{id}/",
+        "POST /api/v1/me/ceremonies/{id}/leave/",
+        "POST /api/v1/me/invitations/{id}/accept/",
+        "POST /api/v1/studios/",
+        "POST /api/v1/studios/me/{studio_id}/images/",
+        "POST /api/v1/studios/me/{studio_id}/reels/",
+        "POST /api/v1/studios/{id}/images/"
+      ]
     }
   ]
 }

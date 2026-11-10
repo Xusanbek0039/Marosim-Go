@@ -6,7 +6,7 @@ export const APP = {
   role: "USER" as Role,
   home: "/",
   nav: [
-    { href: "/", label: "Marosimlarim" },
+    { href: "/", label: "Mening marosimlarim" },
     { href: "/toyxonalar", label: "To'yxonalar" },
     { href: "/studiyalar", label: "Studiyalar" },
     { href: "/xabarlar", label: "Xabarlar" },

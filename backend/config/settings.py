@@ -253,6 +253,8 @@ IMAGE_UPLOAD = {
 }
 #: Studio portfolio reels (vertical videos); the panel proxies must allow the same body size.
 STUDIO_REEL_MAX_MB = env.int("STUDIO_REEL_MAX_MB", default=100)
+#: Where new portfolio files go: "auto" (Drive when connected), "drive" or "local".
+STUDIO_PORTFOLIO_STORAGE = env.str("STUDIO_PORTFOLIO_STORAGE", default="auto")
 
 # ------------------------------------------------------------------- i18n / time
 LANGUAGE_CODE = "uz"
@@ -302,6 +304,7 @@ SPECTACULAR_SETTINGS = {
         "PortfolioKindEnum": "apps.studios.models.PortfolioKind",
         "PortfolioReactionEnum": ["like", "dislike"],
         "StudioDayStatusEnum": "apps.studios.models.StudioDayStatus.Status",
+        "PortfolioStorageEnum": "apps.studios.models.PortfolioStorage",
         "SupportTicketStatusEnum": "apps.support.models.TicketStatus",
         "SupportAudienceEnum": "apps.support.models.TicketAudience",
         "PartnerApplicationStatusEnum": "apps.support.models.ApplicationStatus",

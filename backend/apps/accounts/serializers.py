@@ -402,3 +402,15 @@ class TokenPairSerializer(serializers.Serializer):
 
 class PinflRevealSerializer(serializers.Serializer):
     pinfl = serializers.CharField()
+
+
+class AccountFeatureSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    role = serializers.CharField()
+    label = serializers.CharField()
+    enabled = serializers.BooleanField(help_text="Shu hisob uchun yoqilganmi")
+    platform_enabled = serializers.BooleanField(help_text="Platforma boshqaruvida (butun rol uchun) yoqilganmi")
+
+
+class AccountFeaturesWriteSerializer(serializers.Serializer):
+    disabled_features = serializers.ListField(child=serializers.CharField(max_length=64), max_length=50)

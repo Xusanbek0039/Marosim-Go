@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -8,11 +9,12 @@ from rest_framework.exceptions import APIException, ValidationError
 from apps.audit.services import AuditAction, record
 from apps.core.uploads import process_image
 
-from . import reels
+from . import portfolio_storage, reels
 from .models import (
     MAX_PORTFOLIO_IMAGES,
     MAX_PORTFOLIO_REELS,
     PortfolioKind,
+    PortfolioStorage,
     Studio,
     StudioDayStatus,
     StudioImage,
@@ -82,35 +84,88 @@ def _next_position(studio: Studio) -> int:
     return 0 if last is None else last + 1
 
 
-@transaction.atomic
+def _limits(studio: Studio, kind: str, size: int, field: str) -> None:
+    if kind == PortfolioKind.IMAGE:
+        if studio.images.filter(kind=PortfolioKind.IMAGE).count() >= MAX_PORTFOLIO_IMAGES:
+            raise ValidationError({field: [f"Ko'pi bilan {MAX_PORTFOLIO_IMAGES} ta rasm yuklash mumkin."]})
+    elif studio.images.filter(kind=PortfolioKind.VIDEO).count() >= MAX_PORTFOLIO_REELS:
+        raise ValidationError({field: [f"Ko'pi bilan {MAX_PORTFOLIO_REELS} ta video yuklash mumkin."]})
+    portfolio_storage.ensure_room(studio, size, field)
+
+
+def _store(request, studio: Studio, *, kind: str, field: str, files: list, **fields) -> StudioImage:
+    """Check limits, put the files on Drive (outside any DB lock — videos are big), then save the row.
+
+    ``files``: ``[(content, mime)]`` — the main file first, a reel's poster second. Limits are checked
+    again under the studio row lock; if they no longer fit, the uploaded Drive files are trashed.
+    """
+    size = sum(content.size for content, _ in files)
+    _limits(studio, kind, size, field)
+    storage = portfolio_storage.target()
+    drive_ids = portfolio_storage.upload_to_drive(studio, files) if storage == PortfolioStorage.DRIVE else []
+    try:
+        with transaction.atomic():
+            locked = Studio.objects.select_for_update().get(pk=studio.pk)
+            if kind == PortfolioKind.VIDEO:
+                require_badge(locked)
+            _limits(locked, kind, size, field)
+            row = StudioImage(
+                studio=locked,
+                kind=kind,
+                storage=storage,
+                mime_type=files[0][1],
+                size_bytes=size,
+                position=_next_position(locked),
+                **fields,
+            )
+            if storage == PortfolioStorage.DRIVE:
+                row.drive_file_id = drive_ids[0]
+                row.drive_poster_id = drive_ids[1] if len(drive_ids) > 1 else ""
+            elif kind == PortfolioKind.IMAGE:
+                row.image = files[0][0]
+            else:
+                row.video, row.image = files[0][0], files[1][0]
+            row.save()
+            record(
+                request,
+                AuditAction.CREATE,
+                row,
+                changes={"studio": str(locked.pk), "kind": kind, "storage": storage, "size_bytes": size},
+            )
+            return row
+    except Exception:
+        portfolio_storage.trash(drive_ids)
+        raise
+
+
 def add_portfolio_image(request, studio: Studio, upload) -> StudioImage:
-    """Re-encode (WEBP, no EXIF) and append one portfolio image; the studio row is locked while counting."""
-    studio = Studio.objects.select_for_update().get(pk=studio.pk)
-    if studio.images.filter(kind=PortfolioKind.IMAGE).count() >= MAX_PORTFOLIO_IMAGES:
-        raise ValidationError({"image": [f"Ko'pi bilan {MAX_PORTFOLIO_IMAGES} ta rasm yuklash mumkin."]})
+    """Re-encode (WEBP, no EXIF) and append one portfolio image."""
     try:
         content = process_image(upload, max_side=PORTFOLIO_MAX_SIDE)
     except ValidationError as exc:
         detail = exc.detail if isinstance(exc.detail, list) else [exc.detail]
         raise ValidationError({"image": detail}) from None
-    image = StudioImage.objects.create(studio=studio, image=content, position=_next_position(studio))
-    record(request, AuditAction.CREATE, image, changes={"studio": str(studio.pk), "position": image.position})
-    return image
+    return _store(request, studio, kind=PortfolioKind.IMAGE, field="image", files=[(content, "image/webp")])
 
 
-@transaction.atomic
+VIDEO_MIME = {".mp4": "video/mp4", ".m4v": "video/mp4", ".mov": "video/quicktime", ".webm": "video/webm"}
+
+
 def add_portfolio_reel(request, studio: Studio, video, poster=None, caption: str = "") -> StudioImage:
-    """Append one vertical video. Needs the studio's galichka (checked under the studio row lock)."""
-    studio = Studio.objects.select_for_update().get(pk=studio.pk)
+    """Append one vertical video. Needs the studio's galichka."""
     require_badge(studio)
-    if studio.images.filter(kind=PortfolioKind.VIDEO).count() >= MAX_PORTFOLIO_REELS:
-        raise ValidationError({"video": [f"Ko'pi bilan {MAX_PORTFOLIO_REELS} ta video yuklash mumkin."]})
+    _limits(studio, PortfolioKind.VIDEO, video.size, "video")
     data = reels.prepare(video, poster)
-    item = StudioImage.objects.create(
-        studio=studio, kind=PortfolioKind.VIDEO, caption=caption.strip(), position=_next_position(studio), **data
+    mime = VIDEO_MIME.get(Path(data["video"].name).suffix.lower(), "video/mp4")
+    return _store(
+        request,
+        studio,
+        kind=PortfolioKind.VIDEO,
+        field="video",
+        files=[(data["video"], mime), (data["image"], "image/webp")],
+        caption=caption.strip(),
+        duration=data["duration"],
     )
-    record(request, AuditAction.CREATE, item, changes={"studio": str(studio.pk), "kind": item.kind})
-    return item
 
 
 @transaction.atomic
@@ -125,11 +180,13 @@ def update_portfolio_item(request, item: StudioImage, caption: str) -> StudioIma
 @transaction.atomic
 def delete_portfolio_image(request, image: StudioImage) -> None:
     image_id, studio_id, files = image.pk, image.studio_id, [image.image, image.video]
+    drive_ids = [image.drive_file_id, image.drive_poster_id]
     image.delete()
     record(
         request, AuditAction.DELETE, image, changes={"studio": str(studio_id)}, target_label=f"StudioImage {image_id}"
     )
     transaction.on_commit(lambda: [f.delete(save=False) for f in files if f])
+    transaction.on_commit(lambda: portfolio_storage.trash(drive_ids))
 
 
 # --------------------------------------------------- reactions and comments

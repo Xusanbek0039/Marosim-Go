@@ -108,6 +108,7 @@
 | GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/` | Faylni ko'rish (oqim, Range) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/` | Kichik rasm (preview) | USER | — | JWT | Faqat so'rovchi ACCEPTED egasi yoki muddati tugamagan ko'ruvchisi bo'lgan marosimning READY fayllari; boshqasi 404. Huquq har so'rovda qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{id}/` | Menga biriktirilgan marosim | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
+| PATCH | `/api/v1/me/ceremonies/{id}/folder/` | Papka nomini o'zgartirish (faqat o'zim uchun) | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
 | GET | `/api/v1/me/ceremonies/{id}/invitations/` | Marosim takliflari tarixi | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
 | POST | `/api/v1/me/ceremonies/{id}/invitations/` | VIEWER yoki OWNER taklifi yuborish (telefon / JSHSHIR) | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
 | POST | `/api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/` | Taklifni qayta yuborish (muddat yangilanadi) | USER | — | JWT | Faqat so'rovchi ACCEPTED ega (CEREMONY_OWNER) yoki ACCEPTED ko'ruvchi (CEREMONY_VIEWER) bo'lgan, DRAFT bo'lmagan marosimlar; boshqasi 404. Huquq har so'rovda DB'dan qayta tekshiriladi. | OK |
@@ -145,6 +146,7 @@
 | GET | `/api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/` | Portfolio ishining izohlari | PUBLIC | — | NONE | — | OK |
 | POST | `/api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/` | Izoh yozish | USER | — | JWT | — | OK |
 | DELETE | `/api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/{comment_id}/` | O'z izohimni o'chirish | USER | — | JWT | Faqat so'rovchining o'z izohi; boshqasi 404. | OK |
+| GET | `/api/v1/public/studios/{studio_id}/portfolio/{item_id}/file/{part}/` | Portfolio fayli (rasm, reels videosi yoki muqovasi) | PUBLIC | — | NONE | — | OK |
 | PUT | `/api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/` | Portfolio ishiga like / dislike | USER | — | JWT | Faqat so'rovchining o'z bahosi. | OK |
 | DELETE | `/api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/` | Like / dislike'ni olib tashlash | USER | — | JWT | Faqat so'rovchining o'z bahosi. | OK |
 | POST | `/api/v1/public/studios/{target_id}/like/` | Like bosish | USER | — | JWT | Faqat so'rovchining o'z sharhi / like'i; boshqalarniki o'zgarmaydi. | OK |
@@ -169,6 +171,7 @@
 | GET | `/api/v1/studios/me/{studio_id}/schedule/` | Studiya grafigi (marosimlar, band va dam olish kunlari) | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
 | PATCH | `/api/v1/studios/me/{studio_id}/schedule/` | Haftalik dam olish kunlari | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
 | PUT | `/api/v1/studios/me/{studio_id}/schedule/days/{day}/` | Kunni band / dam olish deb belgilash (status=null — tozalash) | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
+| GET | `/api/v1/studios/me/{studio_id}/storage/` | Portfolio joyi (ishlatilgan / ajratilgan) | STUDIO | — | JWT | Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404. | OK |
 | GET | `/api/v1/studios/{id}/` | Studiya ma'lumotlari | ADMIN, SUPER_ADMIN | `studios.view` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | PATCH | `/api/v1/studios/{id}/` | Studiyani tahrirlash | ADMIN, SUPER_ADMIN | `studios.update` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
 | DELETE | `/api/v1/studios/{id}/` | Studiyani o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `studios.delete` | JWT | Barcha o'chirilmagan studiyalar (get_queryset); STUDIO roli kira olmaydi. | OK |
@@ -187,6 +190,10 @@
 | GET | `/api/v1/users/{id}/` | Mijoz ma'lumotlari | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | PATCH | `/api/v1/users/{id}/` | Mijozni tahrirlash | ADMIN, SUPER_ADMIN | `users.update` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | DELETE | `/api/v1/users/{id}/` | Mijozni o'chirish (soft delete) | ADMIN, SUPER_ADMIN | `users.delete` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| GET | `/api/v1/users/{id}/features/` | Hisob imkoniyatlari (shu profil uchun) | ADMIN, SUPER_ADMIN | `platform.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| PATCH | `/api/v1/users/{id}/features/` | Hisob imkoniyatlarini yoqish / o'chirish | ADMIN, SUPER_ADMIN | `platform.manage` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| GET | `/api/v1/users/{id}/folders/` | Foydalanuvchining marosim papkalari | ADMIN, SUPER_ADMIN | `users.view` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
+| PATCH | `/api/v1/users/{id}/folders/{ceremony_id}/` | Foydalanuvchi papkasi nomini o'zgartirish | ADMIN, SUPER_ADMIN | `users.update` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | GET | `/api/v1/users/{id}/pinfl/` | To'liq JSHSHIR (audit qilinadi) | ADMIN, SUPER_ADMIN | `users.view_pinfl` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | POST | `/api/v1/users/{id}/verify-phone/` | Telefon raqamini qo'lda tasdiqlash | ADMIN, SUPER_ADMIN | `users.update` | JWT | Faqat USER, STUDIO va VENUE_OWNER rolidagi, o'chirilmagan hisoblar (get_queryset). ADMIN / SUPER_ADMIN hisoblari bu yerda ko'rinmaydi (404). | OK |
 | GET | `/api/v1/venue-owner/venues/` | Mening to'yxonalarim | VENUE_OWNER | — | JWT | Faqat so'rovchi faol a'zo (VenueMembership) bo'lgan, o'chirilmagan to'yxonalar; boshqalari 404. | OK |
@@ -224,7 +231,7 @@
 
 ## Rollar bo'yicha
 
-### PUBLIC (21)
+### PUBLIC (22)
 
 * `GET /api/v1/admin/storage/google/callback/` — Google OAuth callback (brauzer redirect)
 * `GET /api/v1/auth/csrf/` — CSRF cookie olish (web panel)
@@ -240,6 +247,7 @@
 * `GET /api/v1/public/studios/{id}/` — Studiya (ommaviy profil, portfolio va reels)
 * `GET /api/v1/public/studios/{id}/schedule/` — Studiya grafigi: band, dam olish va bo'sh kunlar
 * `GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/` — Portfolio ishining izohlari
+* `GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/file/{part}/` — Portfolio fayli (rasm, reels videosi yoki muqovasi)
 * `GET /api/v1/public/studios/{target_id}/reviews/` — Sharhlar, reyting va like soni
 * `GET /api/v1/subscriptions/plans/` — Obuna tariflari
 * `GET /api/v1/venues/` — To'yxonalar katalogi (reyting va like bo'yicha)
@@ -248,7 +256,7 @@
 * `GET /api/v1/venues/{id}/availability/` — To'yxona bo'sh smenalari (kalendar)
 * `GET /api/v1/venues/{target_id}/reviews/` — Sharhlar, reyting va like soni
 
-### USER (52)
+### USER (53)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -258,6 +266,7 @@
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/stream/` — Faylni ko'rish (oqim, Range)
 * `GET /api/v1/me/ceremonies/{ceremony_id}/media/{media_id}/thumbnail/` — Kichik rasm (preview)
 * `GET /api/v1/me/ceremonies/{id}/` — Menga biriktirilgan marosim
+* `PATCH /api/v1/me/ceremonies/{id}/folder/` — Papka nomini o'zgartirish (faqat o'zim uchun)
 * `GET /api/v1/me/ceremonies/{id}/invitations/` — Marosim takliflari tarixi
 * `POST /api/v1/me/ceremonies/{id}/invitations/` — VIEWER yoki OWNER taklifi yuborish (telefon / JSHSHIR)
 * `POST /api/v1/me/ceremonies/{id}/invitations/{invitation_id}/resend/` — Taklifni qayta yuborish (muddat yangilanadi)
@@ -303,7 +312,7 @@
 * `PUT /api/v1/venues/{target_id}/reviews/mine/` — Baho va izoh qoldirish / yangilash
 * `DELETE /api/v1/venues/{target_id}/reviews/mine/` — O'z sharhimni o'chirish
 
-### STUDIO (45)
+### STUDIO (46)
 
 * `GET /api/v1/auth/me/` — Mening profilim
 * `PATCH /api/v1/auth/me/` — Profilni tahrirlash
@@ -344,6 +353,7 @@
 * `GET /api/v1/studios/me/{studio_id}/schedule/` — Studiya grafigi (marosimlar, band va dam olish kunlari)
 * `PATCH /api/v1/studios/me/{studio_id}/schedule/` — Haftalik dam olish kunlari
 * `PUT /api/v1/studios/me/{studio_id}/schedule/days/{day}/` — Kunni band / dam olish deb belgilash (status=null — tozalash)
+* `GET /api/v1/studios/me/{studio_id}/storage/` — Portfolio joyi (ishlatilgan / ajratilgan)
 * `GET /api/v1/support/tickets/` — Mening yordam xatlarim
 * `POST /api/v1/support/tickets/` — Yordam xati yuborish
 * `GET /api/v1/support/tickets/summary/` — Xatlarim soni (javob kelganlar — menyu belgisi uchun)
@@ -390,7 +400,7 @@
 * `POST /api/v1/venue-owner/venues/{id}/members/` — A'zo qo'shish (telefon raqam bo'yicha)
 * `PATCH /api/v1/venue-owner/venues/{id}/members/{membership_id}/` — A'zoning rolini / faolligini o'zgartirish
 
-### ADMIN (75)
+### ADMIN (79)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
@@ -465,10 +475,14 @@
 * `GET /api/v1/users/{id}/` — Mijoz ma'lumotlari
 * `PATCH /api/v1/users/{id}/` — Mijozni tahrirlash
 * `DELETE /api/v1/users/{id}/` — Mijozni o'chirish (soft delete)
+* `GET /api/v1/users/{id}/features/` — Hisob imkoniyatlari (shu profil uchun)
+* `PATCH /api/v1/users/{id}/features/` — Hisob imkoniyatlarini yoqish / o'chirish
+* `GET /api/v1/users/{id}/folders/` — Foydalanuvchining marosim papkalari
+* `PATCH /api/v1/users/{id}/folders/{ceremony_id}/` — Foydalanuvchi papkasi nomini o'zgartirish
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
-### SUPER_ADMIN (105)
+### SUPER_ADMIN (109)
 
 * `GET /api/v1/admin/media-deletion-requests/` — Media o'chirish so'rovlari
 * `GET /api/v1/admin/media-deletion-requests/summary/` — Kutilayotgan so'rovlar soni (menyu belgisi uchun)
@@ -573,6 +587,10 @@
 * `GET /api/v1/users/{id}/` — Mijoz ma'lumotlari
 * `PATCH /api/v1/users/{id}/` — Mijozni tahrirlash
 * `DELETE /api/v1/users/{id}/` — Mijozni o'chirish (soft delete)
+* `GET /api/v1/users/{id}/features/` — Hisob imkoniyatlari (shu profil uchun)
+* `PATCH /api/v1/users/{id}/features/` — Hisob imkoniyatlarini yoqish / o'chirish
+* `GET /api/v1/users/{id}/folders/` — Foydalanuvchining marosim papkalari
+* `PATCH /api/v1/users/{id}/folders/{ceremony_id}/` — Foydalanuvchi papkasi nomini o'zgartirish
 * `GET /api/v1/users/{id}/pinfl/` — To'liq JSHSHIR (audit qilinadi)
 * `POST /api/v1/users/{id}/verify-phone/` — Telefon raqamini qo'lda tasdiqlash
 
@@ -722,6 +740,9 @@
 * `POST /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/`
   * Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.
   * Faqat galichkasi faol studiya (aks holda 403 badge_required).
+* `GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/file/{part}/`
+  * Ommaga: faqat ko'rinadigan ishlar (reels — galichka faol bo'lsa); studiya a'zolari va studios.view ruxsatli xodimlar — barchasi
+  * HTTP Range qo'llab-quvvatlanadi (video uchun)
 * `PUT /api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/`
   * Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.
   * Faqat galichkasi faol studiya (aks holda 403 badge_required).
@@ -752,6 +773,12 @@
   * ADMIN xati Super Admin'ga boradi; boshqalarniki — support.view ruxsati bor adminlarga.
 * `DELETE /api/v1/users/{id}/`
   * Faol studiyaning mas'ul shaxsini o'chirib bo'lmaydi (409 conflict)
+* `PATCH /api/v1/users/{id}/features/`
+  * Faqat shu hisob roliga tegishli imkoniyat kodlari
+* `GET /api/v1/users/{id}/folders/`
+  * Faqat USER: egasi yoki ko'ruvchisi bo'lgan marosimlar
+* `PATCH /api/v1/users/{id}/folders/{ceremony_id}/`
+  * Faqat shu hisob ochishi mumkin bo'lgan marosim; boshqasi 404
 * `GET /api/v1/users/{id}/pinfl/`
   * Har bir ko'rish audit qilinadi (PINFL_REVEAL)
   * Throttle: pinfl_reveal

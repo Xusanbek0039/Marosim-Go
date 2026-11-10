@@ -83,7 +83,10 @@ export interface Studio {
   profile_picture: string | null;
   address: string;
   phone_number: string;
-  images: { id: string; image: string; position: number; created_at: string }[];
+  images: { id: string; kind?: "IMAGE" | "VIDEO"; image: string; position: number; created_at: string; size_bytes?: number }[];
+  /** Portfolio space on Google Drive (MB), 1024 by default. */
+  portfolio_quota_mb: number;
+  portfolio_used_bytes: number;
   responsible_user: UserSummary;
   is_active: boolean;
   created_at: string;

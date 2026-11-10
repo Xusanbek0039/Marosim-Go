@@ -19,6 +19,19 @@ export function useMyCeremony(id: string) {
   return useQuery({ queryKey: keys.ceremony(id), queryFn: () => api.get<MyCeremony>(`/me/ceremonies/${id}/`), enabled: Boolean(id) });
 }
 
+/** Rename my folder of a ceremony (only I see the name); a blank name resets it to the title. */
+export function useRenameFolder() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      api.patch<{ folder_name: string; is_custom: boolean }>(`/me/ceremonies/${id}/folder/`, { name }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: keys.ceremonies });
+      qc.invalidateQueries({ queryKey: keys.ceremony(id) });
+    },
+  });
+}
+
 export function useInvitations() {
   return useQuery({ queryKey: keys.invitations, queryFn: () => api.get<Invitation[]>("/me/invitations/") });
 }

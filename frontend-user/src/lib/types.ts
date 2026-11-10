@@ -81,6 +81,8 @@ export interface Participant {
 
 export interface MyCeremony {
   id: string;
+  /** My own name for this ceremony's folder (the title when not renamed). */
+  folder_name: string;
   title: string;
   event_type: string;
   event_date: string;
