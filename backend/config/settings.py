@@ -251,6 +251,8 @@ IMAGE_UPLOAD = {
     "MAX_SIDE": 1024,
     "ALLOWED_FORMATS": ("JPEG", "PNG", "WEBP"),
 }
+#: Studio portfolio reels (vertical videos); the panel proxies must allow the same body size.
+STUDIO_REEL_MAX_MB = env.int("STUDIO_REEL_MAX_MB", default=100)
 
 # ------------------------------------------------------------------- i18n / time
 LANGUAGE_CODE = "uz"
@@ -297,6 +299,9 @@ SPECTACULAR_SETTINGS = {
         "PaymentMethodEnum": "apps.subscriptions.models.PaymentMethod",
         "MediaStatusEnum": "apps.media.models.MediaStatus",
         "MediaDeletionStatusEnum": "apps.media.models.DeletionRequestStatus",
+        "PortfolioKindEnum": "apps.studios.models.PortfolioKind",
+        "PortfolioReactionEnum": ["like", "dislike"],
+        "StudioDayStatusEnum": "apps.studios.models.StudioDayStatus.Status",
         "SupportTicketStatusEnum": "apps.support.models.TicketStatus",
         "SupportAudienceEnum": "apps.support.models.TicketAudience",
         "PartnerApplicationStatusEnum": "apps.support.models.ApplicationStatus",

@@ -8,6 +8,8 @@ export const APP = {
   nav: [
     { href: "/", label: "Marosimlar" },
     { href: "/portfolio", label: "Portfolio" },
+    { href: "/grafik", label: "Grafik" },
+    { href: "/xabarlar", label: "Xabarlar" },
     { href: "/galichka", label: "Galichka" },
     { href: "/yordam", label: "Yordam" },
     { href: "/profile", label: "Profil" },

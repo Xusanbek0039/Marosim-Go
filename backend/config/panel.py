@@ -49,6 +49,7 @@ def csp(site: str) -> str:
             "script-src 'self' 'unsafe-inline'",  # Next.js bootstraps with inline scripts
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: blob:",
+            "media-src 'self' blob:",
             "font-src 'self'",
             f"connect-src 'self'{EXTRA_CONNECT.get(site, '')}",
             "frame-ancestors 'none'",

@@ -115,6 +115,37 @@
       "operation_id": "ceremonies_participants_destroy",
       "schema_fingerprint": "4dfd36b68f103d2d"
     },
+    "DELETE /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/{comment_id}/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z izohi; boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_studios_portfolio_comments_destroy",
+      "schema_fingerprint": "a1096ceffe0348cc"
+    },
+    "DELETE /api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z bahosi.",
+      "conditions": [
+        "Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.",
+        "Faqat galichkasi faol studiya (aks holda 403 badge_required)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_studios_portfolio_reaction_destroy",
+      "schema_fingerprint": "9ffb73ea68cfe258"
+    },
     "DELETE /api/v1/public/studios/{target_id}/like/": {
       "allowed_roles": [
         "USER"
@@ -154,12 +185,26 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; yuklash/o'chirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_images_destroy",
       "schema_fingerprint": "0222fca617bb5f32"
+    },
+    "DELETE /api/v1/studios/me/{studio_id}/images/{image_id}/comments/{comment_id}/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_images_comments_destroy",
+      "schema_fingerprint": "d9ff3fd17eb16199"
     },
     "DELETE /api/v1/studios/{id}/": {
       "allowed_roles": [
@@ -1248,6 +1293,36 @@
       "operation_id": "me_invitations_retrieve",
       "schema_fingerprint": "dbe5ecb4f45df2e6"
     },
+    "GET /api/v1/me/studio-chats/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z suhbatlari.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_studio_chats_list",
+      "schema_fingerprint": "ac51b480635801a9"
+    },
+    "GET /api/v1/me/studio-chats/{studio_id}/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z suhbatlari.",
+      "conditions": [
+        "Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_studio_chats_retrieve",
+      "schema_fingerprint": "eef1d855ffd25fd6"
+    },
     "GET /api/v1/me/subscriptions/": {
       "allowed_roles": [
         "USER",
@@ -1396,7 +1471,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_list",
-      "schema_fingerprint": "b9cebdc59169b2d5"
+      "schema_fingerprint": "20388e52bcc57428"
     },
     "GET /api/v1/public/studios/{id}/": {
       "allowed_roles": [
@@ -1412,7 +1487,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_retrieve",
-      "schema_fingerprint": "203174bbba33cafc"
+      "schema_fingerprint": "7e96fa1f7baf00bc"
     },
     "GET /api/v1/public/studios/{id}/schedule/": {
       "allowed_roles": [
@@ -1428,7 +1503,24 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "public_studios_schedule_retrieve",
-      "schema_fingerprint": "62c9253cb1186069"
+      "schema_fingerprint": "b2c333cdd7823479"
+    },
+    "GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/": {
+      "allowed_roles": [
+        "PUBLIC"
+      ],
+      "auth_type": "NONE",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.",
+        "Yashirilgan izohlar ko'rinmaydi."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_studios_portfolio_comments_list",
+      "schema_fingerprint": "e35bef9bd04986be"
     },
     "GET /api/v1/public/studios/{target_id}/reviews/": {
       "allowed_roles": [
@@ -1466,7 +1558,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_list",
-      "schema_fingerprint": "477c30d0345306cb"
+      "schema_fingerprint": "71806ffac6dc99cf"
     },
     "GET /api/v1/studios/me/": {
       "allowed_roles": [
@@ -1480,7 +1572,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_list",
-      "schema_fingerprint": "335a7e5a7e5575bc"
+      "schema_fingerprint": "065c64a3921e8915"
     },
     "GET /api/v1/studios/me/ceremonies/": {
       "allowed_roles": [
@@ -1496,6 +1588,34 @@
       "operation_id": "studios_me_ceremonies_list",
       "schema_fingerprint": "03dc4f6c17b37190"
     },
+    "GET /api/v1/studios/me/{studio_id}/chats/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_chats_list",
+      "schema_fingerprint": "b127ac2c87323e56"
+    },
+    "GET /api/v1/studios/me/{studio_id}/chats/{conversation_id}/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_chats_retrieve",
+      "schema_fingerprint": "4f14bf61efb281f0"
+    },
     "GET /api/v1/studios/me/{studio_id}/images/": {
       "allowed_roles": [
         "STUDIO"
@@ -1503,12 +1623,40 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; yuklash/o'chirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
       "conditions": [],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_images_list",
-      "schema_fingerprint": "c10c22c2206d34df"
+      "schema_fingerprint": "b28a27271d78c414"
+    },
+    "GET /api/v1/studios/me/{studio_id}/images/{image_id}/comments/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_images_comments_list",
+      "schema_fingerprint": "b51fb2a7501419de"
+    },
+    "GET /api/v1/studios/me/{studio_id}/schedule/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_schedule_retrieve",
+      "schema_fingerprint": "87bb77691c39731d"
     },
     "GET /api/v1/studios/{id}/": {
       "allowed_roles": [
@@ -1529,7 +1677,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_retrieve",
-      "schema_fingerprint": "01eb36c4276f864b"
+      "schema_fingerprint": "727b2882a6518cff"
     },
     "GET /api/v1/studios/{id}/calendar/": {
       "allowed_roles": [
@@ -2146,6 +2294,34 @@
       "operation_id": "ceremonies_partial_update",
       "schema_fingerprint": "b5c1499a623d97eb"
     },
+    "PATCH /api/v1/studios/me/{studio_id}/images/{image_id}/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_images_partial_update",
+      "schema_fingerprint": "25cb51c4be8ce486"
+    },
+    "PATCH /api/v1/studios/me/{studio_id}/schedule/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_schedule_partial_update",
+      "schema_fingerprint": "946049c4872972ec"
+    },
     "PATCH /api/v1/studios/{id}/": {
       "allowed_roles": [
         "ADMIN",
@@ -2165,7 +2341,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_partial_update",
-      "schema_fingerprint": "f201494396dd4cd8"
+      "schema_fingerprint": "57373976fdbf10ee"
     },
     "PATCH /api/v1/users/{id}/": {
       "allowed_roles": [
@@ -3057,6 +3233,23 @@
       "operation_id": "me_invitations_decline_create",
       "schema_fingerprint": "478a59a6830ee2bf"
     },
+    "POST /api/v1/me/studio-chats/{studio_id}/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z suhbatlari.",
+      "conditions": [
+        "Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.",
+        "Faqat galichkasi faol studiya (aks holda 403 badge_required)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "me_studio_chats_create",
+      "schema_fingerprint": "fa425f9c7bfc3513"
+    },
     "POST /api/v1/me/subscriptions/": {
       "allowed_roles": [
         "USER",
@@ -3139,6 +3332,23 @@
       "operation_id": "public_partner_applications_create",
       "schema_fingerprint": "0266a258e225d4e3"
     },
+    "POST /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": null,
+      "conditions": [
+        "Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.",
+        "Faqat galichkasi faol studiya (aks holda 403 badge_required)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_studios_portfolio_comments_create",
+      "schema_fingerprint": "7049f663a8f9cf91"
+    },
     "POST /api/v1/public/studios/{target_id}/like/": {
       "allowed_roles": [
         "USER"
@@ -3174,7 +3384,23 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_create",
-      "schema_fingerprint": "81943d72c1967fa0"
+      "schema_fingerprint": "2178612770184caa"
+    },
+    "POST /api/v1/studios/me/{studio_id}/chats/{conversation_id}/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [
+        "Faqat galichkasi faol studiya (aks holda 403 badge_required)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_chats_create",
+      "schema_fingerprint": "876c15b817e58df2"
     },
     "POST /api/v1/studios/me/{studio_id}/images/": {
       "allowed_roles": [
@@ -3183,12 +3409,31 @@
       "auth_type": "JWT",
       "required_permissions": [],
       "role_requirements": {},
-      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; yuklash/o'chirish — OWNER yoki MANAGER. Boshqasi 404.",
-      "conditions": [],
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [
+        "Ko'pi bilan 20 ta rasm, har biri 5 MB gacha"
+      ],
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_me_images_create",
-      "schema_fingerprint": "4931da5a2575dd49"
+      "schema_fingerprint": "035c3c672f2dbb01"
+    },
+    "POST /api/v1/studios/me/{studio_id}/reels/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [
+        "Faqat galichkasi faol studiya (aks holda 403 badge_required).",
+        "Ko'pi bilan 15 ta vertikal video, 1–90 soniya"
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_reels_create",
+      "schema_fingerprint": "1c9eff0c68c29a9d"
     },
     "POST /api/v1/studios/{id}/images/": {
       "allowed_roles": [
@@ -3211,7 +3456,7 @@
       "access_status": "DERIVED",
       "deprecated": false,
       "operation_id": "studios_images_create",
-      "schema_fingerprint": "7398b7c9f4b4e5e8"
+      "schema_fingerprint": "a422fb4dde9aad99"
     },
     "POST /api/v1/support/tickets/": {
       "allowed_roles": [
@@ -3483,6 +3728,23 @@
       "operation_id": "venues_like_create",
       "schema_fingerprint": "d2c6136e4a8071b4"
     },
+    "PUT /api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/": {
+      "allowed_roles": [
+        "USER"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchining o'z bahosi.",
+      "conditions": [
+        "Faqat faol studiyalar; xodimlar, mijozlar va marosim nomlari qaytmaydi.",
+        "Faqat galichkasi faol studiya (aks holda 403 badge_required)."
+      ],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "public_studios_portfolio_reaction_update",
+      "schema_fingerprint": "d735f753ed5ee140"
+    },
     "PUT /api/v1/public/studios/{target_id}/reviews/mine/": {
       "allowed_roles": [
         "USER"
@@ -3498,6 +3760,20 @@
       "deprecated": false,
       "operation_id": "public_studios_reviews_mine_update",
       "schema_fingerprint": "3de2e62c1080390d"
+    },
+    "PUT /api/v1/studios/me/{studio_id}/schedule/days/{day}/": {
+      "allowed_roles": [
+        "STUDIO"
+      ],
+      "auth_type": "JWT",
+      "required_permissions": [],
+      "role_requirements": {},
+      "ownership_scope": "Faqat so'rovchi faol a'zo bo'lgan studiya; o'zgartirish — OWNER yoki MANAGER. Boshqasi 404.",
+      "conditions": [],
+      "access_status": "DERIVED",
+      "deprecated": false,
+      "operation_id": "studios_me_schedule_days_update",
+      "schema_fingerprint": "7e2fa4c5df8300ca"
     },
     "PUT /api/v1/venues/{target_id}/reviews/mine/": {
       "allowed_roles": [

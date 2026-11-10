@@ -17,6 +17,7 @@ const csp = [
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
+  "media-src 'self' blob:",
   "font-src 'self'",
   // Media bytes go from the browser straight to a Google Drive resumable session (never through us).
   `connect-src 'self' https://www.googleapis.com${isDev ? " ws: wss:" : ""}`,

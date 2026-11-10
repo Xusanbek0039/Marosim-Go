@@ -43,6 +43,8 @@ export interface StudioBrief {
 }
 
 export interface MyStudio extends StudioBrief {
+  /** Galichka (paid badge) is active: reels, likes / comments and chat are on. */
+  is_verified: boolean;
   description: string;
   is_active: boolean;
   created_at: string;

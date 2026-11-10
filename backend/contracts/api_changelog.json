@@ -1114,6 +1114,87 @@
       "schema_changed": [
         "GET /api/v1/admin/subscriptions/"
       ]
+    },
+    {
+      "revision": 24,
+      "date": "2026-11-10",
+      "note": "",
+      "added": [
+        "DELETE /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/{comment_id}/",
+        "DELETE /api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/",
+        "DELETE /api/v1/studios/me/{studio_id}/images/{image_id}/comments/{comment_id}/",
+        "GET /api/v1/me/studio-chats/",
+        "GET /api/v1/me/studio-chats/{studio_id}/",
+        "GET /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/",
+        "GET /api/v1/studios/me/{studio_id}/chats/",
+        "GET /api/v1/studios/me/{studio_id}/chats/{conversation_id}/",
+        "GET /api/v1/studios/me/{studio_id}/images/{image_id}/comments/",
+        "GET /api/v1/studios/me/{studio_id}/schedule/",
+        "PATCH /api/v1/studios/me/{studio_id}/images/{image_id}/",
+        "PATCH /api/v1/studios/me/{studio_id}/schedule/",
+        "POST /api/v1/me/studio-chats/{studio_id}/",
+        "POST /api/v1/public/studios/{studio_id}/portfolio/{item_id}/comments/",
+        "POST /api/v1/studios/me/{studio_id}/chats/{conversation_id}/",
+        "POST /api/v1/studios/me/{studio_id}/reels/",
+        "PUT /api/v1/public/studios/{studio_id}/portfolio/{item_id}/reaction/",
+        "PUT /api/v1/studios/me/{studio_id}/schedule/days/{day}/"
+      ],
+      "removed": [],
+      "changed": {
+        "DELETE /api/v1/studios/me/{studio_id}/images/{image_id}/": [
+          "ownership_scope"
+        ],
+        "GET /api/v1/public/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/public/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/public/studios/{id}/schedule/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/me/": [
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/me/{studio_id}/images/": [
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "GET /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "PATCH /api/v1/studios/{id}/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/": [
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/me/{studio_id}/images/": [
+          "conditions",
+          "ownership_scope",
+          "schema_fingerprint"
+        ],
+        "POST /api/v1/studios/{id}/images/": [
+          "schema_fingerprint"
+        ]
+      },
+      "breaking": [],
+      "schema_changed": [
+        "GET /api/v1/public/studios/",
+        "GET /api/v1/public/studios/{id}/",
+        "GET /api/v1/public/studios/{id}/schedule/",
+        "GET /api/v1/studios/",
+        "GET /api/v1/studios/me/",
+        "GET /api/v1/studios/me/{studio_id}/images/",
+        "GET /api/v1/studios/{id}/",
+        "PATCH /api/v1/studios/{id}/",
+        "POST /api/v1/studios/",
+        "POST /api/v1/studios/me/{studio_id}/images/",
+        "POST /api/v1/studios/{id}/images/"
+      ]
     }
   ]
 }

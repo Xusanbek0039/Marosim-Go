@@ -379,6 +379,35 @@ OWNERSHIP_TESTS = {
         ["studios_me_images_list", "studios_me_images_create", "studios_me_images_destroy"],
         "ownership_studio_portfolio_is_own",
     ),
+    # reels, reactions, comments, chat, studio calendar — tests/test_studio_portfolio_engagement.py
+    **dict.fromkeys(
+        ["studios_me_reels_create", "studios_me_images_partial_update"], "ownership_studio_reels_are_own"
+    ),
+    **dict.fromkeys(
+        [
+            "public_studios_portfolio_reaction_update",
+            "public_studios_portfolio_reaction_destroy",
+            "public_studios_portfolio_comments_destroy",
+            "studios_me_images_comments_list",
+            "studios_me_images_comments_destroy",
+        ],
+        "ownership_portfolio_engagement_is_own",
+    ),
+    **dict.fromkeys(
+        [
+            "me_studio_chats_list",
+            "me_studio_chats_retrieve",
+            "me_studio_chats_create",
+            "studios_me_chats_list",
+            "studios_me_chats_retrieve",
+            "studios_me_chats_create",
+        ],
+        "ownership_studio_chat_is_private",
+    ),
+    **dict.fromkeys(
+        ["studios_me_schedule_retrieve", "studios_me_schedule_partial_update", "studios_me_schedule_days_update"],
+        "ownership_studio_schedule_is_own",
+    ),
     **dict.fromkeys(
         ["studios_calendar_list", "studios_images_create", "studios_images_destroy"],
         "ownership_panel_studio_calendar_portfolio",
@@ -473,6 +502,13 @@ ownership_admin_reviews_all = _review_tests.test_admin_review_moderation_needs_c
 ownership_studio_portfolio_is_own = _review_tests.test_studio_portfolio_is_own_studio
 ownership_panel_studio_calendar_portfolio = _review_tests.test_panel_studio_calendar_and_portfolio
 ownership_panel_venue_schedule = _review_tests.test_panel_controls_every_venue_schedule
+
+from . import test_studio_portfolio_engagement as _engagement_tests  # noqa: E402
+
+ownership_studio_reels_are_own = _engagement_tests.test_uploader_cannot_add_reels_or_edit_captions
+ownership_portfolio_engagement_is_own = _engagement_tests.test_reactions_and_comments
+ownership_studio_chat_is_private = _engagement_tests.test_chat_needs_galichka_and_is_private
+ownership_studio_schedule_is_own = _engagement_tests.test_studio_marks_busy_and_off_days
 
 from . import test_subscriptions as _subscription_tests  # noqa: E402
 

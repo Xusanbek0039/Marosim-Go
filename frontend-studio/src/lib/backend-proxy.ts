@@ -11,6 +11,9 @@ const BACKEND_URL = (process.env.BACKEND_URL ?? "http://127.0.0.1:8000").replace
 
 /** Upload ceiling enforced before anything reaches Django (backend allows 6 MB). */
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
+/** Portfolio reels (vertical videos): backend `STUDIO_REEL_MAX_MB` = 100, plus multipart overhead. */
+const MAX_REEL_BODY_BYTES = 110 * 1024 * 1024;
+const REEL_UPLOAD = /^\/api\/v1\/studios\/me\/[0-9a-f-]{36}\/reels\/$/i;
 
 const HOP_BY_HOP = new Set([
   "connection",
@@ -41,10 +44,11 @@ export async function forwardToBackend(request: NextRequest): Promise<Response> 
   // WSGI servers need a Content-Length, so the (size-capped) body is buffered, not streamed.
   let body: ArrayBuffer | undefined;
   if (!["GET", "HEAD"].includes(request.method)) {
+    const limit = REEL_UPLOAD.test(pathname) ? MAX_REEL_BODY_BYTES : MAX_BODY_BYTES;
     const declared = Number(request.headers.get("content-length") ?? 0);
-    if (declared > MAX_BODY_BYTES) return tooLarge();
+    if (declared > limit) return tooLarge();
     body = await request.arrayBuffer();
-    if (body.byteLength > MAX_BODY_BYTES) return tooLarge();
+    if (body.byteLength > limit) return tooLarge();
   }
 
   let upstream: Response;

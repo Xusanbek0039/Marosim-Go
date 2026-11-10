@@ -162,5 +162,6 @@ export const api = {
   post: <T>(path: string, body?: unknown, opts: Omit<RequestOptions, "body" | "method"> = {}) =>
     apiRequest<T>(path, { ...opts, method: "POST", body }),
   patch: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: "PATCH", body }),
+  put: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: "PUT", body }),
   delete: (path: string) => apiRequest<void>(path, { method: "DELETE" }),
 };

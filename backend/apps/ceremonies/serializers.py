@@ -8,6 +8,7 @@ from rest_framework import serializers
 from apps.accounts.models import Role
 from apps.accounts.serializers import PhoneNumberField
 from apps.studios.models import Studio
+from apps.subscriptions.badges import PaidBadgeSerializer
 
 from . import ownership, services
 from .invitations import LEGACY_FROM_OWNER_TYPE
@@ -39,12 +40,12 @@ class StudioBriefSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class MyStudioSerializer(serializers.ModelSerializer):
+class MyStudioSerializer(PaidBadgeSerializer, serializers.ModelSerializer):
     """A studio as seen by one of its members (no responsible user PII)."""
 
     class Meta:
         model = Studio
-        fields = ["id", "name", "description", "profile_picture", "address", "is_active", "created_at"]
+        fields = ["is_verified", "id", "name", "description", "profile_picture", "address", "is_active", "created_at"]
         read_only_fields = fields
 
 

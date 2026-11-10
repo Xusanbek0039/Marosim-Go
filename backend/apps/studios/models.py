@@ -26,6 +26,8 @@ class Studio(BaseModel, SoftDeleteModel):
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="responsible_studios"
     )
     is_active = models.BooleanField(default=True)
+    #: Weekly days off (0 = Monday … 6 = Sunday), shown as "dam olish" on the public calendar.
+    off_weekdays = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -35,23 +37,116 @@ class Studio(BaseModel, SoftDeleteModel):
         return self.name
 
 
-#: Portfolio size limit (same as a venue gallery).
+def reel_upload_to(instance, filename):
+    return f"studios/reels/{filename}"
+
+
+#: Portfolio size limits: photos (same as a venue gallery) and vertical reels.
 MAX_PORTFOLIO_IMAGES = 20
+MAX_PORTFOLIO_REELS = 15
+
+
+class PortfolioKind(models.TextChoices):
+    IMAGE = "IMAGE", "Rasm"
+    #: Vertical (9:16) short video. Needs the studio's paid badge (galichka).
+    VIDEO = "VIDEO", "Reels video"
 
 
 class StudioImage(BaseModel):
-    """Portfolio image of a studio (its work), shown on the public studio profile."""
+    """Portfolio item of a studio (its work), shown on the public studio profile.
+
+    ``kind=VIDEO`` rows are reels: ``video`` is the file and ``image`` its poster frame. Reels,
+    reactions and comments are public only while the studio's galichka is active.
+    """
 
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="images")
+    kind = models.CharField(max_length=5, choices=PortfolioKind.choices, default=PortfolioKind.IMAGE)
     image = models.ImageField(upload_to=studio_upload_to)
+    video = models.FileField(upload_to=reel_upload_to, null=True, blank=True)
+    caption = models.CharField(max_length=300, blank=True)
+    duration = models.FloatField(default=0)
     position = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         ordering = ["position", "created_at"]
-        indexes = [models.Index(fields=["studio", "position"])]
+        indexes = [models.Index(fields=["studio", "kind", "position"])]
 
     def __str__(self) -> str:
-        return f"{self.studio_id} #{self.position}"
+        return f"{self.studio_id} {self.kind} #{self.position}"
+
+
+class StudioPortfolioReaction(BaseModel):
+    """One like (+1) or dislike (-1) per customer per portfolio item."""
+
+    LIKE, DISLIKE = 1, -1
+
+    item = models.ForeignKey(StudioImage, on_delete=models.CASCADE, related_name="reactions")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    value = models.SmallIntegerField(choices=[(LIKE, "Like"), (DISLIKE, "Dislike")])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["item", "user"], name="studios_reaction_one_per_item"),
+            models.CheckConstraint(condition=models.Q(value__in=[1, -1]), name="studios_reaction_value"),
+        ]
+
+
+class StudioPortfolioComment(BaseModel):
+    """Customer comment on a portfolio item. The studio (OWNER/MANAGER) may hide it."""
+
+    item = models.ForeignKey(StudioImage, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    text = models.TextField(max_length=500)
+    is_hidden = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["item", "is_hidden", "created_at"])]
+
+
+class StudioDayStatus(BaseModel):
+    """A day the studio marked by hand on its calendar (ceremonies already count as busy)."""
+
+    class Status(models.TextChoices):
+        BUSY = "BUSY", "Band"
+        OFF = "OFF", "Dam olish"
+
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="day_statuses")
+    date = models.DateField()
+    status = models.CharField(max_length=4, choices=Status.choices)
+    #: Private to the studio — never shown publicly.
+    note = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["date"]
+        constraints = [models.UniqueConstraint(fields=["studio", "date"], name="studios_day_status_unique")]
+
+
+class StudioConversation(BaseModel):
+    """Chat between one customer (USER) and one studio. Opening it needs the studio's galichka."""
+
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="conversations")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="studio_conversations")
+    last_message_at = models.DateTimeField()
+    user_read_at = models.DateTimeField(null=True, blank=True)
+    studio_read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-last_message_at"]
+        constraints = [models.UniqueConstraint(fields=["studio", "user"], name="studios_conversation_unique")]
+        indexes = [models.Index(fields=["studio", "last_message_at"]), models.Index(fields=["user", "last_message_at"])]
+
+
+class StudioChatMessage(BaseModel):
+    conversation = models.ForeignKey(StudioConversation, on_delete=models.CASCADE, related_name="messages")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    #: Written by a studio member (otherwise by the customer).
+    from_studio = models.BooleanField(default=False)
+    body = models.TextField(max_length=2000)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["conversation", "created_at"])]
 
 
 class StudioMembership(BaseModel):

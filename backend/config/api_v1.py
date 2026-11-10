@@ -16,6 +16,7 @@ from apps.media.admin_views import AdminDeletionRequestViewSet
 from apps.monitoring.health import LiveView, ReadyView
 from apps.reviews.models import TargetKind
 from apps.reviews.views import AdminReviewViewSet, LikeView, MyReviewView, TargetReviewsView
+from apps.studios import public_views as studio_views
 from apps.studios.public_views import PublicStudioViewSet, StudioMePortfolioImageView, StudioMePortfolioView
 from apps.studios.views import StudioViewSet
 from apps.subscriptions.views import (
@@ -72,11 +73,52 @@ urlpatterns = [
     path("studios/me/", StudioMeView.as_view(), name="studio-me"),
     path("studios/me/ceremonies/", StudioMeCeremoniesView.as_view(), name="studio-me-ceremonies"),
     path("studios/me/<uuid:studio_id>/images/", StudioMePortfolioView.as_view(), name="studio-me-images"),
+    path("studios/me/<uuid:studio_id>/reels/", studio_views.StudioMeReelsView.as_view(), name="studio-me-reels"),
     path(
         "studios/me/<uuid:studio_id>/images/<uuid:image_id>/",
         StudioMePortfolioImageView.as_view(),
         name="studio-me-image",
     ),
+    path(
+        "studios/me/<uuid:studio_id>/images/<uuid:image_id>/comments/",
+        studio_views.StudioMeCommentsView.as_view(),
+        name="studio-me-image-comments",
+    ),
+    path(
+        "studios/me/<uuid:studio_id>/images/<uuid:image_id>/comments/<uuid:comment_id>/",
+        studio_views.StudioMeCommentView.as_view(),
+        name="studio-me-image-comment",
+    ),
+    path("studios/me/<uuid:studio_id>/schedule/", studio_views.StudioMeScheduleView.as_view(), name="studio-me-schedule"),
+    path(
+        "studios/me/<uuid:studio_id>/schedule/days/<str:day>/",
+        studio_views.StudioMeScheduleDayView.as_view(),
+        name="studio-me-schedule-day",
+    ),
+    path("studios/me/<uuid:studio_id>/chats/", studio_views.StudioMeChatsView.as_view(), name="studio-me-chats"),
+    path(
+        "studios/me/<uuid:studio_id>/chats/<uuid:conversation_id>/",
+        studio_views.StudioMeChatView.as_view(),
+        name="studio-me-chat",
+    ),
+    # studio portfolio interactions and customer ↔ studio chat
+    path(
+        "public/studios/<uuid:studio_id>/portfolio/<uuid:item_id>/reaction/",
+        studio_views.PortfolioReactionView.as_view(),
+        name="studio-portfolio-reaction",
+    ),
+    path(
+        "public/studios/<uuid:studio_id>/portfolio/<uuid:item_id>/comments/",
+        studio_views.PortfolioCommentsView.as_view(),
+        name="studio-portfolio-comments",
+    ),
+    path(
+        "public/studios/<uuid:studio_id>/portfolio/<uuid:item_id>/comments/<uuid:comment_id>/",
+        studio_views.PortfolioMyCommentView.as_view(),
+        name="studio-portfolio-comment",
+    ),
+    path("me/studio-chats/", studio_views.MyStudioChatsView.as_view(), name="my-studio-chats"),
+    path("me/studio-chats/<uuid:studio_id>/", studio_views.MyStudioChatView.as_view(), name="my-studio-chat"),
     # reviews / likes of public venues and studios
     *[
         p
